@@ -1,0 +1,20 @@
+{
+  "appId": "com.kaisoft.tamma",
+  "appName": "ธรรมะ E-Book (Tamma)",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#181411",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#181411"
+    }
+  }
+}

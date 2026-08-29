@@ -1,0 +1,24 @@
+{
+  "name": "tamma-ebook",
+  "version": "1.0.0",
+  "description": "Dharma Prayer E-Book & Chanting Companion App with Comic-Style Reader",
+  "main": "tamma.html",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios"
+  },
+  "keywords": [
+    "dharma",
+    "prayers",
+    "ebook",
+    "comic-reader",
+    "chanting",
+    "buddhism",
+    "capacitor"
+  ],
+  "author": "Kai Soft / Antigravity",
+  "license": "MIT"
+}

@@ -1,0 +1,317 @@
+/* ==========================================================================
+   Tamma OS - Comic-Book Style E-Book Reader Engine
+   Horizontal Touch Swipe, 3D Page Turn, Typography & Immersive Reading
+   ========================================================================== */
+
+.reader-view {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.reader-view.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Reader Top Toolbar */
+.reader-toolbar {
+  height: 56px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 10;
+}
+
+.reader-title-box {
+  display: flex;
+  flex-direction: column;
+  max-width: 60%;
+}
+
+.reader-title {
+  font-family: var(--font-header);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reader-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.reader-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Comic Book Stage & Viewport */
+.comic-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+.comic-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.comic-page {
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 20px 80px 20px;
+  position: relative;
+  user-select: text;
+}
+
+/* E-Book Page Card / Frame */
+.page-frame {
+  width: 100%;
+  max-width: 720px;
+  height: 100%;
+  max-height: 82vh;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-md), 0 0 30px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* Comic Decorative Corner Borders */
+.page-frame::before,
+.page-frame::after {
+  content: '❖';
+  position: absolute;
+  color: var(--accent-gold);
+  font-size: 1.1rem;
+  opacity: 0.6;
+}
+.page-frame::before { top: 10px; left: 12px; }
+.page-frame::after { bottom: 10px; right: 12px; }
+
+/* Page Content Typography */
+.page-verse-header {
+  text-align: center;
+  font-family: var(--font-header);
+  font-size: 1.1rem;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.page-verse-body {
+  font-size: var(--reader-font-size, 1.15rem);
+  line-height: 1.9;
+  color: var(--text-primary);
+  text-align: center;
+  margin: auto 0;
+}
+
+.verse-pali {
+  font-weight: 600;
+  color: var(--accent-amber);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.verse-thai {
+  color: var(--text-secondary);
+  font-size: 0.95em;
+  line-height: 1.7;
+}
+
+.page-counter-badge {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+}
+
+/* Floating Navigation Arrows (Desktop / Visual Cue) */
+.comic-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.2s ease;
+  backdrop-filter: var(--glass-blur);
+  opacity: 0.6;
+}
+
+.comic-nav-btn:hover {
+  opacity: 1;
+  background: var(--accent-gold);
+  color: #120e0b;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-gold);
+}
+
+.comic-nav-btn.prev { left: 16px; }
+.comic-nav-btn.next { right: 16px; }
+
+/* Floating Reader Bottom Bar (Page Indicator & Chanting Counter) */
+.reader-bottom-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  padding: 8px 18px;
+  z-index: 20;
+  box-shadow: var(--shadow-gold);
+}
+
+.reader-page-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  max-width: 140px;
+  overflow: hidden;
+}
+
+.reader-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--text-muted);
+  transition: all 0.25s ease;
+}
+
+.reader-dot.active {
+  width: 18px;
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+}
+
+.reader-chant-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-header);
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reader-chant-counter:active {
+  transform: scale(0.95);
+  background: var(--accent-gold);
+  color: #120e0b;
+}
+
+/* Font Resizer & Settings Floating Drawer */
+.reader-settings-drawer {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-modal);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md), var(--shadow-gold);
+  min-width: 280px;
+}
+
+.reader-settings-drawer.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.font-size-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-small {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
