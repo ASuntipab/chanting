@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">ธรรมะ E-Book (Tamma)</string>
-    <string name="title_activity_main">ธรรมะ E-Book (Tamma)</string>
-    <string name="package_name">com.kaisoft.tamma</string>
-    <string name="custom_url_scheme">com.kaisoft.tamma</string>
+    <string name="app_name">Chant: บทสวดมนต์</string>
+    <string name="title_activity_main">Chant: บทสวดมนต์</string>
+    <string name="package_name">com.kaisoft.chant</string>
+    <string name="custom_url_scheme">com.kaisoft.chant</string>
 </resources>

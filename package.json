@@ -1,7 +1,7 @@
 {
-  "name": "tamma-ebook",
+  "name": "chant-app",
   "version": "1.0.0",
-  "description": "Dharma Prayer E-Book & Chanting Companion App with Comic-Style Reader",
+  "description": "Chant: บทสวดมนต์ - Daily Buddhist Chanting & Prayer Companion App",
   "main": "tamma.html",
   "type": "module",
   "scripts": {

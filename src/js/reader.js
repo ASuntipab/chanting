@@ -47,6 +47,12 @@ export class ComicReaderEngine {
     this.btnFontMinus = document.getElementById('btnFontMinus');
     this.fontSizeDisplay = document.getElementById('fontSizeDisplay');
     this.btnChantInReader = document.getElementById('btnChantInReader');
+
+    // Fast Page Scrubber & Quick Navigation
+    this.readerScrubber = document.getElementById('readerScrubber');
+    this.readerPageBadge = document.getElementById('readerPageBadge');
+    this.btnJumpFirst = document.getElementById('btnJumpFirst');
+    this.btnJumpLast = document.getElementById('btnJumpLast');
   }
 
   bindEvents() {
@@ -66,6 +72,26 @@ export class ComicReaderEngine {
     this.btnClose?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.close();
+    });
+
+    // Quick Jump: First Page & Last Page Buttons
+    this.btnJumpFirst?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.goToViewport(0);
+      this.scheduleAutoHide(5000);
+    });
+    this.btnJumpLast?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.goToViewport(this.totalViewportPages - 1);
+      this.scheduleAutoHide(5000);
+    });
+
+    // Scrubber Slider Dragging / Jumping
+    this.readerScrubber?.addEventListener('input', (e) => {
+      e.stopPropagation();
+      const targetPage = parseInt(e.target.value, 10);
+      this.goToViewport(targetPage - 1, false);
+      this.scheduleAutoHide(6000);
     });
 
     // Chanting counter inside reader
@@ -366,6 +392,16 @@ export class ComicReaderEngine {
       this.viewportIndex = this.totalViewportPages - 1;
     }
 
+    // Sync Scrubber Controls
+    if (this.readerScrubber) {
+      this.readerScrubber.min = 1;
+      this.readerScrubber.max = this.totalViewportPages;
+      this.readerScrubber.value = (this.viewportIndex || 0) + 1;
+    }
+    if (this.readerPageBadge) {
+      this.readerPageBadge.textContent = `${(this.viewportIndex || 0) + 1} / ${this.totalViewportPages}`;
+    }
+
     this.renderPageDots();
   }
 
@@ -387,6 +423,14 @@ export class ComicReaderEngine {
       this.counterBadge.textContent = this.totalViewportPages > 1 
         ? `ส่วนที่ ${index + 1} จาก ${this.totalViewportPages}` 
         : '๑ บทสมบูรณ์';
+    }
+
+    // Update Scrubber Badge & Slider Value
+    if (this.readerScrubber) {
+      this.readerScrubber.value = index + 1;
+    }
+    if (this.readerPageBadge) {
+      this.readerPageBadge.textContent = `${index + 1} / ${this.totalViewportPages}`;
     }
 
     // Update "มีต่อ ▼" Indicator

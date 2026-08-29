@@ -1,6 +1,6 @@
 {
-  "appId": "com.kaisoft.tamma",
-  "appName": "ธรรมะ E-Book (Tamma)",
+  "appId": "com.kaisoft.chant",
+  "appName": "Chant: บทสวดมนต์",
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {

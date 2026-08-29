@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ธรรมะ E-Book (Tamma OS) - คลังบทสวดมนต์ & บันทึกการสวด</title>
+  <title>บทสวดมนต์ (Tamma OS) - คลังบทสวดมนต์ & บันทึกการสวด</title>
   
   <!-- Thai Modern Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +32,7 @@
     <header class="top-header">
       <div class="brand" onclick="window.tammaApp.switchTab('library')">
         <span class="brand-icon">🪷</span>
-        <div class="brand-name">ธรรมะ E-Book</div>
+        <div class="brand-name">บทสวดมนต์</div>
       </div>
 
       <div class="header-actions">
@@ -165,36 +165,45 @@
       <button id="btnNextPage" class="comic-nav-btn next" aria-label="หน้าถัดไป">›</button>
     </div>
 
-    <!-- Reader Bottom Floating Bar (Auto-hiding HUD) - Full Controls in One Place -->
+    <!-- Reader Bottom Floating Bar (Auto-hiding HUD) - Fast Jump & Controls -->
     <div id="readerBottomBar" class="reader-bottom-bar">
-      <!-- Font Size Resizer (Up to 300% for Elders) -->
-      <div class="reader-font-dock">
-        <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
-        <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
-        <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+      <!-- Quick Page Scrubber Slider (Jump to any section / first / last) -->
+      <div class="reader-scrubber-dock">
+        <button id="btnJumpFirst" class="btn-scrubber-nav" title="ไปหน้าแรก">⏮ หน้าแรก</button>
+        <div class="reader-scrubber-track-wrap">
+          <input type="range" id="readerScrubber" min="1" max="1" value="1" class="reader-scrubber-slider" title="เลื่อนข้ามหน้า">
+        </div>
+        <span id="readerPageBadge" class="reader-scrubber-badge">1 / 1</span>
+        <button id="btnJumpLast" class="btn-scrubber-nav" title="ไปหน้าสุดท้าย">หน้าสุดท้าย ⏭</button>
       </div>
 
-      <!-- Quick Theme Switcher directly in Bottom Bar -->
-      <div class="reader-theme-dock">
-        <button class="btn-dock-theme" data-set-theme="cosmic" title="ธีมจักรวาล">🌌</button>
-        <button class="btn-dock-theme" data-set-theme="gold" title="ธีมทองอร่าม">🌟</button>
-        <button class="btn-dock-theme" data-set-theme="parchment" title="ธีมใบลาน">📜</button>
-        <button class="btn-dock-theme" data-set-theme="midnight" title="ธีมราตรีสงบ">🌙</button>
-      </div>
+      <div class="reader-dock-divider"></div>
 
-      <!-- Quick Chant Counter with Bell -->
-      <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
-        <span>🔔</span>
-        <span id="readerChantCount">0 จบ</span>
-      </button>
+      <!-- Controls Row: Font Size + Themes + Counter -->
+      <div class="reader-controls-row">
+        <!-- Font Size Resizer (Up to 300% for Elders) -->
+        <div class="reader-font-dock">
+          <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
+          <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
+          <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+        </div>
+
+        <!-- Quick Theme Switcher directly in Bottom Bar -->
+        <div class="reader-theme-dock">
+          <button class="btn-dock-theme" data-set-theme="cosmic" title="ธีมจักรวาล">🌌</button>
+          <button class="btn-dock-theme" data-set-theme="gold" title="ธีมทองอร่าม">🌟</button>
+          <button class="btn-dock-theme" data-set-theme="parchment" title="ธีมใบลาน">📜</button>
+          <button class="btn-dock-theme" data-set-theme="midnight" title="ธีมราตรีสงบ">🌙</button>
+        </div>
+
+        <!-- Quick Chant Counter with Bell -->
+        <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
+          <span>🔔</span>
+          <span id="readerChantCount">0 จบ</span>
+        </button>
+      </div>
     </div>
   </div>
-
-      <!-- Prayers Grid -->
-      <div id="prayerGrid" class="prayer-grid">
-        <!-- Rendered dynamically by JS -->
-      </div>
-    </main>
 
   <!-- ==========================================================================
        MODALS: SUGGEST / REQUEST PRAYER (EMAIL TO ADMIN@KAISOFT.NET)
