@@ -6,9 +6,9 @@
     "vinayaVolumes": 8,
     "suttaVolumes": 25,
     "abhidhammaVolumes": 12,
-    "totalRawBytes": 321418,
-    "totalBrBytes": 45626,
-    "compressionRatio": "85.8%"
+    "totalRawBytes": 695213,
+    "totalBrBytes": 75237,
+    "compressionRatio": "89.2%"
   },
   "volumes": [
     {
@@ -21,8 +21,8 @@
       "totalSections": 6,
       "jsonFile": "vol_01.json",
       "brFile": "vol_01.json.br",
-      "rawSizeKb": "13.5",
-      "brSizeKb": "1.3"
+      "rawSizeKb": "30.0",
+      "brSizeKb": "2.0"
     },
     {
       "volume": 2,
@@ -34,8 +34,8 @@
       "totalSections": 4,
       "jsonFile": "vol_02.json",
       "brFile": "vol_02.json.br",
-      "rawSizeKb": "8.8",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "19.7",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 3,
@@ -47,8 +47,8 @@
       "totalSections": 4,
       "jsonFile": "vol_03.json",
       "brFile": "vol_03.json.br",
-      "rawSizeKb": "8.2",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "19.1",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 4,
@@ -60,8 +60,8 @@
       "totalSections": 3,
       "jsonFile": "vol_04.json",
       "brFile": "vol_04.json.br",
-      "rawSizeKb": "6.8",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.1",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 5,
@@ -73,8 +73,8 @@
       "totalSections": 4,
       "jsonFile": "vol_05.json",
       "brFile": "vol_05.json.br",
-      "rawSizeKb": "8.9",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "19.9",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 6,
@@ -86,8 +86,8 @@
       "totalSections": 3,
       "jsonFile": "vol_06.json",
       "brFile": "vol_06.json.br",
-      "rawSizeKb": "7.0",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.3",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 7,
@@ -99,8 +99,8 @@
       "totalSections": 3,
       "jsonFile": "vol_07.json",
       "brFile": "vol_07.json.br",
-      "rawSizeKb": "7.0",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.3",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 8,
@@ -112,8 +112,8 @@
       "totalSections": 3,
       "jsonFile": "vol_08.json",
       "brFile": "vol_08.json.br",
-      "rawSizeKb": "6.7",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.0",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 9,
@@ -125,8 +125,8 @@
       "totalSections": 4,
       "jsonFile": "vol_09.json",
       "brFile": "vol_09.json.br",
-      "rawSizeKb": "9.8",
-      "brSizeKb": "1.2"
+      "rawSizeKb": "20.9",
+      "brSizeKb": "1.8"
     },
     {
       "volume": 10,
@@ -138,8 +138,8 @@
       "totalSections": 4,
       "jsonFile": "vol_10.json",
       "brFile": "vol_10.json.br",
-      "rawSizeKb": "10.0",
-      "brSizeKb": "1.2"
+      "rawSizeKb": "21.1",
+      "brSizeKb": "1.8"
     },
     {
       "volume": 11,
@@ -151,8 +151,8 @@
       "totalSections": 4,
       "jsonFile": "vol_11.json",
       "brFile": "vol_11.json.br",
-      "rawSizeKb": "10.0",
-      "brSizeKb": "1.2"
+      "rawSizeKb": "21.1",
+      "brSizeKb": "1.9"
     },
     {
       "volume": 12,
@@ -164,8 +164,8 @@
       "totalSections": 3,
       "jsonFile": "vol_12.json",
       "brFile": "vol_12.json.br",
-      "rawSizeKb": "7.1",
-      "brSizeKb": "1.1"
+      "rawSizeKb": "15.4",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 13,
@@ -177,8 +177,8 @@
       "totalSections": 3,
       "jsonFile": "vol_13.json",
       "brFile": "vol_13.json.br",
-      "rawSizeKb": "7.2",
-      "brSizeKb": "1.1"
+      "rawSizeKb": "15.6",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 14,
@@ -190,8 +190,8 @@
       "totalSections": 4,
       "jsonFile": "vol_14.json",
       "brFile": "vol_14.json.br",
-      "rawSizeKb": "9.7",
-      "brSizeKb": "1.2"
+      "rawSizeKb": "20.9",
+      "brSizeKb": "1.8"
     },
     {
       "volume": 15,
@@ -203,8 +203,8 @@
       "totalSections": 3,
       "jsonFile": "vol_15.json",
       "brFile": "vol_15.json.br",
-      "rawSizeKb": "7.3",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.6",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 16,
@@ -216,8 +216,8 @@
       "totalSections": 3,
       "jsonFile": "vol_16.json",
       "brFile": "vol_16.json.br",
-      "rawSizeKb": "7.3",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.7",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 17,
@@ -229,8 +229,8 @@
       "totalSections": 2,
       "jsonFile": "vol_17.json",
       "brFile": "vol_17.json.br",
-      "rawSizeKb": "5.2",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.7",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 18,
@@ -242,8 +242,8 @@
       "totalSections": 2,
       "jsonFile": "vol_18.json",
       "brFile": "vol_18.json.br",
-      "rawSizeKb": "5.0",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.5",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 19,
@@ -255,8 +255,8 @@
       "totalSections": 3,
       "jsonFile": "vol_19.json",
       "brFile": "vol_19.json.br",
-      "rawSizeKb": "7.4",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.7",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 20,
@@ -268,8 +268,8 @@
       "totalSections": 3,
       "jsonFile": "vol_20.json",
       "brFile": "vol_20.json.br",
-      "rawSizeKb": "7.2",
-      "brSizeKb": "1.1"
+      "rawSizeKb": "15.5",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 21,
@@ -281,8 +281,8 @@
       "totalSections": 2,
       "jsonFile": "vol_21.json",
       "brFile": "vol_21.json.br",
-      "rawSizeKb": "4.7",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.3",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 22,
@@ -294,8 +294,8 @@
       "totalSections": 2,
       "jsonFile": "vol_22.json",
       "brFile": "vol_22.json.br",
-      "rawSizeKb": "5.2",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.8",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 23,
@@ -307,8 +307,8 @@
       "totalSections": 2,
       "jsonFile": "vol_23.json",
       "brFile": "vol_23.json.br",
-      "rawSizeKb": "5.1",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.6",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 24,
@@ -320,8 +320,8 @@
       "totalSections": 2,
       "jsonFile": "vol_24.json",
       "brFile": "vol_24.json.br",
-      "rawSizeKb": "5.6",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "11.1",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 25,
@@ -333,8 +333,8 @@
       "totalSections": 3,
       "jsonFile": "vol_25.json",
       "brFile": "vol_25.json.br",
-      "rawSizeKb": "7.6",
-      "brSizeKb": "1.1"
+      "rawSizeKb": "15.9",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 26,
@@ -346,8 +346,8 @@
       "totalSections": 3,
       "jsonFile": "vol_26.json",
       "brFile": "vol_26.json.br",
-      "rawSizeKb": "7.3",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.7",
+      "brSizeKb": "1.7"
     },
     {
       "volume": 27,
@@ -359,8 +359,8 @@
       "totalSections": 2,
       "jsonFile": "vol_27.json",
       "brFile": "vol_27.json.br",
-      "rawSizeKb": "4.7",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.3",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 28,
@@ -372,8 +372,8 @@
       "totalSections": 10,
       "jsonFile": "vol_28.json",
       "brFile": "vol_28.json.br",
-      "rawSizeKb": "22.3",
-      "brSizeKb": "1.8"
+      "rawSizeKb": "49.8",
+      "brSizeKb": "2.5"
     },
     {
       "volume": 29,
@@ -385,8 +385,8 @@
       "totalSections": 2,
       "jsonFile": "vol_29.json",
       "brFile": "vol_29.json.br",
-      "rawSizeKb": "4.8",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.4",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 30,
@@ -398,8 +398,8 @@
       "totalSections": 2,
       "jsonFile": "vol_30.json",
       "brFile": "vol_30.json.br",
-      "rawSizeKb": "5.0",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.5",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 31,
@@ -411,8 +411,8 @@
       "totalSections": 2,
       "jsonFile": "vol_31.json",
       "brFile": "vol_31.json.br",
-      "rawSizeKb": "4.8",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.3",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 32,
@@ -424,8 +424,8 @@
       "totalSections": 3,
       "jsonFile": "vol_32.json",
       "brFile": "vol_32.json.br",
-      "rawSizeKb": "7.3",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "15.7",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 33,
@@ -437,8 +437,8 @@
       "totalSections": 3,
       "jsonFile": "vol_33.json",
       "brFile": "vol_33.json.br",
-      "rawSizeKb": "7.1",
-      "brSizeKb": "1.0"
+      "rawSizeKb": "15.5",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 34,
@@ -450,8 +450,8 @@
       "totalSections": 3,
       "jsonFile": "vol_34.json",
       "brFile": "vol_34.json.br",
-      "rawSizeKb": "7.0",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "15.3",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 35,
@@ -463,8 +463,8 @@
       "totalSections": 3,
       "jsonFile": "vol_35.json",
       "brFile": "vol_35.json.br",
-      "rawSizeKb": "6.6",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "14.9",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 36,
@@ -476,8 +476,8 @@
       "totalSections": 2,
       "jsonFile": "vol_36.json",
       "brFile": "vol_36.json.br",
-      "rawSizeKb": "4.9",
-      "brSizeKb": "0.8"
+      "rawSizeKb": "10.4",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 37,
@@ -489,8 +489,8 @@
       "totalSections": 2,
       "jsonFile": "vol_37.json",
       "brFile": "vol_37.json.br",
-      "rawSizeKb": "5.2",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.8",
+      "brSizeKb": "1.6"
     },
     {
       "volume": 38,
@@ -502,8 +502,8 @@
       "totalSections": 2,
       "jsonFile": "vol_38.json",
       "brFile": "vol_38.json.br",
-      "rawSizeKb": "4.4",
-      "brSizeKb": "0.8"
+      "rawSizeKb": "9.8",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 39,
@@ -515,8 +515,8 @@
       "totalSections": 2,
       "jsonFile": "vol_39.json",
       "brFile": "vol_39.json.br",
-      "rawSizeKb": "4.8",
-      "brSizeKb": "0.8"
+      "rawSizeKb": "10.3",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 40,
@@ -528,8 +528,8 @@
       "totalSections": 2,
       "jsonFile": "vol_40.json",
       "brFile": "vol_40.json.br",
-      "rawSizeKb": "5.2",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.8",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 41,
@@ -541,8 +541,8 @@
       "totalSections": 2,
       "jsonFile": "vol_41.json",
       "brFile": "vol_41.json.br",
-      "rawSizeKb": "4.8",
-      "brSizeKb": "0.8"
+      "rawSizeKb": "10.4",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 42,
@@ -554,8 +554,8 @@
       "totalSections": 2,
       "jsonFile": "vol_42.json",
       "brFile": "vol_42.json.br",
-      "rawSizeKb": "4.8",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.4",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 43,
@@ -567,8 +567,8 @@
       "totalSections": 2,
       "jsonFile": "vol_43.json",
       "brFile": "vol_43.json.br",
-      "rawSizeKb": "4.6",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.1",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 44,
@@ -580,8 +580,8 @@
       "totalSections": 2,
       "jsonFile": "vol_44.json",
       "brFile": "vol_44.json.br",
-      "rawSizeKb": "4.8",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.3",
+      "brSizeKb": "1.5"
     },
     {
       "volume": 45,
@@ -593,8 +593,8 @@
       "totalSections": 2,
       "jsonFile": "vol_45.json",
       "brFile": "vol_45.json.br",
-      "rawSizeKb": "5.2",
-      "brSizeKb": "0.9"
+      "rawSizeKb": "10.7",
+      "brSizeKb": "1.5"
     }
   ]
 }

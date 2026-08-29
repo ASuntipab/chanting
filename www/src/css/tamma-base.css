@@ -558,12 +558,52 @@ body {
   opacity: 0.8;
 }
 
+/* Library Counter & Filter Status Info Bar */
+.library-header-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px 2px;
+}
+
+.library-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-family: var(--font-header);
+  transition: all 0.2s ease;
+}
+
+.theme-parchment .library-count-badge {
+  background: rgba(160, 82, 45, 0.08);
+  border-color: rgba(160, 82, 45, 0.22);
+}
+
+.library-count-badge strong {
+  color: var(--accent-gold);
+  font-weight: 700;
+}
+
+.theme-parchment .library-count-badge strong {
+  color: #8b4513;
+}
+
+.library-count-icon {
+  font-size: 0.92rem;
+}
+
 /* Cards Grid */
 .prayer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 16px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .prayer-card {

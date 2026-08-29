@@ -7,6 +7,7 @@ import { audio } from './audio.js';
 import { storage } from './storage.js';
 import { nativeBridge } from './native-bridge.js';
 import { ttsEngine } from './tts-engine.js';
+import { mp3Player, CHANTING_AUDIO_TRACKS } from './mp3-player.js';
 
 export class ComicReaderEngine {
   constructor() {
@@ -29,12 +30,14 @@ export class ComicReaderEngine {
     this.initElements();
     this.bindEvents();
     this.initTTSCallbacks();
+    this.initMP3Player();
   }
 
   initElements() {
     this.readerView = document.getElementById('readerView');
     this.readerToolbar = document.getElementById('readerToolbar');
     this.readerBottomBar = document.getElementById('readerBottomBar');
+    this.comicStage = document.getElementById('comicStage');
     this.comicTrack = document.getElementById('comicTrack');
     this.readerTitle = document.getElementById('readerTitle');
     this.readerSubtitle = document.getElementById('readerSubtitle');
@@ -65,6 +68,22 @@ export class ComicReaderEngine {
     this.btnCloseTTSSettings = document.getElementById('btnCloseTTSSettings');
     this.ttsModeBtns = document.querySelectorAll('.tts-mode-btn');
     this.ttsSpeedBtns = document.querySelectorAll('.tts-speed-btn');
+
+    // Real Monastic MP3 Controls
+    this.btnMP3Play = document.getElementById('btnMP3Play');
+    this.mp3PlayerDeck = document.getElementById('mp3PlayerDeck');
+    this.btnCloseMP3Deck = document.getElementById('btnCloseMP3Deck');
+    this.mp3TrackSelect = document.getElementById('mp3TrackSelect');
+    this.mp3TrackTitle = document.getElementById('mp3TrackTitle');
+    this.mp3TrackTemple = document.getElementById('mp3TrackTemple');
+    this.mp3CurrentTime = document.getElementById('mp3CurrentTime');
+    this.mp3Duration = document.getElementById('mp3Duration');
+    this.mp3ProgressBar = document.getElementById('mp3ProgressBar');
+    this.btnMP3Rewind10 = document.getElementById('btnMP3Rewind10');
+    this.btnMP3MainPlay = document.getElementById('btnMP3MainPlay');
+    this.btnMP3Forward10 = document.getElementById('btnMP3Forward10');
+    this.btnMP3Loop = document.getElementById('btnMP3Loop');
+    this.mp3SpeedSelect = document.getElementById('mp3SpeedSelect');
   }
 
   bindEvents() {
@@ -198,10 +217,71 @@ export class ComicReaderEngine {
       });
     });
 
+    // MP3 Real Chanting Controls Binding
+    this.btnMP3Play?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleMP3Deck();
+    });
+
+    this.btnCloseMP3Deck?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideMP3Deck();
+    });
+
+    this.btnMP3MainPlay?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (ttsEngine.isPlaying) {
+        ttsEngine.stop();
+      }
+      mp3Player.togglePlay();
+    });
+
+    this.btnMP3Rewind10?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (mp3Player.audioElement) {
+        mp3Player.seek((mp3Player.audioElement.currentTime || 0) - 10);
+      }
+    });
+
+    this.btnMP3Forward10?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (mp3Player.audioElement) {
+        mp3Player.seek((mp3Player.audioElement.currentTime || 0) + 10);
+      }
+    });
+
+    this.btnMP3Loop?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isLoop = mp3Player.toggleLoop();
+      this.btnMP3Loop.style.color = isLoop ? 'var(--accent-gold)' : 'var(--text-muted)';
+    });
+
+    this.mp3SpeedSelect?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      const speed = parseFloat(e.target.value);
+      mp3Player.setSpeed(speed);
+    });
+
+    this.mp3TrackSelect?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      const trackId = e.target.value;
+      mp3Player.loadTrack(trackId);
+      if (mp3Player.isPlaying) {
+        mp3Player.play();
+      }
+    });
+
+    this.mp3ProgressBar?.addEventListener('input', (e) => {
+      e.stopPropagation();
+      const percent = parseFloat(e.target.value);
+      mp3Player.seekPercent(percent);
+    });
+
     // Prevent clicks inside Toolbar & Bottom bar from toggling page
     this.readerToolbar?.addEventListener('click', (e) => e.stopPropagation());
     this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
     this.ttsSettingsModal?.addEventListener('click', (e) => e.stopPropagation());
+    this.mp3PlayerDeck?.addEventListener('click', (e) => e.stopPropagation());
 
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
@@ -308,6 +388,12 @@ export class ComicReaderEngine {
     const count = trackerData.totalCounts[prayer.id] || 0;
     this.updateChantDisplay(count);
 
+    // Prime matching MP3 track
+    const matchedTrack = mp3Player.getTrackForPrayer(prayer);
+    if (matchedTrack) {
+      mp3Player.loadTrack(matchedTrack);
+    }
+
     // Show View and start in HUD mode, then auto-hide
     this.readerView.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -327,7 +413,9 @@ export class ComicReaderEngine {
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
     ttsEngine.stop();
+    mp3Player.pause();
     this.hideTTSSettings();
+    this.hideMP3Deck();
     if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
       window.tammaApp.refreshCurrentViews();
     }
@@ -970,5 +1058,69 @@ export class ComicReaderEngine {
     }
     // Jump to the last page to show completion button
     this.goToViewport(this.totalViewportPages - 1, true);
+  }
+
+  // --- Real Monastic MP3 Audio Player Integration ---
+  initMP3Player() {
+    // Populate Track Dropdown
+    if (this.mp3TrackSelect) {
+      this.mp3TrackSelect.innerHTML = '';
+      CHANTING_AUDIO_TRACKS.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.title} (${t.temple})`;
+        this.mp3TrackSelect.appendChild(opt);
+      });
+    }
+
+    // Subscribe to state updates
+    mp3Player.onStateChange((state) => {
+      if (this.btnMP3MainPlay) {
+        this.btnMP3MainPlay.textContent = state.isPlaying ? '⏸️ พักเสียงพระสวด' : '▶️ เล่นเสียงพระสวด';
+      }
+      if (this.btnMP3Play) {
+        this.btnMP3Play.classList.toggle('playing', state.isPlaying);
+      }
+      if (state.currentTrack) {
+        if (this.mp3TrackTitle) this.mp3TrackTitle.textContent = state.currentTrack.title;
+        if (this.mp3TrackTemple) this.mp3TrackTemple.textContent = state.currentTrack.temple;
+        if (this.mp3TrackSelect) this.mp3TrackSelect.value = state.currentTrack.id;
+      }
+    });
+
+    // Subscribe to progress updates
+    mp3Player.onProgress((p) => {
+      if (this.mp3CurrentTime) this.mp3CurrentTime.textContent = p.formattedCurrent;
+      if (this.mp3Duration && p.duration > 0) this.mp3Duration.textContent = p.formattedDuration;
+      if (this.mp3ProgressBar && !this.mp3ProgressBar.matches(':active')) {
+        this.mp3ProgressBar.value = p.percent || 0;
+      }
+    });
+  }
+
+  toggleMP3Deck() {
+    if (!this.mp3PlayerDeck) return;
+    if (this.mp3PlayerDeck.style.display === 'none' || !this.mp3PlayerDeck.style.display) {
+      this.showMP3Deck();
+    } else {
+      this.hideMP3Deck();
+    }
+  }
+
+  showMP3Deck() {
+    if (this.mp3PlayerDeck) {
+      this.mp3PlayerDeck.style.display = 'flex';
+      this.hideTTSSettings();
+    }
+  }
+
+  hideMP3Deck() {
+    if (this.mp3PlayerDeck) {
+      this.mp3PlayerDeck.style.display = 'none';
+    }
+  }
+
+  selectMP3Track(trackId) {
+    mp3Player.loadTrack(trackId);
   }
 }

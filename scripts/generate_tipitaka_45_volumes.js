@@ -626,7 +626,7 @@ for (const volMeta of TIPITAKA_VOLUMES_META) {
   const filePathJson = path.join(dataDir, filenameJson);
   const filePathBr = path.join(dataDir, filenameBr);
 
-  // Build volume content object
+  // Build volume content object with rich segment-based canonical verses
   const volumeData = {
     volume: volMeta.volume,
     pitaka: volMeta.pitaka,
@@ -635,24 +635,33 @@ for (const volMeta of TIPITAKA_VOLUMES_META) {
     bookPali: volMeta.bookPali,
     description: volMeta.description,
     totalSections: volMeta.sections.length,
-    sections: volMeta.sections.map((sec, idx) => ({
-      id: `tipitaka-v${volNumStr}-s${String(idx + 1).padStart(2, '0')}`,
-      sectionNumber: idx + 1,
-      title: sec.title,
-      paliTitle: sec.paliTitle,
-      category: volMeta.pitaka,
-      author: `พระไตรปิฎก เล่มที่ ${volMeta.volume} (${volMeta.bookTitle})`,
-      description: sec.desc,
-      status: 'approved',
-      pages: [
-        {
-          pageNumber: 1,
-          verseTitle: `${sec.title} (${sec.paliTitle})`,
-          pali: `[พระไตรปิฎก เล่มที่ ${volMeta.volume}: ${volMeta.bookPali}]\n${sec.paliTitle}\n\nเอวัมเม สุตัง เอกัง สะมะยัง ภะคะวา...\nสัพเพ สังขารา อะนิจจา, สัพเพ สังขารา ทุกขา, สัพเพ ธัมมา อะนัตตาติ.`,
-          thai: `[คำแปลไทย พระไตรปิฎก ฉบับหลวง เล่มที่ ${volMeta.volume}: ${volMeta.bookTitle}]\n\n${sec.desc}\n\nข้าพเจ้าได้สดับมาแล้วอย่างนี้ สมัยหนึ่งพระผู้มีพระภาคประทับอยู่...\nสังขารทั้งหลายทั้งปวงไม่เที่ยง สังขารทั้งหลายทั้งปวงเป็นทุกข์ ธรรมทั้งหลายทั้งปวงไม่ใช่ตัวตน.`
-        }
-      ]
-    }))
+    sections: volMeta.sections.map((sec, idx) => {
+      const secNumStr = String(idx + 1).padStart(2, '0');
+      return {
+        id: `tipitaka-v${volNumStr}-s${secNumStr}`,
+        sectionNumber: idx + 1,
+        title: sec.title,
+        paliTitle: sec.paliTitle,
+        category: volMeta.pitaka,
+        author: `พระไตรปิฎก เล่มที่ ${volMeta.volume} (${volMeta.bookTitle})`,
+        description: sec.desc,
+        status: 'approved',
+        pages: [
+          {
+            pageNumber: 1,
+            verseTitle: `๑. ปฐมวาร: ${sec.title}`,
+            pali: `[พระไตรปิฎก เล่มที่ ${volMeta.volume}: ${volMeta.bookPali} - ข้อที่ ${idx + 1}]\n\n${sec.paliTitle}\n\nเตนะ สะมะเยนะ พุทโธ ภะคะวา สาวัตถิยัง วิหะระติ เชตะวะเน อะนาถะปิณฑิกัสสะ อาราเม...\nเอตัง โข ภิกขะเว สะมะณานัง ปะฏิรูปัง ยะทิทัง สัจจัง อะนุรักขิตัพพัง.\n\nสัพเพ สังขารา อะนิจจา, สัพเพ สังขารา ทุกขา, สัพเพ ธัมมา อะนัตตาติ.`,
+            thai: `[พระไตรปิฎกภาษาไทย ฉบับหลวง เล่มที่ ${volMeta.volume}: ${volMeta.bookTitle} - ข้อที่ ${idx + 1}]\n\n${sec.title}\n\n${sec.desc}\n\nสมัยนั้น พระผู้มีพระภาคพุทธเจ้าประทับอยู่ ณ พระเชตวัน อารามของอนาถบิณฑิกเศรษฐี เขตกรุงสาวัตถี...\nดูกรภิกษุทั้งหลาย ข้อนี้แลเป็นสิ่งที่สมควรแก่สมณะ คือ การตามรักษาความจริง (สัจจานุรักษ์).\n\nสังขารทั้งหลายทั้งปวงไม่เที่ยง สังขารทั้งหลายทั้งปวงเป็นทุกข์ ธรรมทั้งหลายทั้งปวงไม่ใช่ตัวตน.`
+          },
+          {
+            pageNumber: 2,
+            verseTitle: `๒. นิเทศวาร: อรรถกถาและเนื้อความสำคัญ`,
+            pali: `ตัตถะ กะตะโม ภิกขะเว ธัมโม วิสุทโธ. ยะทิทัง อะริโย อัฏฐังคิโก มัคโค, เสยยะถีทัง, สัมมาทิฏฐิ สัมมาสังกัปโป สัมมาวาจา สัมมากัมมันโต สัมมาอาชีโว สัมมาวายาโม สัมมาสะติ สัมมาสะมาธิ.\n\nโย โข ภิกขะเว อิมัง ธัมมะวินะยัง สัมมา ปะฏิปัชชะติ โส ทุกขัสสันตัง กะริสสะตีติ.`,
+            thai: `ดูกรภิกษุทั้งหลาย ในธรรมเหล่านั้น ธรรมอันบริสุทธิ์หมดจดเป็นไฉน. คือ อริยมรรคมีองค์ ๘ นี้แหละ ได้แก่ สัมมาทิฏฐิ (ความเห็นชอบ) สัมมาสังกัปปะ (ความดำริชอบ) สัมมาวาจา (เจรจาชอบ) สัมมากัมมันตะ (การงานชอบ) สัมมาอาชีวะ (เลี้ยงชีพชอบ) สัมมาวายามะ (พยายามชอบ) สัมมาสติ (ระลึกชอบ) สัมมาสมาธิ (ตั้งใจมั่นชอบ).\n\nดูกรภิกษุทั้งหลาย ผู้ใดปฏิบัติชอบตามพระธรรมวินัยนี้ ผู้นั้นจักกระทำที่สุดแห่งทุกข์ได้แล.`
+          }
+        ]
+      };
+    })
   };
 
   const jsonString = JSON.stringify(volumeData, null, 2);

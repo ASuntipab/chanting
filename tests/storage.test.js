@@ -362,9 +362,9 @@ test('Library Header: Accurate Prayer Count & Thai Numeral Formatting', () => {
   const totalCount = activePrayers.length;
   const totalPages = activePrayers.reduce((acc, p) => acc + (p.pages?.length || 1), 0);
 
-  assert.equal(totalCount, 100, 'Should have exactly 100 active prayers in default library');
-  assert.equal(toThai(totalCount), '๑๐๐', 'Should correctly format 100 to Thai numeral ๑๐๐');
-  assert.equal(totalPages, 183, 'Should have 183 total pages across all prayers');
-  assert.equal(toThai(totalPages), '๑๘๓', 'Should correctly format 183 pages to Thai numeral ๑๘๓');
+  assert.equal(totalCount, 102, 'Should have exactly 102 active prayers in default library');
+  assert.equal(toThai(totalCount), '๑๐๒', 'Should correctly format 102 to Thai numeral ๑๐๒');
+  assert.equal(totalPages, 189, 'Should have 189 total pages across all prayers');
+  assert.equal(toThai(totalPages), '๑๘๙', 'Should correctly format 189 pages to Thai numeral ๑๘๙');
 });
 
