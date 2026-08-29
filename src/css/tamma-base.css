@@ -370,51 +370,12 @@ body {
   filter: drop-shadow(0 0 6px var(--accent-gold));
 }
 
-/* Category Filter Chips - Clean Multi-Row Wrap Layout */
-.chip-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 6px;
-  padding: 6px 0 14px 0;
-  align-items: center;
-}
-
-.chip {
-  padding: 6px 13px;
-  border-radius: var(--radius-full);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
-  font-size: 0.82rem;
-  font-family: var(--font-header);
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.chip:hover {
-  border-color: var(--accent-gold);
-  color: var(--text-primary);
-  transform: translateY(-1px);
-}
-
-.chip.active {
-  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
-  color: #120e0b;
-  font-weight: 600;
-  border-color: var(--accent-gold);
-  box-shadow: 0 2px 10px var(--accent-gold-glow);
-  transform: scale(1.04);
-}
-
-/* Search & Filter Bar */
+/* Compact Search & Category Filter Bar (1-Line Space Saver) */
 .search-container {
   display: flex;
-  gap: 10px;
-  margin: 14px 0;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 14px 0;
 }
 
 .search-input-wrap {
@@ -428,18 +389,18 @@ body {
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .search-input {
   width: 100%;
-  padding: 12px 16px 12px 42px;
-  border-radius: var(--radius-md);
+  padding: 9px 14px 9px 38px;
+  border-radius: var(--radius-full);
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   outline: none;
   transition: all 0.2s ease;
 }
@@ -447,6 +408,80 @@ body {
 .search-input:focus {
   border-color: var(--accent-gold);
   box-shadow: var(--shadow-gold);
+}
+
+/* Category Dropdown Pill */
+.btn-category-dropdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  padding: 8px 14px;
+  color: var(--accent-gold);
+  font-family: var(--font-header);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-category-dropdown:hover, .btn-category-dropdown:active {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-gold);
+}
+
+.dropdown-caret {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* Category Sheet Grid Modal */
+.category-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.category-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-header);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.category-sheet-item:hover {
+  border-color: var(--accent-gold);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.category-sheet-item.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(36, 29, 23, 0.9));
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  font-weight: 600;
+  box-shadow: 0 0 16px var(--accent-gold-glow);
+}
+
+.category-sheet-item .cat-icon {
+  font-size: 1.15rem;
 }
 
 /* Cards Grid */

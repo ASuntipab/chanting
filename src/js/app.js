@@ -104,12 +104,27 @@ class TammaApp {
       this.renderLibrary();
     });
 
-    // Category Chips
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        this.currentCategory = chip.dataset.category || 'all';
+    // Category Selector Modal & Dropdown
+    const btnCategorySelect = document.getElementById('btnCategorySelect');
+    const categoryModal = document.getElementById('categoryModal');
+    const btnCloseCategoryModal = document.getElementById('btnCloseCategoryModal');
+    const selectedCategoryLabel = document.getElementById('selectedCategoryLabel');
+
+    btnCategorySelect?.addEventListener('click', () => categoryModal?.classList.add('open'));
+    btnCloseCategoryModal?.addEventListener('click', () => categoryModal?.classList.remove('open'));
+    categoryModal?.addEventListener('click', (e) => {
+      if (e.target === categoryModal) categoryModal.classList.remove('open');
+    });
+
+    document.querySelectorAll('.category-sheet-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.category-sheet-item').forEach(c => c.classList.remove('active'));
+        item.classList.add('active');
+        this.currentCategory = item.dataset.category || 'all';
+        if (selectedCategoryLabel) {
+          selectedCategoryLabel.textContent = item.textContent.trim();
+        }
+        categoryModal?.classList.remove('open');
         this.renderLibrary();
       });
     });

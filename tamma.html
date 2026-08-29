@@ -44,25 +44,17 @@
 
     <!-- TAB 1: PRAYER LIBRARY VIEW -->
     <main id="viewLibrary" class="tab-view">
-      <!-- Search Input -->
+      <!-- Compact 1-Line Search & Category Filter Bar -->
       <div class="search-container">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบทสวดมนต์ เช่น ชินบัญชร, พาหุง, แผ่เมตตา...">
+          <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบทสวดมนต์ เช่น ชินบัญชร, พาหุง...">
         </div>
-      </div>
-
-      <!-- Category Filter Chips -->
-      <div class="chip-group">
-        <button class="chip active" data-category="all">✨ ทั้งหมด</button>
-        <button class="chip" data-category="หลวงพ่อจรัญ">🪷 หลวงพ่อจรัญ (วัดอัมพวัน)</button>
-        <button class="chip" data-category="หลวงปู่มั่น">⛰️ หลวงปู่มั่น ภูริทัตโต</button>
-        <button class="chip" data-category="หลวงตามหาบัว">🪷 หลวงตามหาบัว (วัดป่าบ้านตาด)</button>
-        <button class="chip" data-category="แผ่เมตตา">💖 แผ่เมตตา</button>
-        <button class="chip" data-category="คาถาศักดิ์สิทธิ์">🌟 คาถาศักดิ์สิทธิ์</button>
-        <button class="chip" data-category="บทสวดประจำวัน">🙏 บทสวดประจำวัน</button>
-        <button class="chip" data-category="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา</button>
-        <button class="chip" data-category="ทำวัตร">📜 ทำวัตรเช้า-เย็น</button>
+        <!-- Category Selector Dropdown Button -->
+        <button id="btnCategorySelect" class="btn-category-dropdown" title="เลือกหมวดหมู่">
+          <span id="selectedCategoryLabel">✨ ทั้งหมด</span>
+          <span class="dropdown-caret">▼</span>
+        </button>
       </div>
 
       <!-- Prayers Grid -->
@@ -180,6 +172,56 @@
         <span>🔔</span>
         <span id="readerChantCount">0 จบ</span>
       </button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: CATEGORY SELECTOR BOTTOM SHEET
+       ========================================================================== -->
+  <div id="categoryModal" class="modal-overlay">
+    <div class="modal-card category-sheet" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🏷️ เลือกหมวดหมู่บทสวด</h3>
+        <button id="btnCloseCategoryModal" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
+      </div>
+      <div class="category-sheet-grid">
+        <button class="category-sheet-item active" data-category="all">
+          <span class="cat-icon">✨</span>
+          <span class="cat-name">ทั้งหมด</span>
+        </button>
+        <button class="category-sheet-item" data-category="หลวงพ่อจรัญ">
+          <span class="cat-icon">🪷</span>
+          <span class="cat-name">หลวงพ่อจรัญ (วัดอัมพวัน)</span>
+        </button>
+        <button class="category-sheet-item" data-category="หลวงปู่มั่น">
+          <span class="cat-icon">⛰️</span>
+          <span class="cat-name">หลวงปู่มั่น ภูริทัตโต</span>
+        </button>
+        <button class="category-sheet-item" data-category="หลวงตามหาบัว">
+          <span class="cat-icon">🪷</span>
+          <span class="cat-name">หลวงตามหาบัว (วัดป่าบ้านตาด)</span>
+        </button>
+        <button class="category-sheet-item" data-category="แผ่เมตตา">
+          <span class="cat-icon">💖</span>
+          <span class="cat-name">แผ่เมตตา</span>
+        </button>
+        <button class="category-sheet-item" data-category="คาถาศักดิ์สิทธิ์">
+          <span class="cat-icon">🌟</span>
+          <span class="cat-name">คาถาศักดิ์สิทธิ์</span>
+        </button>
+        <button class="category-sheet-item" data-category="บทสวดประจำวัน">
+          <span class="cat-icon">🙏</span>
+          <span class="cat-name">บทสวดประจำวัน</span>
+        </button>
+        <button class="category-sheet-item" data-category="ชัยมงคลคาถา">
+          <span class="cat-icon">🛡️</span>
+          <span class="cat-name">ชัยมงคลคาถา</span>
+        </button>
+        <button class="category-sheet-item" data-category="ทำวัตร">
+          <span class="cat-icon">📜</span>
+          <span class="cat-name">ทำวัตรเช้า-เย็น</span>
+        </button>
+      </div>
     </div>
   </div>
 
