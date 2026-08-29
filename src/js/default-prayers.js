@@ -9,6 +9,9 @@ import { TIPITAKA_SUTTA_PRAYERS } from './prayers-tipitaka-suttas.js';
 import { CEREMONY_CHANT_PRAYERS } from './prayers-ceremony-chants.js';
 import { FAMOUS_MONKS_PRAYERS } from './prayers-famous-monks.js';
 import { PARITTA_DAILY_PRAYERS } from './prayers-paritta-daily.js';
+import { BIRTHDAY_PROTECTION_PRAYERS } from './prayers-birthday-protection.js';
+import { MONASTIC_RITUAL_PRAYERS } from './prayers-monastic-rituals.js';
+import { WEALTH_DEITIES_PRAYERS } from './prayers-wealth-deities.js';
 
 const BASE_PRAYERS = [
   // =========================================================================
@@ -616,5 +619,8 @@ export const DEFAULT_PRAYERS = [
   ...TIPITAKA_SUTTA_PRAYERS,
   ...CEREMONY_CHANT_PRAYERS,
   ...FAMOUS_MONKS_PRAYERS,
-  ...PARITTA_DAILY_PRAYERS
+  ...PARITTA_DAILY_PRAYERS,
+  ...BIRTHDAY_PROTECTION_PRAYERS,
+  ...MONASTIC_RITUAL_PRAYERS,
+  ...WEALTH_DEITIES_PRAYERS
 ];
