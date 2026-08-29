@@ -447,7 +447,8 @@ export class ComicReaderEngine {
     if (!this.isSwiping) return;
     this.isSwiping = false;
     const deltaX = this.touchStartX - this.touchCurrentX;
-    const deltaY = Math.abs(this.touchStartY - (e.changedTouches[0]?.clientY || this.touchStartY));
+    const currentY = e.changedTouches[0]?.clientY || this.touchStartY;
+    const deltaY = Math.abs(this.touchStartY - currentY);
     const elapsed = Date.now() - this.touchStartTime;
 
     // Reset frame tilt
@@ -456,7 +457,7 @@ export class ComicReaderEngine {
     const frame = curPage?.querySelector('.page-frame');
     if (frame) frame.style.transform = '';
 
-    // 1. Horizontal swipe dominant -> Turn Page
+    // 1. Horizontal swipe gesture -> Turn Page
     if (Math.abs(deltaX) > this.swipeThreshold && Math.abs(deltaX) > deltaY) {
       if (deltaX > 0) {
         this.nextPage(); // Swipe Left -> Turn Page Next
@@ -464,21 +465,9 @@ export class ComicReaderEngine {
         this.prevPage(); // Swipe Right -> Turn Page Prev
       }
     } 
-    // 2. Clean Tap Detected (Short duration, minimal movement)
-    else if (elapsed < 350 && Math.abs(deltaX) < 15 && deltaY < 15) {
-      const tapX = this.touchStartX;
-      const screenWidth = window.innerWidth;
-
-      if (tapX < screenWidth * 0.22) {
-        // Tap Left Margin -> Previous Page
-        this.prevPage();
-      } else if (tapX > screenWidth * 0.78) {
-        // Tap Right Margin -> Next Page
-        this.nextPage();
-      } else {
-        // Tap Center -> Toggle Floating Control HUD & Font Controls!
-        this.toggleHUD();
-      }
+    // 2. Instant Single Tap Detected (No long press needed, taps anywhere toggle options)
+    else if (elapsed < 600 && Math.abs(deltaX) < 25 && deltaY < 25) {
+      this.toggleHUD();
     }
   }
 
@@ -519,20 +508,14 @@ export class ComicReaderEngine {
     const frame = curPage?.querySelector('.page-frame');
     if (frame) frame.style.transform = '';
 
+    // 1. Drag / Swipe -> Turn Page
     if (Math.abs(deltaX) > this.swipeThreshold) {
       if (deltaX > 0) this.nextPage();
       else this.prevPage();
-    } else if (elapsed < 350 && Math.abs(deltaX) < 10 && deltaY < 10) {
-      const clickX = e.clientX;
-      const screenWidth = window.innerWidth;
-
-      if (clickX < screenWidth * 0.22) {
-        this.prevPage();
-      } else if (clickX > screenWidth * 0.78) {
-        this.nextPage();
-      } else {
-        this.toggleHUD();
-      }
+    } 
+    // 2. Instant Single Click -> Toggle HUD & Options Panel
+    else if (elapsed < 600 && Math.abs(deltaX) < 20 && deltaY < 20) {
+      this.toggleHUD();
     }
   }
 
