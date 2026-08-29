@@ -11,7 +11,8 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
       assert.ok(track.id, 'Track must have an ID');
       assert.ok(track.title, 'Track must have a title');
       assert.ok(track.temple, 'Track must have a temple attribution');
-      assert.ok(track.src.endsWith('.mp3'), 'Track src must be MP3');
+      assert.ok(track.srcWebm, 'Track must have compressed WebM/Ogg source');
+      assert.ok(track.srcMp3.endsWith('.mp3'), 'Track must have fallback MP3 source');
     });
   });
 

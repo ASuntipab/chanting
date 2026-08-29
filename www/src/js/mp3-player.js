@@ -1,6 +1,6 @@
 /**
- * Tamma OS - Real Monastic MP3 Chanting Audio Player Engine
- * High-fidelity streaming for authentic Buddhist chanting from reputable Theravada monasteries.
+ * Tamma OS - High-Density Compressed Audio Engine (.webm / .ogg + MP3 Fallback)
+ * Intelligent codec negotiation & offline audio cache for Buddhist chanting.
  */
 
 export const CHANTING_AUDIO_TRACKS = [
@@ -8,7 +8,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-morning-chanting',
     title: 'ทำวัตรเช้า (แปลไทย-บาลี)',
     temple: 'วัดอัมรวดี / สายวัดป่าหนองป่าพง',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-English-Wat_Amaravati-Morning_Chanting.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-English-Wat_Amaravati-Morning_Chanting.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-English-Wat_Amaravati-Morning_Chanting.mp3',
     durationEst: '26:37',
     category: 'ทำวัตร'
   },
@@ -16,7 +17,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-evening-chanting',
     title: 'ทำวัตรเย็น (แปลไทย-บาลี)',
     temple: 'วัดอัมรวดี / สายวัดป่าหนองป่าพง',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-12-Evening_Chanting.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-12-Evening_Chanting.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-12-Evening_Chanting.mp3',
     durationEst: '09:34',
     category: 'ทำวัตร'
   },
@@ -24,7 +26,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-chinabanchorn',
     title: 'พระคาถาชินบัญชร (สมเด็จโต)',
     temple: 'พระคาถาชินบัญชรฉบับโบราณ',
-    src: 'https://ia800706.us.archive.org/14/items/JinapanjaraGatha/Jinapanjara%20Gatha.mp3',
+    srcWebm: 'https://ia800706.us.archive.org/14/items/JinapanjaraGatha/Jinapanjara%20Gatha.ogg',
+    srcMp3: 'https://ia800706.us.archive.org/14/items/JinapanjaraGatha/Jinapanjara%20Gatha.mp3',
     durationEst: '07:27',
     category: 'คาถาศักดิ์สิทธิ์'
   },
@@ -32,7 +35,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-phahung-mahaka',
     title: 'พุทธชัยมงคลคาถา (พาหุง-มหากา)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bahum_Sahassam-abhinimmita.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bahum_Sahassam-abhinimmita.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bahum_Sahassam-abhinimmita.mp3',
     durationEst: '02:29',
     category: 'ชัยมงคลคาถา'
   },
@@ -40,7 +44,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-karaniya-metta',
     title: 'กรณียเมตตสูตร (แผ่เมตตา)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Karaniyamattha_kusalena.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Karaniyamattha_kusalena.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Karaniyamattha_kusalena.mp3',
     durationEst: '02:10',
     category: 'แผ่เมตตา'
   },
@@ -48,7 +53,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-dhammacakka',
     title: 'ธัมมจักกัปปวัตตนสูตร (ปฐมเทศนา)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Dhammacakkappavattana.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Dhammacakkappavattana.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Dhammacakkappavattana.mp3',
     durationEst: '12:54',
     category: 'พระสูตรสำคัญ'
   },
@@ -56,7 +62,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-anattalakkhana',
     title: 'อนัตตลักขณสูตร (ขันธ์ ๕ เป็นอนัตตา)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Anatta_Sutta.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Anatta_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Anatta_Sutta.mp3',
     durationEst: '10:39',
     category: 'พระสูตรสำคัญ'
   },
@@ -64,7 +71,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-adittapariyaya',
     title: 'อาทิตตปริยายสูตร (ไฟราคะ-โทสะ-โมหะ)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Aditta-Pariyaya_Sutta.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Aditta-Pariyaya_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Aditta-Pariyaya_Sutta.mp3',
     durationEst: '07:45',
     category: 'พระสูตรสำคัญ'
   },
@@ -72,7 +80,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-mangala-sutta',
     title: 'มงคลสูตร (มงคล ๓๘ ประการ)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Asevana_Ca_Balanam.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Asevana_Ca_Balanam.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Asevana_Ca_Balanam.mp3',
     durationEst: '01:58',
     category: 'ชัยมงคลคาถา'
   },
@@ -80,7 +89,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-ratana-sutta',
     title: 'รัตนสูตร (ดับภัยพิบัติและโรคระบาด)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yankinci_Vittam.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yankinci_Vittam.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yankinci_Vittam.mp3',
     durationEst: '01:57',
     category: 'ชัยมงคลคาถา'
   },
@@ -88,7 +98,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-khandha-paritta',
     title: 'ขันธปริตร (ป้องกันสัตว์มีพิษและอสรพิษ)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Virupakkehi_Me_Mettam.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Virupakkehi_Me_Mettam.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Virupakkehi_Me_Mettam.mp3',
     durationEst: '01:15',
     category: 'ชัยมงคลคาถา'
   },
@@ -96,7 +107,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-bojjhanga-paritta',
     title: 'โพชฌังคปริตร (หายจากโรคภัยไข้เจ็บ)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bojjango_Satisankhato.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bojjango_Satisankhato.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bojjango_Satisankhato.mp3',
     durationEst: '01:32',
     category: 'ชัยมงคลคาถา'
   },
@@ -104,7 +116,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-abhaya-paritta',
     title: 'อภยปริตร (ยันทุนนิมิตตัง ปัดเป่าฝันร้าย)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yandunnimittam_Avamangalanca.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yandunnimittam_Avamangalanca.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yandunnimittam_Avamangalanca.mp3',
     durationEst: '00:47',
     category: 'ชัยมงคลคาถา'
   },
@@ -112,7 +125,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-angulimala-paritta',
     title: 'อังคุลิมาลปริตร (คลอดบุตรง่าย ปลอดภัย)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yatoham_Bhagini_Ariyaya.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yatoham_Bhagini_Ariyaya.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yatoham_Bhagini_Ariyaya.mp3',
     durationEst: '00:53',
     category: 'ชัยมงคลคาถา'
   },
@@ -120,7 +134,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-atanatiya-paritta',
     title: 'อาฏานาฏิยปริตร (ภาณยักษ์ คุ้มครองจากภูตผี)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Atanatiya_Parittam.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Atanatiya_Parittam.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Atanatiya_Parittam.mp3',
     durationEst: '08:33',
     category: 'ชัยมงคลคาถา'
   },
@@ -128,7 +143,8 @@ export const CHANTING_AUDIO_TRACKS = [
     id: 'track-12-tamnan-paritta',
     title: 'พระปริตร ๑๒ ตำนาน (รวมบทสวดคุ้มครองครบชุด)',
     temple: 'วัดอัมรวดี / สายวัดป่า',
-    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Parittas-All.mp3',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Parittas-All.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Parittas-All.mp3',
     durationEst: '18:40',
     category: 'บทสวดประจำวัน'
   }
@@ -141,9 +157,25 @@ class MP3ChantingAudioEngine {
     this.isPlaying = false;
     this.isLooping = false;
     this.playbackRate = 1.0;
+    this.preferredFormat = 'webm';
     this.onStateChangeCallbacks = [];
     this.onProgressCallbacks = [];
+    this.cacheName = 'tamma-chanting-audio-v1';
+    this._initFormatSupport();
     this._initAudioElement();
+  }
+
+  _initFormatSupport() {
+    if (typeof window === 'undefined' || typeof Audio === 'undefined') {
+      this.preferredFormat = 'webm';
+      return;
+    }
+    const a = new Audio();
+    const canPlayWebm = a.canPlayType('audio/webm; codecs="opus"').replace(/no/, '') ||
+                        a.canPlayType('audio/webm').replace(/no/, '') ||
+                        a.canPlayType('audio/ogg; codecs="opus"').replace(/no/, '') ||
+                        a.canPlayType('audio/ogg').replace(/no/, '');
+    this.preferredFormat = canPlayWebm ? 'webm' : 'mp3';
   }
 
   _initAudioElement() {
@@ -187,9 +219,14 @@ class MP3ChantingAudioEngine {
     });
 
     this.audioElement.addEventListener('error', (e) => {
-      console.warn('MP3 Playback notice:', e);
-      this.isPlaying = false;
-      this._notifyState();
+      console.warn('Audio fallback triggered, attempting MP3 fallback:', e);
+      if (this.currentTrack && this.audioElement.src !== this.currentTrack.srcMp3) {
+        this.audioElement.src = this.currentTrack.srcMp3;
+        this.audioElement.play().catch(() => {});
+      } else {
+        this.isPlaying = false;
+        this._notifyState();
+      }
     });
   }
 
@@ -214,7 +251,7 @@ class MP3ChantingAudioEngine {
           }
         });
       } catch (err) {
-        console.log('MediaSession setup:', err);
+        console.log('MediaSession notice:', err);
       }
     }
   }
@@ -299,15 +336,34 @@ class MP3ChantingAudioEngine {
     if (!track) return;
     this.currentTrack = track;
 
+    // Pick compressed WebM/Ogg if supported, or fallback to MP3
+    const targetUrl = (this.preferredFormat === 'webm' && track.srcWebm) ? track.srcWebm : track.srcMp3;
+
     if (this.audioElement) {
-      if (this.audioElement.src !== track.src) {
-        this.audioElement.src = track.src;
+      if (this.audioElement.src !== targetUrl) {
+        this.audioElement.src = targetUrl;
       }
       this.audioElement.playbackRate = this.playbackRate;
       this.audioElement.loop = this.isLooping;
     }
 
+    // Background offline cache preloader
+    this._cacheAudioOffline(targetUrl);
+
     this._notifyState();
+  }
+
+  async _cacheAudioOffline(url) {
+    if (typeof window === 'undefined' || !('caches' in window) || !url) return;
+    try {
+      const cache = await window.caches.open(this.cacheName);
+      const match = await cache.match(url);
+      if (!match) {
+        cache.add(url).catch(() => {});
+      }
+    } catch (e) {
+      // Cache silently ignored in non-secure or restricted contexts
+    }
   }
 
   play(trackIdOrObj = null) {
@@ -391,6 +447,7 @@ class MP3ChantingAudioEngine {
       isPlaying: this.isPlaying,
       isLooping: this.isLooping,
       playbackRate: this.playbackRate,
+      preferredFormat: this.preferredFormat,
       currentTrack: this.currentTrack
     };
     this.onStateChangeCallbacks.forEach(cb => cb(state));
