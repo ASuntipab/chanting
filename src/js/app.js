@@ -7,12 +7,15 @@ import { shareEngine } from './share.js';
 import { starfield } from './starfield.js';
 import { nativeBridge } from './native-bridge.js';
 import { renderQRCodeToCanvas } from './qrcode.js';
+import { tipitakaLoader } from './tipitaka-loader.js';
 
 class TammaApp {
   constructor() {
     this.reader = null;
     this.currentCategory = 'all';
     this.searchQuery = '';
+    this.tipitakaPitaka = 'all';
+    this.tipitakaQuery = '';
     this.activeTab = 'library';
   }
 
@@ -114,6 +117,23 @@ class TammaApp {
     categorySelect?.addEventListener('change', (e) => {
       this.currentCategory = e.target.value || 'all';
       this.renderLibrary();
+    });
+
+    // Tipitaka Search Input
+    const tipitakaSearchInput = document.getElementById('tipitakaSearchInput');
+    tipitakaSearchInput?.addEventListener('input', (e) => {
+      this.tipitakaQuery = e.target.value.toLowerCase().trim();
+      this.renderTipitaka();
+    });
+
+    // Tipitaka Filter Pills
+    document.querySelectorAll('.tipitaka-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.tipitaka-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        this.tipitakaPitaka = pill.dataset.pitaka || 'all';
+        this.renderTipitaka();
+      });
     });
 
     // Suggest / Request Prayer Modal Triggers (+)
@@ -447,10 +467,12 @@ class TammaApp {
 
     // Tab content views
     const viewLibrary = document.getElementById('viewLibrary');
+    const viewTipitaka = document.getElementById('viewTipitaka');
     const viewTracker = document.getElementById('viewTracker');
     const viewFavorites = document.getElementById('viewFavorites');
 
     if (viewLibrary) viewLibrary.style.display = tabId === 'library' ? 'block' : 'none';
+    if (viewTipitaka) viewTipitaka.style.display = tabId === 'tipitaka' ? 'block' : 'none';
     if (viewTracker) viewTracker.style.display = tabId === 'tracker' ? 'block' : 'none';
     if (viewFavorites) viewFavorites.style.display = tabId === 'favorites' ? 'block' : 'none';
 
@@ -458,6 +480,8 @@ class TammaApp {
       tracker.render();
     } else if (tabId === 'favorites') {
       this.renderFavorites();
+    } else if (tabId === 'tipitaka') {
+      this.renderTipitaka();
     } else {
       this.renderLibrary();
     }
@@ -470,6 +494,8 @@ class TammaApp {
     tracker.render();
     if (this.activeTab === 'favorites') {
       this.renderFavorites();
+    } else if (this.activeTab === 'tipitaka') {
+      this.renderTipitaka();
     }
   }
 
@@ -580,6 +606,130 @@ class TammaApp {
 
       container.appendChild(card);
     });
+  }
+
+  async renderTipitaka() {
+    const container = document.getElementById('tipitakaGrid');
+    if (!container) return;
+
+    try {
+      const index = await tipitakaLoader.loadIndex();
+      let volumes = index.volumes || [];
+
+      // Filter by Pitaka
+      if (this.tipitakaPitaka !== 'all') {
+        volumes = volumes.filter(v => v.pitaka === this.tipitakaPitaka);
+      }
+
+      // Filter by Search Query
+      if (this.tipitakaQuery) {
+        volumes = await tipitakaLoader.search(this.tipitakaQuery);
+        if (this.tipitakaPitaka !== 'all') {
+          volumes = volumes.filter(v => v.pitaka === this.tipitakaPitaka);
+        }
+      }
+
+      if (volumes.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 48px 16px; color: var(--text-muted);">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
+            <div style="font-family: var(--font-header); font-size: 1.1rem;">ไม่พบข้อมูลพระไตรปิฎกที่ค้นหา</div>
+            <div style="font-size: 0.85rem; margin-top: 4px;">ลองเปลี่ยนคำค้นหา เช่น ธรรมบท, มหาปรินิพพาน หรือเลือกหมวดหมู่อื่น</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      volumes.forEach(vol => {
+        const card = document.createElement('div');
+        card.className = 'prayer-card';
+        
+        let pitakaBadgeClass = 'rgba(218, 165, 32, 0.15)';
+        let pitakaColor = 'var(--accent-gold)';
+        if (vol.pitaka === 'พระวินัยปิฎก') {
+          pitakaColor = '#e07a5f';
+        } else if (vol.pitaka === 'พระสุตตันตปิฎก') {
+          pitakaColor = '#81b29a';
+        } else if (vol.pitaka === 'พระอภิธรรมปิฎก') {
+          pitakaColor = '#9d4edd';
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="card-header">
+              <span class="card-category" style="color: ${pitakaColor}; background: ${pitakaBadgeClass}; border: 1px solid ${pitakaColor};">
+                ${vol.pitaka} • เล่มที่ ${vol.volume}
+              </span>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">⚡ .br (${vol.brSizeKb} KB)</span>
+            </div>
+            <div class="card-title">${vol.bookTitle}</div>
+            <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 6px; font-style: italic;">${vol.bookPali}</div>
+            <div class="card-excerpt">${vol.description}</div>
+          </div>
+          <div class="card-footer" style="margin-top: 12px;">
+            <div class="card-stats">
+              <span class="card-stat-item">📑 ${vol.totalSections} กัณฑ์/สูตร</span>
+            </div>
+            <button class="btn-primary btn-read-card" style="padding: 4px 14px; font-size: 0.85rem;">
+              📖 เปิดอ่าน
+            </button>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          this.openTipitakaVolume(vol.volume);
+        });
+
+        container.appendChild(card);
+      });
+    } catch (err) {
+      console.error('Error rendering Tipitaka:', err);
+      container.innerHTML = `<div style="grid-column:1/-1; color:var(--text-danger); text-align:center; padding:24px;">ไม่สามารถโหลดพระไตรปิฎกได้: ${err.message}</div>`;
+    }
+  }
+
+  async openTipitakaVolume(volumeNumber) {
+    try {
+      this.showToast(`⚡ กำลังคลายการบีบอัด .br เล่มที่ ${volumeNumber}...`);
+      const volData = await tipitakaLoader.loadVolume(volumeNumber);
+      
+      if (!volData || !volData.sections || volData.sections.length === 0) {
+        this.showToast('ไม่พบเนื้อหาในเล่มนี้');
+        return;
+      }
+
+      // Convert volume sections into a combined readable prayer object for Comic Reader
+      const combinedPages = [];
+      volData.sections.forEach(sec => {
+        if (sec.pages && sec.pages.length > 0) {
+          sec.pages.forEach(p => {
+            combinedPages.push({
+              pageNumber: combinedPages.length + 1,
+              verseTitle: `${sec.title} (${sec.paliTitle})`,
+              pali: p.pali,
+              thai: p.thai
+            });
+          });
+        }
+      });
+
+      const tipitakaPrayerObj = {
+        id: `tipitaka-vol-${String(volumeNumber).padStart(2, '0')}`,
+        title: `พระไตรปิฎก เล่มที่ ${volumeNumber}: ${volData.bookTitle}`,
+        category: volData.pitaka,
+        author: `พระไตรปิฎกฉบับสยามรัฐ (${volData.bookPali})`,
+        description: volData.description,
+        status: 'approved',
+        pages: combinedPages
+      };
+
+      this.reader.open(tipitakaPrayerObj);
+      this.showToast(`✨ เปิดพระไตรปิฎก เล่มที่ ${volumeNumber} สำเร็จ (${combinedPages.length} ตอน)`);
+    } catch (err) {
+      console.error('Failed to open Tipitaka volume:', err);
+      this.showToast(`❌ เกิดข้อผิดพลาดในการโหลด: ${err.message}`);
+    }
   }
 
   openShareModal(prayer) {

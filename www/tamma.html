@@ -71,6 +71,9 @@
             <option value="บทสวดประจำวัน">🙏 บทสวดประจำวัน</option>
             <option value="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา</option>
             <option value="ทำวัตร">📜 ทำวัตรเช้า-เย็น</option>
+            <option value="พระสูตรสำคัญ">📖 พระสูตรสำคัญ</option>
+            <option value="พระเกจิอาจารย์">📿 พระเกจิอาจารย์</option>
+            <option value="พิธีกรรม">🕯️ พิธีกรรม (ถวายทาน/กฐิน)</option>
           </select>
           <span class="select-arrow">▼</span>
         </div>
@@ -114,7 +117,38 @@
       </div>
     </section>
 
-    <!-- TAB 3: FAVORITES VIEW -->
+    <!-- TAB 3: TIPITAKA 45-VOLUME VIEW -->
+    <section id="viewTipitaka" class="tab-view" style="display: none;">
+      <div style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-family: var(--font-header); font-size: 1.3rem; color: var(--accent-gold);">📖 พระไตรปิฎก ๔๕ เล่ม (ฉบับสมบูรณ์)</h2>
+          <span style="font-size: 0.75rem; background: rgba(255,215,0,0.15); color: var(--accent-gold); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--accent-gold);">⚡ บีบอัด .br (-85%)</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">พระวินัยปิฎก (๑-๘), พระสุตตันตปิฎก (๙-๓๓), พระอภิธรรมปิฎก (๓๔-๔๕)</p>
+      </div>
+
+      <!-- Tipitaka Filter Pills & Search -->
+      <div class="search-container" style="margin-bottom: 12px;">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="tipitakaSearchInput" class="search-input" placeholder="ค้นหาพระไตรปิฎก เช่น ธรรมบท, มหาปรินิพพาน, ปาราชิก...">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px;">
+        <button class="filter-pill tipitaka-pill active" data-pitaka="all">✨ ทั้งหมด (๔๕ เล่ม)</button>
+        <button class="filter-pill tipitaka-pill" data-pitaka="พระวินัยปิฎก">📜 พระวินัย (๘)</button>
+        <button class="filter-pill tipitaka-pill" data-pitaka="พระสุตตันตปิฎก">📖 พระสุตตันตะ (๒๕)</button>
+        <button class="filter-pill tipitaka-pill" data-pitaka="พระอภิธรรมปิฎก">💎 พระอภิธรรม (๑๒)</button>
+      </div>
+
+      <!-- Tipitaka Volumes Grid -->
+      <div id="tipitakaGrid" class="prayer-grid">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 4: FAVORITES VIEW -->
     <section id="viewFavorites" class="tab-view" style="display: none;">
       <div style="margin-bottom: 16px;">
         <h2 style="font-family: var(--font-header); font-size: 1.3rem; color: var(--accent-lotus);">💖 รายการโปรดของฉัน</h2>
@@ -127,17 +161,21 @@
 
   </div>
 
-  <!-- Bottom Navigation Bar (3 Clean Tabs) -->
+  <!-- Bottom Navigation Bar (4 Clean Tabs) -->
   <nav class="bottom-nav">
-    <button class="nav-item active" data-tab="library" style="width: 33%;">
+    <button class="nav-item active" data-tab="library" style="width: 25%;">
       <span class="nav-icon">📚</span>
       <span>คลังบทสวด</span>
     </button>
-    <button class="nav-item" data-tab="tracker" style="width: 33%;">
+    <button class="nav-item" data-tab="tipitaka" style="width: 25%;">
+      <span class="nav-icon">📖</span>
+      <span>พระไตรปิฎก</span>
+    </button>
+    <button class="nav-item" data-tab="tracker" style="width: 25%;">
       <span class="nav-icon">📊</span>
       <span>บันทึกสวด</span>
     </button>
-    <button class="nav-item" data-tab="favorites" style="width: 33%;">
+    <button class="nav-item" data-tab="favorites" style="width: 25%;">
       <span class="nav-icon">💖</span>
       <span>รายการโปรด</span>
     </button>
@@ -155,6 +193,54 @@
       <div class="reader-title-box">
         <span id="readerTitle" class="reader-title">พระคาถาชินบัญชร</span>
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
+      </div>
+
+      <!-- TTS Voice Reading Controls -->
+      <div class="reader-audio-dock">
+        <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงอ่านบทสวด">
+          <span id="ttsPlayIcon">🔊</span>
+          <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
+        </button>
+        <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ตั้งค่าเสียงอ่าน">
+          ⚙️
+        </button>
+      </div>
+    </div>
+
+    <!-- TTS Settings Popover Card -->
+    <div id="ttsSettingsModal" class="tts-settings-overlay" style="display: none;">
+      <div class="tts-settings-card">
+        <div class="tts-settings-header">
+          <h4>🔊 ตั้งค่าเสียงอ่านบทสวด</h4>
+          <button id="btnCloseTTSSettings" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;">✕</button>
+        </div>
+        <div class="tts-settings-body">
+          <div class="tts-setting-row">
+            <label>รูปแบบการอ่าน:</label>
+            <div class="tts-mode-pills">
+              <button class="tts-mode-btn active" data-mode="both">บาลี + แปลไทย</button>
+              <button class="tts-mode-btn" data-mode="pali">เฉพาะบาลี</button>
+              <button class="tts-mode-btn" data-mode="thai">เฉพาะแปลไทย</button>
+            </div>
+          </div>
+          <div class="tts-setting-row">
+            <label>ความเร็วเสียงสวด:</label>
+            <div class="tts-speed-pills">
+              <button class="tts-speed-btn" data-speed="0.75">0.75x (ช้า/สงบ)</button>
+              <button class="tts-speed-btn active" data-speed="0.85">0.85x (มาตรฐาน)</button>
+              <button class="tts-speed-btn" data-speed="1.0">1.0x (ปกติ)</button>
+              <button class="tts-speed-btn" data-speed="1.15">1.15x (เร็ว)</button>
+            </div>
+          </div>
+
+          <!-- AI / TTS Accuracy Disclaimer -->
+          <div class="tts-disclaimer-box">
+            <div class="tts-disclaimer-title">📢 คำแนะนำการออกเสียง</div>
+            <p class="tts-disclaimer-text">
+              เสียงอ่านนี้สร้างโดยระบบสังเคราะห์เสียงอัตโนมัติ (AI / System TTS) เพื่อช่วยสวดนำและฝึกสวดเบื้องต้น การออกเสียงอักขระบาลีบางคำอาจมีความคลาดเคลื่อนหรือไม่ตรงตามหลักการสวดจริงของพระสงฆ์หรือครูบาอาจารย์ 100% แนะนำให้อ่านตามตัวหนังสือและยึดการออกเสียงตามหลักพระบาลีเป็นสำคัญครับ 🙏
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 

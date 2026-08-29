@@ -6,6 +6,7 @@
 import { audio } from './audio.js';
 import { storage } from './storage.js';
 import { nativeBridge } from './native-bridge.js';
+import { ttsEngine } from './tts-engine.js';
 
 export class ComicReaderEngine {
   constructor() {
@@ -27,6 +28,7 @@ export class ComicReaderEngine {
 
     this.initElements();
     this.bindEvents();
+    this.initTTSCallbacks();
   }
 
   initElements() {
@@ -53,6 +55,16 @@ export class ComicReaderEngine {
     this.readerPageBadge = document.getElementById('readerPageBadge');
     this.btnJumpFirst = document.getElementById('btnJumpFirst');
     this.btnJumpLast = document.getElementById('btnJumpLast');
+
+    // TTS Voice Controls
+    this.btnTTSPlay = document.getElementById('btnTTSPlay');
+    this.ttsPlayIcon = document.getElementById('ttsPlayIcon');
+    this.ttsPlayText = document.getElementById('ttsPlayText');
+    this.btnTTSSettings = document.getElementById('btnTTSSettings');
+    this.ttsSettingsModal = document.getElementById('ttsSettingsModal');
+    this.btnCloseTTSSettings = document.getElementById('btnCloseTTSSettings');
+    this.ttsModeBtns = document.querySelectorAll('.tts-mode-btn');
+    this.ttsSpeedBtns = document.querySelectorAll('.tts-speed-btn');
   }
 
   bindEvents() {
@@ -141,9 +153,55 @@ export class ComicReaderEngine {
       setTimeout(() => this.close(), 1500);
     });
 
+    // TTS Voice Controls Binding
+    this.btnTTSPlay?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleTTS();
+    });
+
+    this.btnTTSSettings?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleTTSSettings();
+    });
+
+    this.btnCloseTTSSettings?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideTTSSettings();
+    });
+
+    // TTS Mode selection pills
+    this.ttsModeBtns?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const mode = btn.dataset.mode;
+        this.ttsModeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ttsEngine.setMode(mode);
+        if (this.currentPrayer) {
+          const wasPlaying = ttsEngine.isPlaying;
+          ttsEngine.prepareQueue(this.currentPrayer);
+          if (wasPlaying) {
+            ttsEngine.play();
+          }
+        }
+      });
+    });
+
+    // TTS Speed selection pills
+    this.ttsSpeedBtns?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const speed = parseFloat(btn.dataset.speed);
+        this.ttsSpeedBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ttsEngine.setRate(speed);
+      });
+    });
+
     // Prevent clicks inside Toolbar & Bottom bar from toggling page
     this.readerToolbar?.addEventListener('click', (e) => e.stopPropagation());
     this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
+    this.ttsSettingsModal?.addEventListener('click', (e) => e.stopPropagation());
 
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
@@ -268,6 +326,8 @@ export class ComicReaderEngine {
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
+    ttsEngine.stop();
+    this.hideTTSSettings();
     if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
       window.tammaApp.refreshCurrentViews();
     }
@@ -297,7 +357,7 @@ export class ComicReaderEngine {
     // Header
     const header = document.createElement('div');
     header.className = 'page-verse-header';
-    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span>`;
+    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span><span class="page-verse-header-hint">💡 แตะที่ข้อความเพื่อเริ่มฟังจากจุดนั้น</span>`;
 
     // Viewport Window
     const viewport = document.createElement('div');
@@ -312,37 +372,84 @@ export class ComicReaderEngine {
     rawPages.forEach((page, idx) => {
       const section = document.createElement('div');
       section.className = 'verse-section';
+      section.dataset.pageIndex = idx;
 
       if (page.verseTitle && rawPages.length > 1) {
         const titleEl = document.createElement('div');
-        titleEl.className = 'verse-section-title';
-        titleEl.style.fontSize = '0.92rem';
-        titleEl.style.color = 'var(--accent-gold)';
-        titleEl.style.opacity = '0.85';
-        titleEl.style.marginBottom = '4px';
+        titleEl.className = 'verse-section-title verse-clickable';
+        titleEl.dataset.pageIndex = idx;
+        titleEl.dataset.type = 'title';
+        titleEl.dataset.text = page.verseTitle.trim();
         titleEl.textContent = page.verseTitle;
+        titleEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+        titleEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.playFromElement(titleEl);
+        });
         section.appendChild(titleEl);
       }
 
       if (page.pali) {
-        const paliEl = document.createElement('div');
-        paliEl.className = 'verse-pali';
-        paliEl.innerHTML = this.escapeHtml(page.pali).replace(/\n/g, '<br>');
-        section.appendChild(paliEl);
+        const paliWrap = document.createElement('div');
+        paliWrap.className = 'verse-pali-wrap';
+        const paliLines = page.pali.split('\n').filter(l => l.trim().length > 0);
+        paliLines.forEach(line => {
+          const paliEl = document.createElement('div');
+          paliEl.className = 'verse-pali verse-clickable';
+          paliEl.dataset.pageIndex = idx;
+          paliEl.dataset.type = 'pali';
+          paliEl.dataset.text = line.trim();
+          paliEl.innerHTML = this.escapeHtml(line);
+          paliEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+          paliEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playFromElement(paliEl);
+          });
+          paliWrap.appendChild(paliEl);
+        });
+        section.appendChild(paliWrap);
       }
 
       if (page.thai) {
-        const thaiEl = document.createElement('div');
-        thaiEl.className = 'verse-thai';
-        thaiEl.innerHTML = this.escapeHtml(page.thai).replace(/\n/g, '<br>');
-        section.appendChild(thaiEl);
+        const thaiWrap = document.createElement('div');
+        thaiWrap.className = 'verse-thai-wrap';
+        const thaiLines = page.thai.split('\n').filter(l => l.trim().length > 0);
+        thaiLines.forEach(line => {
+          const thaiEl = document.createElement('div');
+          thaiEl.className = 'verse-thai verse-clickable';
+          thaiEl.dataset.pageIndex = idx;
+          thaiEl.dataset.type = 'thai';
+          thaiEl.dataset.text = line.trim();
+          thaiEl.innerHTML = this.escapeHtml(line);
+          thaiEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+          thaiEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playFromElement(thaiEl);
+          });
+          thaiWrap.appendChild(thaiEl);
+        });
+        section.appendChild(thaiWrap);
       }
 
       if (!page.pali && !page.thai && page.content) {
-        const contentEl = document.createElement('div');
-        contentEl.className = 'verse-thai';
-        contentEl.innerHTML = this.escapeHtml(page.content).replace(/\n/g, '<br>');
-        section.appendChild(contentEl);
+        const contentWrap = document.createElement('div');
+        contentWrap.className = 'verse-thai-wrap';
+        const contentLines = page.content.split('\n').filter(l => l.trim().length > 0);
+        contentLines.forEach(line => {
+          const contentEl = document.createElement('div');
+          contentEl.className = 'verse-thai verse-clickable';
+          contentEl.dataset.pageIndex = idx;
+          contentEl.dataset.type = 'thai';
+          contentEl.dataset.text = line.trim();
+          contentEl.innerHTML = this.escapeHtml(line);
+          contentEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+          contentEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playFromElement(contentEl);
+          });
+          contentWrap.appendChild(contentEl);
+        });
+        section.appendChild(contentWrap);
       }
 
       flow.appendChild(section);
@@ -355,6 +462,9 @@ export class ComicReaderEngine {
     });
 
     viewport.appendChild(flow);
+
+    // Prepare TTS Queue for current prayer
+    ttsEngine.prepareQueue(prayer);
 
     // Footer Container with Indicator and Progress
     const footer = document.createElement('div');
@@ -706,5 +816,159 @@ export class ComicReaderEngine {
         this.btnChantInReader.style.transform = 'scale(1)';
       }, 200);
     }
+  }
+
+  // --- TTS Voice Reading & Karaoke Mechanics ---
+  initTTSCallbacks() {
+    ttsEngine.onHighlight = (chunkIndex, chunk) => this.handleTTSHighlight(chunkIndex, chunk);
+    ttsEngine.onStateChange = (state) => this.handleTTSState(state);
+    ttsEngine.onFinish = () => this.handleTTSFinish();
+  }
+
+  toggleTTS() {
+    if (!this.currentPrayer) return;
+    if (ttsEngine.queue.length === 0) {
+      ttsEngine.prepareQueue(this.currentPrayer);
+    }
+    
+    if (ttsEngine.isPlaying) {
+      ttsEngine.pause();
+    } else if (ttsEngine.isPaused) {
+      ttsEngine.play();
+    } else {
+      // Start from the currently visible verse in viewport
+      const startIdx = this.findFirstVisibleChunkIndex();
+      ttsEngine.play(startIdx >= 0 ? startIdx : 0);
+    }
+  }
+
+  playFromElement(el) {
+    if (!el || !this.currentPrayer) return;
+    const pageIndex = parseInt(el.dataset.pageIndex, 10);
+    const type = el.dataset.type;
+    const text = (el.dataset.text || el.textContent || '').trim();
+
+    if (ttsEngine.queue.length === 0) {
+      ttsEngine.prepareQueue(this.currentPrayer);
+    }
+
+    // 1. Find exact matching chunk in queue
+    let targetIdx = ttsEngine.queue.findIndex(c => 
+      c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+    );
+
+    // 2. Fallback to matching page & type
+    if (targetIdx < 0) {
+      targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex && c.type === type);
+    }
+
+    // 3. Fallback to first chunk of this page
+    if (targetIdx < 0) {
+      targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex);
+    }
+
+    if (targetIdx >= 0) {
+      ttsEngine.play(targetIdx);
+      this.scheduleAutoHide(5000);
+      nativeBridge.hapticSuccess();
+    }
+  }
+
+  findFirstVisibleChunkIndex() {
+    if (!this.flowEl || ttsEngine.queue.length === 0 || !this.viewportStepPx) return 0;
+    const currentViewportTop = (this.viewportIndex || 0) * this.viewportStepPx;
+    
+    const clickables = this.flowEl.querySelectorAll('.verse-clickable');
+    for (const el of clickables) {
+      if (el.offsetTop >= currentViewportTop - 40) {
+        const pageIndex = parseInt(el.dataset.pageIndex, 10);
+        const type = el.dataset.type;
+        const text = (el.dataset.text || el.textContent || '').trim();
+        const idx = ttsEngine.queue.findIndex(c => 
+          c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+        );
+        if (idx >= 0) return idx;
+      }
+    }
+    return 0;
+  }
+
+  toggleTTSSettings() {
+    if (!this.ttsSettingsModal) return;
+    if (this.ttsSettingsModal.style.display === 'none' || !this.ttsSettingsModal.style.display) {
+      this.ttsSettingsModal.style.display = 'block';
+    } else {
+      this.ttsSettingsModal.style.display = 'none';
+    }
+  }
+
+  hideTTSSettings() {
+    if (this.ttsSettingsModal) {
+      this.ttsSettingsModal.style.display = 'none';
+    }
+  }
+
+  handleTTSHighlight(chunkIndex, chunk) {
+    if (!this.flowEl) return;
+
+    // Remove active highlight from all elements
+    const actives = this.flowEl.querySelectorAll('.verse-reading-active');
+    actives.forEach(el => el.classList.remove('verse-reading-active'));
+
+    if (!chunk || chunkIndex < 0) return;
+
+    // Find the exact matching DOM node
+    let target = null;
+    const candidates = this.flowEl.querySelectorAll(`[data-page-index="${chunk.pageIndex}"][data-type="${chunk.type}"]`);
+    for (const el of candidates) {
+      if (el.dataset.text && el.dataset.text.trim() === chunk.rawText.trim()) {
+        target = el;
+        break;
+      }
+    }
+    if (!target && candidates.length > 0) {
+      target = candidates[0];
+    }
+
+    if (target) {
+      target.classList.add('verse-reading-active');
+
+      // Auto-scroll / Jump Viewport if target is outside current view
+      if (this.viewportStepPx) {
+        const elOffsetTop = target.offsetTop;
+        const targetViewport = Math.floor(elOffsetTop / this.viewportStepPx);
+        if (targetViewport !== this.viewportIndex && targetViewport >= 0 && targetViewport < this.totalViewportPages) {
+          this.goToViewport(targetViewport, true);
+        }
+      }
+    }
+  }
+
+  handleTTSState(state) {
+    if (!this.btnTTSPlay) return;
+
+    if (state === 'playing') {
+      this.btnTTSPlay.classList.add('playing');
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '⏸️';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'พักเสียง';
+      nativeBridge.setKeepAwake(true);
+    } else if (state === 'paused') {
+      this.btnTTSPlay.classList.remove('playing');
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '▶️';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดต่อ';
+    } else {
+      this.btnTTSPlay.classList.remove('playing');
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '🔊';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดนำ';
+    }
+  }
+
+  handleTTSFinish() {
+    audio.playBell(648);
+    if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
+      window.tammaApp.showToast('✨ สวดมนต์จบแล้ว อนุโมทนาบุญครับ 🙏');
+    }
+    // Jump to the last page to show completion button
+    this.goToViewport(this.totalViewportPages - 1, true);
   }
 }

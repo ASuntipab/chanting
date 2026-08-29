@@ -34,13 +34,26 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    let ext = path.extname(filePath).toLowerCase();
+    let isBrotli = false;
+    let contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-    res.writeHead(200, {
+    if (ext === '.br') {
+      isBrotli = true;
+      const baseExt = path.extname(filePath.slice(0, -3)).toLowerCase();
+      contentType = MIME_TYPES[baseExt] || 'application/json; charset=UTF-8';
+    }
+
+    const headers = {
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*'
-    });
+    };
+
+    if (isBrotli) {
+      headers['Content-Encoding'] = 'br';
+    }
+
+    res.writeHead(200, headers);
 
     const stream = fs.createReadStream(filePath);
     stream.pipe(res);
