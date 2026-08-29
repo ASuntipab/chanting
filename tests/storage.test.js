@@ -139,11 +139,14 @@ class ReaderGestureTester {
 
   handleTapOrSwipe(deltaX, deltaY, elapsed) {
     const swipeThreshold = 40;
-    if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > deltaY) {
-      if (deltaX > 0) this.currentPageIndex = Math.min(this.currentPageIndex + 1, this.totalPages - 1);
-      else this.currentPageIndex = Math.max(this.currentPageIndex - 1, 0);
-      return { action: 'swipe', page: this.currentPageIndex };
-    } else if (elapsed < 600 && Math.abs(deltaX) < 25 && deltaY < 25) {
+    // Unified swipe handling: Horizontal or Vertical
+    if (deltaX > swipeThreshold || deltaY > swipeThreshold) {
+      this.currentPageIndex = Math.min(this.currentPageIndex + 1, this.totalPages - 1);
+      return { action: 'swipe', direction: 'next', page: this.currentPageIndex };
+    } else if (deltaX < -swipeThreshold || deltaY < -swipeThreshold) {
+      this.currentPageIndex = Math.max(this.currentPageIndex - 1, 0);
+      return { action: 'swipe', direction: 'prev', page: this.currentPageIndex };
+    } else if (elapsed < 600 && Math.abs(deltaX) < 25 && Math.abs(deltaY) < 25) {
       this.toggleHUD();
       return { action: 'tap', hudVisible: this.hudVisible };
     }
@@ -174,16 +177,48 @@ test('Instant Single-Tap: Tapping once should immediately toggle HUD state witho
   assert.equal(tap2.hudVisible, true, 'HUD should immediately appear on second tap');
 });
 
-test('Swipe vs Tap Discrimination: Swiping turns page without toggling HUD', () => {
+test('Viewport Snap Swipe: Both Horizontal (Left/Right) and Vertical (Up/Down) swipes snap to next/prev section', () => {
   const tester = new ReaderGestureTester();
   assert.equal(tester.hudVisible, true);
   assert.equal(tester.currentPageIndex, 0);
 
-  // Swipe Left (deltaX = 60px)
-  const swipeRes = tester.handleTapOrSwipe(60, 5, 200);
-  assert.equal(swipeRes.action, 'swipe');
-  assert.equal(swipeRes.page, 1, 'Page should advance to 1 on swipe left');
-  assert.equal(tester.hudVisible, true, 'HUD state should remain untouched during swipe');
+  // 1. Swipe Left (deltaX = 55px, deltaY = 0) -> Next Section
+  const swipeLeft = tester.handleTapOrSwipe(55, 0, 200);
+  assert.equal(swipeLeft.action, 'swipe');
+  assert.equal(swipeLeft.page, 1, 'Swipe left should advance to section 1');
+
+  // 2. Swipe Up / Scroll Up gesture (deltaX = 0, deltaY = 60px) -> Next Section
+  const swipeUp = tester.handleTapOrSwipe(0, 60, 200);
+  assert.equal(swipeUp.action, 'swipe');
+  assert.equal(swipeUp.page, 2, 'Swipe up should advance to section 2');
+
+  // 3. Swipe Down (deltaX = 0, deltaY = -60px) -> Prev Section
+  const swipeDown = tester.handleTapOrSwipe(0, -60, 200);
+  assert.equal(swipeDown.action, 'swipe');
+  assert.equal(swipeDown.page, 1, 'Swipe down should return to section 1');
+
+  // 4. Swipe Right (deltaX = -55px, deltaY = 0) -> Prev Section
+  const swipeRight = tester.handleTapOrSwipe(-55, 0, 200);
+  assert.equal(swipeRight.action, 'swipe');
+  assert.equal(swipeRight.page, 0, 'Swipe right should return to section 0');
+
+  assert.equal(tester.hudVisible, true, 'HUD state should remain untouched during swipes');
+});
+
+test('Viewport Snap Metric Calculation: Accurately calculates total viewport pages from flow height and viewport height', () => {
+  function calculateViewportPages(viewportHeight, flowHeight) {
+    const step = Math.max(viewportHeight - 24, 120);
+    return Math.max(1, Math.ceil((flowHeight - 24) / step));
+  }
+
+  // Short prayer (fits within 1 screen)
+  assert.equal(calculateViewportPages(500, 420), 1, 'Short prayer should be exactly 1 section');
+
+  // Medium prayer (800px content on 450px screen) -> 2 sections
+  assert.equal(calculateViewportPages(450, 800), 2, '800px content on 450px screen should be 2 sections');
+
+  // Long prayer (1800px content on 450px screen) -> 5 sections
+  assert.equal(calculateViewportPages(450, 1800), 5, '1800px content on 450px screen should be 5 sections');
 });
 
 test('Font Size Rescaling: Scaling clamps safely and calculates percentage accurately', () => {

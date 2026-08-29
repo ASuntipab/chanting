@@ -157,15 +157,15 @@ export class ComicReaderEngine {
       window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
     }
 
-    // Dynamic Live Auto-Pagination on Screen Resize / Orientation Change
+    // Dynamic Live Viewport Recalculation on Screen Resize / Orientation Change
     window.addEventListener('resize', () => {
       if (this.isOpen() && this.currentPrayer) {
         if (this.resizeDebounce) clearTimeout(this.resizeDebounce);
         this.resizeDebounce = setTimeout(() => {
-          const relativeProgress = this.totalPages > 1 ? this.currentPageIndex / (this.totalPages - 1) : 0;
-          this.renderPages(this.currentPrayer);
-          const newIndex = Math.min(Math.round(relativeProgress * (this.totalPages - 1)), this.totalPages - 1);
-          this.goToPage(newIndex, false);
+          const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+          this.calculateViewportMetrics();
+          const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
+          this.goToViewport(newIndex, false);
         }, 150);
       }
     });
@@ -258,70 +258,189 @@ export class ComicReaderEngine {
   }
 
   /**
-   * Intelligently renders and paginates prayer content into Comic frames
-   * Guarantees 100% Zero-Loss Parity: Every Pali verse and Thai translation remains intact and perfectly paired.
+   * Viewport Snap Paging Engine:
+   * Renders the entire prayer continuously in 1 unified frame.
+   * Measures rendered height and calculates viewport snap steps without scrollbars.
    */
   renderPages(prayer) {
-    let pages = prayer.pages;
-
-    // If pages not pre-split (e.g. raw text import from user), auto-paginate text cleanly
-    if (!pages || pages.length === 0) {
-      pages = this.autoPaginateText(prayer.content || prayer.description || '');
-      this.currentPrayer.pages = pages;
-    }
-
-    this.totalPages = pages.length;
+    this.currentPrayer = prayer;
+    const rawPages = prayer.pages || this.autoPaginateText(prayer.content || prayer.description || '');
     this.comicTrack.innerHTML = '';
 
-    pages.forEach((page, idx) => {
-      const pageEl = document.createElement('div');
-      pageEl.className = 'comic-page';
-      pageEl.dataset.pageIndex = idx;
+    const pageEl = document.createElement('div');
+    pageEl.className = 'comic-page active-page';
+    pageEl.dataset.pageIndex = 0;
 
-      const frame = document.createElement('div');
-      frame.className = 'page-frame';
+    const frame = document.createElement('div');
+    frame.className = 'page-frame';
 
-      const header = document.createElement('div');
-      header.className = 'page-verse-header';
-      header.innerHTML = `<span>${this.escapeHtml(page.verseTitle || `บทที่ ${idx + 1}`)}</span>`;
+    // Header
+    const header = document.createElement('div');
+    header.className = 'page-verse-header';
+    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span>`;
 
-      const body = document.createElement('div');
-      body.className = 'page-verse-body';
+    // Viewport Window
+    const viewport = document.createElement('div');
+    viewport.className = 'page-verse-viewport';
+    this.viewportEl = viewport;
+
+    // Continuous Flow Container
+    const flow = document.createElement('div');
+    flow.className = 'page-verse-flow';
+    this.flowEl = flow;
+
+    rawPages.forEach((page, idx) => {
+      const section = document.createElement('div');
+      section.className = 'verse-section';
+
+      if (page.verseTitle && rawPages.length > 1) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'verse-section-title';
+        titleEl.style.fontSize = '0.92rem';
+        titleEl.style.color = 'var(--accent-gold)';
+        titleEl.style.opacity = '0.85';
+        titleEl.style.marginBottom = '4px';
+        titleEl.textContent = page.verseTitle;
+        section.appendChild(titleEl);
+      }
 
       if (page.pali) {
         const paliEl = document.createElement('div');
         paliEl.className = 'verse-pali';
         paliEl.innerHTML = this.escapeHtml(page.pali).replace(/\n/g, '<br>');
-        body.appendChild(paliEl);
+        section.appendChild(paliEl);
       }
 
       if (page.thai) {
         const thaiEl = document.createElement('div');
         thaiEl.className = 'verse-thai';
         thaiEl.innerHTML = this.escapeHtml(page.thai).replace(/\n/g, '<br>');
-        body.appendChild(thaiEl);
+        section.appendChild(thaiEl);
       }
 
-      // If plain text content
       if (!page.pali && !page.thai && page.content) {
         const contentEl = document.createElement('div');
         contentEl.className = 'verse-thai';
         contentEl.innerHTML = this.escapeHtml(page.content).replace(/\n/g, '<br>');
-        body.appendChild(contentEl);
+        section.appendChild(contentEl);
       }
 
-      const counterBadge = document.createElement('div');
-      counterBadge.className = 'page-counter-badge';
-      counterBadge.textContent = `หน้า ${idx + 1} จาก ${this.totalPages}`;
+      flow.appendChild(section);
 
-      frame.appendChild(header);
-      frame.appendChild(body);
-      frame.appendChild(counterBadge);
-      pageEl.appendChild(frame);
-      this.comicTrack.appendChild(pageEl);
+      if (idx < rawPages.length - 1) {
+        const divider = document.createElement('div');
+        divider.className = 'verse-section-divider';
+        flow.appendChild(divider);
+      }
     });
 
+    viewport.appendChild(flow);
+
+    // Footer Container with Indicator and Progress
+    const footer = document.createElement('div');
+    footer.className = 'page-footer-container';
+
+    const moreIndicator = document.createElement('div');
+    moreIndicator.className = 'scroll-more-indicator';
+    moreIndicator.innerHTML = '<span>มีต่อ</span> <span>▼</span>';
+    moreIndicator.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.nextPage();
+    });
+    this.moreIndicator = moreIndicator;
+
+    const counterBadge = document.createElement('div');
+    counterBadge.className = 'page-counter-badge';
+    this.counterBadge = counterBadge;
+
+    footer.appendChild(moreIndicator);
+    footer.appendChild(counterBadge);
+
+    frame.appendChild(header);
+    frame.appendChild(viewport);
+    frame.appendChild(footer);
+    pageEl.appendChild(frame);
+    this.comicTrack.appendChild(pageEl);
+
+    // Calculate dynamic viewport step & pages
+    requestAnimationFrame(() => {
+      this.calculateViewportMetrics();
+      this.goToViewport(this.viewportIndex || 0, false);
+    });
+  }
+
+  calculateViewportMetrics() {
+    if (!this.viewportEl || !this.flowEl) {
+      this.totalViewportPages = 1;
+      this.totalPages = 1;
+      return;
+    }
+
+    const viewportHeight = this.viewportEl.clientHeight || 450;
+    const flowHeight = this.flowEl.scrollHeight || 450;
+
+    // Overlap slightly (24px) for reading continuity
+    this.viewportStepPx = Math.max(viewportHeight - 24, 120);
+    this.totalViewportPages = Math.max(1, Math.ceil((flowHeight - 24) / this.viewportStepPx));
+    this.totalPages = this.totalViewportPages;
+
+    if (this.viewportIndex >= this.totalViewportPages) {
+      this.viewportIndex = this.totalViewportPages - 1;
+    }
+
     this.renderPageDots();
+  }
+
+  goToViewport(index, animate = true) {
+    if (index < 0) index = 0;
+    if (index >= this.totalViewportPages) index = this.totalViewportPages - 1;
+
+    this.viewportIndex = index;
+    this.currentPageIndex = index;
+
+    if (this.flowEl && this.viewportStepPx) {
+      const offsetY = index * this.viewportStepPx;
+      this.flowEl.style.transition = animate ? 'transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1)' : 'none';
+      this.flowEl.style.transform = offsetY > 0 ? `translateY(-${offsetY}px)` : 'translateY(0px)';
+    }
+
+    // Update Counter Badge
+    if (this.counterBadge) {
+      this.counterBadge.textContent = this.totalViewportPages > 1 
+        ? `ส่วนที่ ${index + 1} จาก ${this.totalViewportPages}` 
+        : '๑ บทสมบูรณ์';
+    }
+
+    // Update "มีต่อ ▼" Indicator
+    if (this.moreIndicator) {
+      if (index < this.totalViewportPages - 1) {
+        this.moreIndicator.classList.remove('hidden');
+      } else {
+        this.moreIndicator.classList.add('hidden');
+      }
+    }
+
+    this.updateDots();
+    this.updateNavButtons();
+  }
+
+  goToPage(index, animate = true) {
+    this.goToViewport(index, animate);
+  }
+
+  nextPage() {
+    if (this.viewportIndex < this.totalViewportPages - 1) {
+      this.goToViewport(this.viewportIndex + 1, true);
+    } else {
+      // Reached the end of prayer! Play bell tone
+      audio.playBell(648);
+    }
+  }
+
+  prevPage() {
+    if (this.viewportIndex > 0) {
+      this.goToViewport(this.viewportIndex - 1, true);
+    }
   }
 
   escapeHtml(str) {
@@ -338,10 +457,8 @@ export class ComicReaderEngine {
     if (!rawText.trim()) {
       return [{ pageNumber: 1, verseTitle: 'บทสวด', content: 'ไม่มีเนื้อหา' }];
     }
-    // Split by double line breaks or verses
     const chunks = rawText.split(/\n\s*\n/).filter(c => c.trim().length > 0);
     if (chunks.length <= 1) {
-      // Chunk by sentence length approx 300 chars
       const lines = rawText.split('\n');
       const pages = [];
       let cur = [];
@@ -370,85 +487,36 @@ export class ComicReaderEngine {
   renderPageDots() {
     if (!this.readerPageDots) return;
     this.readerPageDots.innerHTML = '';
-    for (let i = 0; i < this.totalPages; i++) {
+    for (let i = 0; i < this.totalViewportPages; i++) {
       const dot = document.createElement('div');
-      dot.className = `reader-dot ${i === this.currentPageIndex ? 'active' : ''}`;
+      dot.className = `reader-dot ${i === this.viewportIndex ? 'active' : ''}`;
       dot.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.goToPage(i, true);
+        this.goToViewport(i, true);
       });
       this.readerPageDots.appendChild(dot);
     }
-  }
-
-  goToPage(index, animate = true, direction = 'next') {
-    if (index < 0 || index >= this.totalPages) return;
-    const prevIndex = this.currentPageIndex;
-    this.currentPageIndex = index;
-
-    const allPages = this.comicTrack.querySelectorAll('.comic-page');
-    allPages.forEach((p, idx) => {
-      p.classList.toggle('active-page', idx === index);
-      const frame = p.querySelector('.page-frame');
-      if (frame) frame.style.transform = '';
-    });
-
-    // Animate 3D Page Turn
-    if (animate && this.comicTrack) {
-      const offsetPercent = -index * 100;
-      this.comicTrack.style.transform = `translateX(${offsetPercent}%)`;
-
-      // Visual page curl effect on turned page
-      const turnedPage = allPages[prevIndex];
-      if (turnedPage) {
-        turnedPage.classList.add(direction === 'next' ? 'page-turning-left' : 'page-turning-right');
-        setTimeout(() => {
-          turnedPage.classList.remove('page-turning-left', 'page-turning-right');
-        }, 400);
-      }
-    } else if (this.comicTrack) {
-      this.comicTrack.style.transform = `translateX(${-index * 100}%)`;
-    }
-
-    // Update Dots & Navigation states
-    this.updateDots();
-    this.updateNavButtons();
   }
 
   updateDots() {
     if (!this.readerPageDots) return;
     const dots = this.readerPageDots.querySelectorAll('.reader-dot');
     dots.forEach((dot, idx) => {
-      dot.classList.toggle('active', idx === this.currentPageIndex);
+      dot.classList.toggle('active', idx === this.viewportIndex);
     });
   }
 
   updateNavButtons() {
     if (this.btnPrev) {
-      this.btnPrev.style.opacity = this.currentPageIndex === 0 ? '0.3' : '1';
-      this.btnPrev.style.pointerEvents = this.currentPageIndex === 0 ? 'none' : 'auto';
+      this.btnPrev.style.opacity = this.viewportIndex === 0 ? '0.3' : '1';
+      this.btnPrev.style.pointerEvents = this.viewportIndex === 0 ? 'none' : 'auto';
     }
     if (this.btnNext) {
-      this.btnNext.style.opacity = this.currentPageIndex === this.totalPages - 1 ? '0.3' : '1';
+      this.btnNext.style.opacity = this.viewportIndex === this.totalViewportPages - 1 ? '0.3' : '1';
     }
   }
 
-  nextPage() {
-    if (this.currentPageIndex < this.totalPages - 1) {
-      this.goToPage(this.currentPageIndex + 1, true, 'next');
-    } else {
-      // Reached the end! Play celebration bell
-      audio.playBell(648);
-    }
-  }
-
-  prevPage() {
-    if (this.currentPageIndex > 0) {
-      this.goToPage(this.currentPageIndex - 1, true, 'prev');
-    }
-  }
-
-  // --- 3D Touch Gesture Controllers with Live Page Lift & Tap Zones ---
+  // --- Touch Gesture Controllers (Swipe Left/Right & Up/Down to Snap Viewport) ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
     this.lastTouchTime = Date.now();
@@ -456,111 +524,80 @@ export class ComicReaderEngine {
     this.touchStartX = e.touches[0].clientX;
     this.touchStartY = e.touches[0].clientY;
     this.touchCurrentX = this.touchStartX;
+    this.touchCurrentY = this.touchStartY;
     this.isSwiping = true;
   }
 
   handleTouchMove(e) {
     if (!this.isSwiping || e.touches.length !== 1) return;
     this.touchCurrentX = e.touches[0].clientX;
-
-    const deltaX = this.touchStartX - this.touchCurrentX;
-    const allPages = this.comicTrack.querySelectorAll('.comic-page');
-    const curPage = allPages[this.currentPageIndex];
-    const frame = curPage?.querySelector('.page-frame');
-
-    if (frame && Math.abs(deltaX) > 12) {
-      // Rotate 3D page dynamically with finger movement
-      const angle = Math.max(Math.min((deltaX / window.innerWidth) * -60, 45), -45);
-      const lift = Math.min(Math.abs(deltaX) * 0.2, 25);
-      frame.style.transform = `rotateY(${angle}deg) translateZ(${lift}px) scale(0.98)`;
-    }
+    this.touchCurrentY = e.touches[0].clientY;
   }
 
   handleTouchEnd(e) {
     if (!this.isSwiping) return;
     this.isSwiping = false;
     this.lastTouchTime = Date.now();
+
     const deltaX = this.touchStartX - this.touchCurrentX;
-    const currentY = e.changedTouches[0]?.clientY || this.touchStartY;
-    const deltaY = Math.abs(this.touchStartY - currentY);
+    const deltaY = this.touchStartY - (e.changedTouches[0]?.clientY || this.touchCurrentY);
     const elapsed = Date.now() - this.touchStartTime;
 
-    // Reset frame tilt
-    const allPages = this.comicTrack.querySelectorAll('.comic-page');
-    const curPage = allPages[this.currentPageIndex];
-    const frame = curPage?.querySelector('.page-frame');
-    if (frame) frame.style.transform = '';
-
-    // 1. Horizontal swipe gesture -> Turn Page
-    if (Math.abs(deltaX) > this.swipeThreshold && Math.abs(deltaX) > deltaY) {
-      if (deltaX > 0) {
-        this.nextPage(); // Swipe Left -> Turn Page Next
-      } else {
-        this.prevPage(); // Swipe Right -> Turn Page Prev
-      }
+    // 1. Unified Swipe Handling: Swipe Left OR Swipe Up -> Next Viewport
+    if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
+      this.nextPage();
     } 
-    // 2. Instant Single Tap Detected on mobile
-    else if (elapsed < 600 && Math.abs(deltaX) < 25 && deltaY < 25) {
+    // 2. Swipe Right OR Swipe Down -> Prev Viewport
+    else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
+      this.prevPage();
+    } 
+    // 3. Instant Single Tap Detected on mobile
+    else if (elapsed < 600 && Math.abs(deltaX) < 25 && Math.abs(deltaY) < 25) {
       this.toggleHUD();
     }
   }
 
   // --- Mouse Drag & Click Gestures for Desktop ---
   handleMouseDown(e) {
-    // If recently triggered by touch, ignore synthetic mouse event
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
-
     this.isMouseDown = true;
     this.touchStartTime = Date.now();
     this.touchStartX = e.clientX;
     this.touchStartY = e.clientY;
     this.touchCurrentX = e.clientX;
+    this.touchCurrentY = e.clientY;
   }
 
   handleMouseMove(e) {
     if (!this.isMouseDown) return;
     this.touchCurrentX = e.clientX;
-
-    const deltaX = this.touchStartX - this.touchCurrentX;
-    const allPages = this.comicTrack.querySelectorAll('.comic-page');
-    const curPage = allPages[this.currentPageIndex];
-    const frame = curPage?.querySelector('.page-frame');
-
-    if (frame && Math.abs(deltaX) > 12) {
-      const angle = Math.max(Math.min((deltaX / window.innerWidth) * -50, 40), -40);
-      const lift = Math.min(Math.abs(deltaX) * 0.15, 20);
-      frame.style.transform = `rotateY(${angle}deg) translateZ(${lift}px) scale(0.98)`;
-    }
+    this.touchCurrentY = e.clientY;
   }
 
   handleMouseUp(e) {
     if (!this.isMouseDown) return;
     this.isMouseDown = false;
-
-    // If recently triggered by touch, ignore synthetic mouse event
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
 
     const deltaX = this.touchStartX - this.touchCurrentX;
-    const deltaY = Math.abs(this.touchStartY - e.clientY);
+    const deltaY = this.touchStartY - e.clientY;
     const elapsed = Date.now() - this.touchStartTime;
 
-    const allPages = this.comicTrack.querySelectorAll('.comic-page');
-    const curPage = allPages[this.currentPageIndex];
-    const frame = curPage?.querySelector('.page-frame');
-    if (frame) frame.style.transform = '';
-
-    // 1. Drag / Swipe -> Turn Page
-    if (Math.abs(deltaX) > this.swipeThreshold) {
-      if (deltaX > 0) this.nextPage();
-      else this.prevPage();
+    // Swipe Left or Up -> Next Viewport
+    if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
+      this.nextPage();
     } 
-    // 2. Instant Single Click -> Toggle HUD & Options Panel
-    else if (elapsed < 600 && Math.abs(deltaX) < 20 && deltaY < 20) {
+    // Swipe Right or Down -> Prev Viewport
+    else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
+      this.prevPage();
+    } 
+    // Instant Single Click -> Toggle HUD
+    else if (elapsed < 600 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
       this.toggleHUD();
     }
   }
 
-  // --- Font Scaling & Preference Persistence with Dynamic Auto-Repagination ---
+  // --- Font Scaling & Preference Persistence with Viewport Recalculation ---
   adjustFontSize(delta) {
     const settings = storage.getSettings();
     let current = settings.fontSize || 1.15;
@@ -569,12 +606,14 @@ export class ComicReaderEngine {
     storage.saveSettings(settings);
     this.applyFontSize(settings.fontSize);
 
-    // Re-paginate dynamically with new font size without losing reading progress
+    // Recalculate viewports with new font size and preserve reading progress
     if (this.currentPrayer && this.isOpen()) {
-      const relativeProgress = this.totalPages > 1 ? this.currentPageIndex / (this.totalPages - 1) : 0;
-      this.renderPages(this.currentPrayer);
-      const newIndex = Math.min(Math.round(relativeProgress * (this.totalPages - 1)), this.totalPages - 1);
-      this.goToPage(newIndex, false);
+      const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+      requestAnimationFrame(() => {
+        this.calculateViewportMetrics();
+        const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
+        this.goToViewport(newIndex, false);
+      });
     }
   }
 
