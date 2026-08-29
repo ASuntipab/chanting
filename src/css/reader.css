@@ -1,0 +1,497 @@
+/* ==========================================================================
+   Tamma OS - 3D Realistic Book Page Flip Reader Engine
+   Authentic Book Spine, Page Curl Dynamics & Cosmic Sanctuary Aesthetics
+   ========================================================================== */
+
+.reader-view {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.reader-view.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Reader Top Toolbar (Auto-hiding HUD) */
+.reader-toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 58px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 100;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.35s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.reader-title-box {
+  display: flex;
+  flex-direction: column;
+  max-width: 40%;
+}
+
+.reader-title {
+  font-family: var(--font-header);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reader-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Auto-hiding HUD States */
+.reader-view.hud-hidden .reader-toolbar {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reader-view.hud-hidden .reader-bottom-bar {
+  transform: translateX(-50%) translateY(140%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reader-view.hud-hidden .comic-nav-btn {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 3D Book Stage & Viewport */
+.comic-stage {
+  flex: 1;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 2000px;
+  perspective-origin: 50% 50%;
+}
+
+.comic-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.comic-page {
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 12px;
+  position: relative;
+  user-select: text;
+  transform-style: preserve-3d;
+}
+
+/* 3D Realistic Fullscreen Book Leaf Frame - Viewport Snap Paging (Zero Scrollbar) */
+.page-frame {
+  width: 100%;
+  max-width: 780px;
+  height: 100%;
+  max-height: 94vh;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 24px 22px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden; /* ZERO SCROLLBAR: Viewport snaps to next section */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  /* 3D Book Page Spine & Shadows */
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.65),
+    inset 0 0 40px rgba(0, 0, 0, 0.3),
+    inset 4px 0 12px rgba(0, 0, 0, 0.4);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
+  will-change: transform, box-shadow;
+}
+
+.page-frame::-webkit-scrollbar,
+.page-verse-viewport::-webkit-scrollbar,
+.page-verse-flow::-webkit-scrollbar,
+.page-verse-body::-webkit-scrollbar,
+.comic-stage::-webkit-scrollbar,
+.comic-page::-webkit-scrollbar,
+.reader-view::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Book Spine Gutter Light & Shadow Overlay */
+.page-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  pointer-events: none;
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+  z-index: 5;
+}
+
+/* Decorative Cosmic Corner Ornaments */
+.page-frame::after {
+  content: '❖';
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  color: var(--accent-gold);
+  font-size: 1.1rem;
+  opacity: 0.6;
+  z-index: 5;
+}
+
+/* 3D Turning Animations */
+.comic-page.turning-left .page-frame {
+  transform: rotateY(-35deg) scale(0.96) translateZ(20px);
+  box-shadow: -25px 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-gold-glow);
+}
+
+.comic-page.turning-right .page-frame {
+  transform: rotateY(35deg) scale(0.96) translateZ(20px);
+  transform-origin: right center;
+  box-shadow: 25px 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-gold-glow);
+}
+
+/* Cosmic Reader Variations */
+body.theme-cosmic .reader-view {
+  background: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0d122e 45%, #050714 100%);
+}
+
+body.theme-cosmic .page-frame {
+  background: rgba(14, 21, 48, 0.86);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  box-shadow:
+    0 15px 40px rgba(2, 6, 23, 0.85),
+    0 0 35px rgba(251, 191, 36, 0.22),
+    0 0 60px rgba(99, 102, 241, 0.25),
+    inset 0 0 30px rgba(129, 140, 248, 0.15);
+}
+
+body.theme-cosmic .page-frame::after {
+  content: '✦';
+  color: var(--accent-gold);
+  text-shadow: 0 0 10px var(--accent-gold);
+  opacity: 0.95;
+}
+
+body.theme-cosmic .verse-pali {
+  color: #fde047;
+  text-shadow: 0 0 14px rgba(253, 224, 71, 0.4);
+}
+
+/* Page Content Typography & Viewport Flow */
+.page-verse-header {
+  text-align: center;
+  font-family: var(--font-header);
+  font-size: 1.15rem;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border-subtle);
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  z-index: 6;
+}
+
+.page-verse-viewport {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0;
+  mask-image: linear-gradient(to bottom, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 94%, transparent 100%);
+}
+
+.page-verse-flow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1);
+  will-change: transform;
+  text-align: center;
+  margin: 0;
+  padding: 4px 0 20px 0;
+  font-size: var(--reader-font-size, 1.15rem);
+  color: var(--text-primary);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.verse-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.verse-section-divider {
+  width: 48px;
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 8px auto;
+  opacity: 0.5;
+}
+
+.verse-pali {
+  font-size: calc(var(--reader-font-size, 1.15rem) * 1.12);
+  font-weight: 600;
+  color: var(--accent-amber);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  line-height: 1.85;
+}
+
+.verse-thai {
+  color: var(--text-secondary);
+  font-size: calc(var(--reader-font-size, 1.15rem) * 0.94);
+  line-height: 1.75;
+}
+
+/* Page Footer & Indicators */
+.page-footer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+  z-index: 6;
+}
+
+.scroll-more-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-family: var(--font-header);
+  color: var(--accent-gold);
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  padding: 3px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: 4px;
+  cursor: pointer;
+  animation: floatPulse 2.2s infinite ease-in-out;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  user-select: none;
+}
+
+.scroll-more-indicator.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50% { transform: translateY(4px); opacity: 1; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+}
+
+.page-counter-badge {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Floating Navigation Arrows */
+.comic-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 15;
+  transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s ease;
+  backdrop-filter: var(--glass-blur);
+  opacity: 0.75;
+}
+
+.comic-nav-btn:hover {
+  opacity: 1;
+  background: var(--accent-gold);
+  color: #120e0b;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-gold);
+}
+
+.comic-nav-btn.prev { left: 14px; }
+.comic-nav-btn.next { right: 14px; }
+
+/* Floating Reader Bottom Bar (Auto-hiding HUD) */
+.reader-bottom-bar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  z-index: 100;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), var(--shadow-gold);
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.35s ease;
+  max-width: 96vw;
+}
+
+/* Font Resizer Dock in Bottom Bar (Up to 300%) */
+.reader-font-dock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 24, 52, 0.65);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.btn-dock-font {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-gold);
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dock-font:hover, .btn-dock-font:active {
+  background: var(--accent-gold);
+  color: #120e0b;
+  transform: scale(1.12);
+}
+
+.font-dock-badge {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 44px;
+  text-align: center;
+  user-select: none;
+}
+
+/* Theme Switcher Dock in Bottom Bar */
+.reader-theme-dock {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(16, 24, 52, 0.65);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 6px;
+  border-radius: var(--radius-full);
+}
+
+.btn-dock-theme {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dock-theme:hover, .btn-dock-theme:active {
+  background: var(--bg-card);
+  border-color: var(--accent-gold);
+  transform: scale(1.15);
+}
+
+.reader-chant-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--border-subtle);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-header);
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.reader-chant-counter:active {
+  transform: scale(0.95);
+  background: var(--accent-gold);
+  color: #120e0b;
+}
