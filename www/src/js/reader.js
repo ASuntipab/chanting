@@ -388,10 +388,15 @@ export class ComicReaderEngine {
     const count = trackerData.totalCounts[prayer.id] || 0;
     this.updateChantDisplay(count);
 
-    // Prime matching MP3 track
+    // Prime matching MP3 track & only show MP3 button if real recording exists
     const matchedTrack = mp3Player.getTrackForPrayer(prayer);
     if (matchedTrack) {
+      if (this.btnMP3Play) this.btnMP3Play.style.display = 'inline-flex';
       mp3Player.loadTrack(matchedTrack);
+    } else {
+      if (this.btnMP3Play) this.btnMP3Play.style.display = 'none';
+      this.hideMP3Deck();
+      mp3Player.pause();
     }
 
     // Show View and start in HUD mode, then auto-hide

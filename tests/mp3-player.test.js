@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import { mp3Player, CHANTING_AUDIO_TRACKS } from '../src/js/mp3-player.js';
 import { TIPITAKA_SUTTA_PRAYERS } from '../src/js/prayers-tipitaka-suttas.js';
 
-test('MP3 Chanting Audio Engine & New Suttas Verification', async (t) => {
+test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t) => {
   await t.test('CHANTING_AUDIO_TRACKS provides authentic public domain chanting sources', () => {
-    assert.ok(CHANTING_AUDIO_TRACKS.length >= 8);
+    assert.ok(CHANTING_AUDIO_TRACKS.length >= 16);
     
     CHANTING_AUDIO_TRACKS.forEach(track => {
       assert.ok(track.id, 'Track must have an ID');
@@ -15,22 +15,33 @@ test('MP3 Chanting Audio Engine & New Suttas Verification', async (t) => {
     });
   });
 
-  await t.test('MP3 player matches track intelligently based on opened prayer', () => {
+  await t.test('MP3 player strictly matches prayer or returns null if no audio exists', () => {
     const morningPrayer = { id: 'morning-chanting', title: 'บททำวัตรเช้า', category: 'ทำวัตร' };
     const matchedMorning = mp3Player.getTrackForPrayer(morningPrayer);
+    assert.ok(matchedMorning);
     assert.strictEqual(matchedMorning.id, 'track-morning-chanting');
+    assert.strictEqual(mp3Player.hasAudioForPrayer(morningPrayer), true);
 
     const eveningPrayer = { id: 'evening-chanting', title: 'บททำวัตรเย็น', category: 'ทำวัตร' };
     const matchedEvening = mp3Player.getTrackForPrayer(eveningPrayer);
+    assert.ok(matchedEvening);
     assert.strictEqual(matchedEvening.id, 'track-evening-chanting');
 
     const chinabanchorn = { id: 'somdej-toh-chinabanchorn', title: 'พระคาถาชินบัญชร', category: 'คาถาศักดิ์สิทธิ์' };
     const matchedChina = mp3Player.getTrackForPrayer(chinabanchorn);
+    assert.ok(matchedChina);
     assert.strictEqual(matchedChina.id, 'track-chinabanchorn');
 
-    const satipatthana = { id: 'mahasatipatthana-sutta-full', title: 'มหาสติปัฏฐานสูตร (ฉบับสวดมนต์เต็ม)', category: 'พระสูตรสำคัญ' };
-    const matchedSati = mp3Player.getTrackForPrayer(satipatthana);
-    assert.strictEqual(matchedSati.id, 'track-satipatthana');
+    const dhammacakka = { id: 'dhammacakkappavattana-sutta', title: 'ธัมมจักกัปปวัตตนสูตร', category: 'พระสูตรสำคัญ' };
+    const matchedDhamma = mp3Player.getTrackForPrayer(dhammacakka);
+    assert.ok(matchedDhamma);
+    assert.strictEqual(matchedDhamma.id, 'track-dhammacakka');
+
+    // Prayers without recorded audio must return NULL so button is NOT displayed
+    const unrecordedPrayer = { id: 'luang-por-guay-chant', title: 'คาถาหลวงพ่อกวย', category: 'พระเกจิอาจารย์' };
+    const matchedNone = mp3Player.getTrackForPrayer(unrecordedPrayer);
+    assert.strictEqual(matchedNone, null, 'Unrecorded prayer must return null');
+    assert.strictEqual(mp3Player.hasAudioForPrayer(unrecordedPrayer), false, 'hasAudioForPrayer must be false');
   });
 
   await t.test('MP3 player utility functions: time formatting, speed, loop', () => {

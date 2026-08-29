@@ -1141,19 +1141,31 @@ body.theme-parchment .reader-chant-counter {
 
 .mp3-track-select {
   width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
+  background: #182245;
+  border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: var(--radius-sm, 6px);
-  padding: 6px 10px;
-  font-size: 0.82rem;
-  color: var(--text-primary);
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #ffffff;
   outline: none;
   cursor: pointer;
 }
 
+.mp3-track-select option, .mp3-speed-select option {
+  background: #101834;
+  color: #ffffff;
+  padding: 8px 10px;
+}
+
 .theme-parchment .mp3-track-select {
-  background: #fff;
-  border-color: rgba(140, 95, 35, 0.3);
+  background: #fdfbf7;
+  border-color: rgba(140, 95, 35, 0.4);
+  color: #332211;
+}
+
+.theme-parchment .mp3-track-select option, .theme-parchment .mp3-speed-select option {
+  background: #fbf6ec;
   color: #332211;
 }
 
