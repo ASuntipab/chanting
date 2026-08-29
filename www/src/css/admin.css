@@ -244,3 +244,35 @@
   gap: 10px;
   width: 100%;
 }
+
+/* ==========================================================================
+   Parchment Theme Tracker Overrides
+   ========================================================================== */
+body.theme-parchment .tracker-summary-card {
+  background: linear-gradient(135deg, rgba(240, 222, 195, 0.7), rgba(255, 252, 246, 0.98));
+  border: 1px solid rgba(160, 120, 60, 0.35);
+  box-shadow: 0 6px 20px rgba(90, 60, 30, 0.08);
+}
+
+body.theme-parchment .tracker-stat-num {
+  color: #7c4a03;
+}
+
+body.theme-parchment .tracker-stat-label {
+  color: #6b533c;
+}
+
+body.theme-parchment .tracker-item {
+  background: rgba(255, 253, 248, 0.96);
+  border: 1px solid rgba(160, 120, 60, 0.28);
+  box-shadow: 0 2px 10px rgba(90, 60, 30, 0.05);
+}
+
+body.theme-parchment .tracker-item.completed {
+  border-color: #059669;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+body.theme-parchment .tracker-title {
+  color: #2b1d0c;
+}

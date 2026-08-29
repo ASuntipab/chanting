@@ -24,16 +24,17 @@ export class CosmicStarfield {
 
     // Generate peaceful cosmic stars & dharma dust particles
     this.stars = [];
+    this.numStars = 85;
     for (let i = 0; i < this.numStars; i++) {
       this.stars.push({
         x: Math.random() * this.width,
         y: Math.random() * this.height,
-        radius: Math.random() * 1.8 + 0.5,
-        baseAlpha: Math.random() * 0.6 + 0.2,
-        twinkleSpeed: Math.random() * 0.03 + 0.01,
+        radius: Math.random() * 2.0 + 0.6,
+        baseAlpha: Math.random() * 0.65 + 0.35,
+        twinkleSpeed: Math.random() * 0.015 + 0.005,
         twinklePhase: Math.random() * Math.PI * 2,
-        vy: -(Math.random() * 0.25 + 0.08), // Gentle upward floating
-        vx: (Math.random() - 0.5) * 0.1,
+        vy: -(Math.random() * 0.05 + 0.018), // Slow, tranquil & meditative upward floating
+        vx: (Math.random() - 0.5) * 0.025,
         color: Math.random() > 0.4 ? '#fbbf24' : (Math.random() > 0.5 ? '#818cf8' : '#38bdf8') // Gold, Indigo, Cyan
       });
     }
