@@ -175,7 +175,43 @@ class ReaderGestureTester {
     const percent = Math.round((this.fontSize / 1.15) * 100);
     return { fontSize: this.fontSize, percent: `${percent}%` };
   }
+
+  jumpFirst() {
+    this.currentPageIndex = 0;
+    return this.currentPageIndex;
+  }
+
+  jumpLast() {
+    this.currentPageIndex = this.totalPages - 1;
+    return this.currentPageIndex;
+  }
+
+  jumpToPage(pageNumber) {
+    this.currentPageIndex = Math.min(Math.max(pageNumber - 1, 0), this.totalPages - 1);
+    return this.currentPageIndex;
+  }
 }
+
+test('Quick Jump & Scrubber Navigation: Instant jump to first, last, next-to-last, or slider index', () => {
+  const tester = new ReaderGestureTester();
+  assert.equal(tester.currentPageIndex, 0);
+
+  // 1. Jump to Last Page (10th section -> index 9)
+  const lastIndex = tester.jumpLast();
+  assert.equal(lastIndex, 9, 'jumpLast should jump to index 9');
+
+  // 2. Jump to Next-to-last Page (9th section -> index 8)
+  const nextToLast = tester.jumpToPage(9);
+  assert.equal(nextToLast, 8, 'jumpToPage(9) should jump to next-to-last section (index 8)');
+
+  // 3. Jump to First Page (1st section -> index 0)
+  const firstIndex = tester.jumpFirst();
+  assert.equal(firstIndex, 0, 'jumpFirst should jump back to index 0');
+
+  // 4. Scrubber drag to any section (e.g. page 5 -> index 4)
+  const middleIndex = tester.jumpToPage(5);
+  assert.equal(middleIndex, 4, 'jumpToPage(5) should jump to section index 4');
+});
 
 test('Instant Single-Tap: Tapping once should immediately toggle HUD state without long press', () => {
   const tester = new ReaderGestureTester();
