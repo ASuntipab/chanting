@@ -104,6 +104,9 @@ export class ComicReaderEngine {
       this.updateChantDisplay(count);
       this.animateCounterBump();
       this.scheduleAutoHide();
+      if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
+        window.tammaApp.refreshCurrentViews();
+      }
     });
 
     // Font Sizing in Bottom HUD Dock (Up to 300% for Elders)
@@ -127,6 +130,9 @@ export class ComicReaderEngine {
       nativeBridge.hapticSuccess();
       const count = storage.incrementPrayerCount(this.currentPrayer.id);
       this.updateChantDisplay(count);
+      if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
+        window.tammaApp.refreshCurrentViews();
+      }
       
       // Close reader or show success toast
       window.tammaApp.showToast(`✨ อนุโมทนาบุญ! คุณสวดจบแล้ว ${count} ครั้ง`);
@@ -261,6 +267,9 @@ export class ComicReaderEngine {
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
+    if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
+      window.tammaApp.refreshCurrentViews();
+    }
   }
 
   isOpen() {

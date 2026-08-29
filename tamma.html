@@ -286,31 +286,53 @@
   </div>
 
   <!-- ==========================================================================
-       MODAL: BACKUP & RESTORE (EXPORT / IMPORT JSON)
+       MODAL: BACKUP & RESTORE (USER STATS & FAVORITES)
        ========================================================================== -->
   <div id="backupModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 440px;">
       <div class="modal-header">
-        <h3 class="modal-title">💾 สำรอง & นำเข้าบทสวดมนต์</h3>
+        <h3 class="modal-title">💾 สำรอง & ย้ายข้อมูล</h3>
         <button id="btnCloseBackup" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
       </div>
 
       <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
-        คุณสามารถส่งออก (Export) บทสวดมนต์ทั้งหมดและสถิติการสวดของคุณเป็นไฟล์ JSON เพื่อสำรองข้อมูล หรือนำเข้า (Import) เพื่อแชร์ให้เพื่อนๆ ได้โดยไม่ต้องมีเซิร์ฟเวอร์
+        สำรองข้อมูล<strong>รายการโปรด, ยอดสวดสะสม และสถิติของคุณ</strong> เพื่อนำไปใช้บนเครื่องใหม่หรือป้องกันข้อมูลสูญหาย
       </p>
 
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button id="btnExportJson" class="btn-primary" style="justify-content: center; width: 100%;">
-          📤 ส่งออกคลังบทสวดเป็นไฟล์ (Export JSON)
+        <!-- Easy Option 1: Copy Code for LINE -->
+        <button id="btnCopyBackupCode" class="btn-primary" style="justify-content: center; width: 100%;">
+          📋 คัดลอกรหัสสำรอง (ส่งเข้า LINE / จดบันทึก)
         </button>
 
-        <div style="border-top: 1px solid var(--border-subtle); margin: 8px 0;"></div>
+        <div style="border-top: 1px solid var(--border-subtle); margin: 4px 0;"></div>
 
-        <label class="form-label" style="margin-bottom: 4px;">นำเข้าไฟล์บทสวดมนต์ (Import JSON)</label>
-        <input type="file" id="importFileInput" accept=".json" class="form-control" style="font-size: 0.85rem;">
-        <button id="btnImportJson" class="btn-secondary" style="justify-content: center; width: 100%;">
-          📥 นำเข้าไฟล์บทสวด (Import File)
-        </button>
+        <!-- Easy Option 2: Paste Code to Restore -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-size: 0.85rem;">วางรหัสสำรองเพื่อกู้คืนข้อมูล</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="inputBackupCode" class="form-control" placeholder="วางรหัสสำรองที่นี่..." style="font-size: 0.85rem;">
+            <button id="btnRestoreCode" class="btn-secondary" style="white-space: nowrap; padding: 8px 16px;">
+              กู้คืน
+            </button>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); margin: 4px 0;"></div>
+
+        <!-- Option 3: Traditional File Export / Import -->
+        <details style="font-size: 0.82rem; color: var(--text-muted);">
+          <summary style="cursor: pointer; padding: 4px 0; color: var(--accent-gold);">📁 ตัวเลือกขั้นสูง (บันทึกเป็นไฟล์ .json)</summary>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <button id="btnExportJson" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.82rem;">
+              📤 ส่งออกเป็นไฟล์ (Export JSON)
+            </button>
+            <input type="file" id="importFileInput" accept=".json" class="form-control" style="font-size: 0.8rem;">
+            <button id="btnImportJson" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.82rem;">
+              📥 นำเข้าจากไฟล์ (Import JSON)
+            </button>
+          </div>
+        </details>
       </div>
     </div>
   </div>
