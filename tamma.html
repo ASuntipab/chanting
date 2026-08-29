@@ -62,28 +62,20 @@
         <!-- Native Styled Category Dropdown -->
         <div class="category-dropdown-wrap">
           <select id="categorySelect" class="category-select" title="เลือกหมวดหมู่">
-            <option value="all">✨ ทุกหมวดหมู่</option>
-            <option value="หลวงพ่อจรัญ">🪷 หลวงพ่อจรัญ</option>
-            <option value="หลวงปู่มั่น">⛰️ หลวงปู่มั่น</option>
-            <option value="หลวงตามหาบัว">🪷 หลวงตามหาบัว</option>
-            <option value="แผ่เมตตา">💖 แผ่เมตตา</option>
-            <option value="คาถาศักดิ์สิทธิ์">🌟 คาถาศักดิ์สิทธิ์</option>
-            <option value="บทสวดประจำวัน">🙏 บทสวดประจำวัน</option>
-            <option value="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา</option>
-            <option value="ทำวัตร">📜 ทำวัตรเช้า-เย็น</option>
-            <option value="พระสูตรสำคัญ">📖 พระสูตรสำคัญ</option>
-            <option value="พระเกจิอาจารย์">📿 พระเกจิอาจารย์</option>
-            <option value="พิธีกรรม">🕯️ พิธีกรรม (ถวายทาน/กฐิน)</option>
+            <option value="all">✨ ทุกหมวดหมู่ (๑๐๐ บท)</option>
+            <option value="หลวงพ่อจรัญ">🪷 หลวงพ่อจรัญ (๗ บท)</option>
+            <option value="หลวงปู่มั่น">⛰️ หลวงปู่มั่น (๔ บท)</option>
+            <option value="หลวงตามหาบัว">🪷 หลวงตามหาบัว (๒ บท)</option>
+            <option value="แผ่เมตตา">💖 แผ่เมตตา (๕ บท)</option>
+            <option value="คาถาศักดิ์สิทธิ์">🌟 คาถาศักดิ์สิทธิ์ (๑๖ บท)</option>
+            <option value="บทสวดประจำวัน">🙏 บทสวดประจำวัน (๑๐ บท)</option>
+            <option value="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา (๔ บท)</option>
+            <option value="ทำวัตร">📜 ทำวัตรเช้า-เย็น (๔ บท)</option>
+            <option value="พระสูตรสำคัญ">📖 พระสูตรสำคัญ (๑๒ บท)</option>
+            <option value="พระเกจิอาจารย์">📿 พระเกจิอาจารย์ (๒๔ บท)</option>
+            <option value="พิธีกรรม">🕯️ พิธีกรรม (๑๒ บท)</option>
           </select>
           <span class="select-arrow">▼</span>
-        </div>
-      </div>
-
-      <!-- Library Count & Status Info Bar -->
-      <div class="library-header-info">
-        <div class="library-count-badge">
-          <span class="library-count-icon">📿</span>
-          <span id="prayerTotalCountText">บทสวดมนต์ทั้งหมด <strong>๑๐๐</strong> บท (๑๘๓ หน้า)</span>
         </div>
       </div>
 
@@ -128,26 +120,26 @@
     <!-- TAB 3: TIPITAKA 45-VOLUME VIEW -->
     <section id="viewTipitaka" class="tab-view" style="display: none;">
       <div style="margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h2 style="font-family: var(--font-header); font-size: 1.3rem; color: var(--accent-gold);">📖 พระไตรปิฎก ๔๕ เล่ม (ฉบับสมบูรณ์)</h2>
-          <span style="font-size: 0.75rem; background: rgba(255,215,0,0.15); color: var(--accent-gold); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--accent-gold);">⚡ บีบอัด .br (-85%)</span>
-        </div>
+        <h2 style="font-family: var(--font-header); font-size: 1.3rem; color: var(--accent-gold);">📖 พระไตรปิฎก ๔๕ เล่ม (ฉบับสมบูรณ์)</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted);">พระวินัยปิฎก (๑-๘), พระสุตตันตปิฎก (๙-๓๓), พระอภิธรรมปิฎก (๓๔-๔๕)</p>
       </div>
 
-      <!-- Tipitaka Filter Pills & Search -->
-      <div class="search-container" style="margin-bottom: 12px;">
+      <!-- Compact 1-Line Tipitaka Search & Pitaka Dropdown -->
+      <div class="search-container">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
           <input type="text" id="tipitakaSearchInput" class="search-input" placeholder="ค้นหาพระไตรปิฎก เช่น ธรรมบท, มหาปรินิพพาน, ปาราชิก...">
         </div>
-      </div>
-
-      <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px;">
-        <button class="filter-pill tipitaka-pill active" data-pitaka="all">✨ ทั้งหมด (๔๕ เล่ม)</button>
-        <button class="filter-pill tipitaka-pill" data-pitaka="พระวินัยปิฎก">📜 พระวินัย (๘)</button>
-        <button class="filter-pill tipitaka-pill" data-pitaka="พระสุตตันตปิฎก">📖 พระสุตตันตะ (๒๕)</button>
-        <button class="filter-pill tipitaka-pill" data-pitaka="พระอภิธรรมปิฎก">💎 พระอภิธรรม (๑๒)</button>
+        <!-- Native Styled Pitaka Dropdown -->
+        <div class="category-dropdown-wrap">
+          <select id="tipitakaSelect" class="category-select" title="เลือกปิฎก">
+            <option value="all">✨ ทุกปิฎก (๔๕ เล่ม)</option>
+            <option value="พระวินัยปิฎก">📜 พระวินัยปิฎก (๘ เล่ม)</option>
+            <option value="พระสุตตันตปิฎก">📖 พระสุตตันตปิฎก (๒๕ เล่ม)</option>
+            <option value="พระอภิธรรมปิฎก">💎 พระอภิธรรมปิฎก (๑๒ เล่ม)</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
       </div>
 
       <!-- Tipitaka Volumes Grid -->

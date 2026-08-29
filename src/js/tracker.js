@@ -1,10 +1,6 @@
-/**
- * Tamma OS - Daily Dhamma Tracker & Chanting Counter Engine
- * Manages daily habits, streaks, counts, and interactive checklist
- */
-
 import { storage } from './storage.js';
 import { audio } from './audio.js';
+import { tipitakaLoader } from './tipitaka-loader.js';
 
 export class DhammaTrackerEngine {
   constructor() {
@@ -14,15 +10,44 @@ export class DhammaTrackerEngine {
     this.totalChantsEl = document.getElementById('statTotalChants');
   }
 
-  render() {
+  async render() {
     if (!this.container) return;
 
     const trackerData = storage.getTrackerData();
     const prayers = storage.getPrayers();
     const favorites = storage.getFavorites();
 
-    // Prioritize favorites and common prayers in the daily checklist
-    let displayList = prayers.filter(p => favorites.includes(p.id));
+    // Map all available items (Prayers + Tipitaka Volumes if present in favorites/tracker)
+    let allItems = [...prayers];
+    const tipitakaTrackedIds = Object.keys(trackerData.totalCounts)
+      .concat(Object.keys(trackerData.todayChanted))
+      .concat(favorites)
+      .filter(id => id.startsWith('tipitaka-vol-'));
+
+    if (tipitakaTrackedIds.length > 0) {
+      try {
+        const index = await tipitakaLoader.loadIndex();
+        (index.volumes || []).forEach(vol => {
+          const volId = `tipitaka-vol-${String(vol.volume).padStart(2, '0')}`;
+          if (tipitakaTrackedIds.includes(volId) && !allItems.some(p => p.id === volId)) {
+            allItems.push({
+              id: volId,
+              isTipitaka: true,
+              volumeNumber: vol.volume,
+              title: `พระไตรปิฎก เล่มที่ ${vol.volume}: ${vol.bookTitle}`,
+              category: vol.pitaka,
+              author: `พระไตรปิฎก (${vol.bookPali})`,
+              description: vol.description
+            });
+          }
+        });
+      } catch (err) {
+        console.warn('Tipitaka tracker load index failed:', err);
+      }
+    }
+
+    // Prioritize favorites and chanted items in the daily checklist
+    let displayList = allItems.filter(p => favorites.includes(p.id) || trackerData.todayChanted[p.id] || (trackerData.totalCounts[p.id] || 0) > 0);
     if (displayList.length === 0) {
       displayList = prayers.slice(0, 5);
     }
@@ -58,14 +83,16 @@ export class DhammaTrackerEngine {
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
           <button class="btn-primary btn-read-tracker" data-id="${prayer.id}" style="padding: 6px 14px; font-size: 0.85rem; border-radius: 20px;">
-            เปิดสวด
+            ${prayer.isTipitaka ? 'เปิดอ่าน' : 'เปิดสวด'}
           </button>
         </div>
       `;
 
-      // Click to open prayer reader directly
+      // Click to open prayer reader or tipitaka directly
       item.addEventListener('click', () => {
-        if (window.tammaApp && window.tammaApp.reader) {
+        if (prayer.isTipitaka && prayer.volumeNumber && window.tammaApp) {
+          window.tammaApp.openTipitakaVolume(prayer.volumeNumber);
+        } else if (window.tammaApp && window.tammaApp.reader) {
           window.tammaApp.reader.open(prayer);
         }
       });
@@ -76,3 +103,4 @@ export class DhammaTrackerEngine {
 }
 
 export const tracker = new DhammaTrackerEngine();
+

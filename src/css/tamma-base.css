@@ -223,6 +223,15 @@ body.theme-midnight {
   user-select: none;
 }
 
+button {
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
@@ -596,6 +605,86 @@ body {
 
 .library-count-icon {
   font-size: 0.92rem;
+}
+
+/* Filter Pills & Tipitaka Segment Buttons (Theme-Adaptive) */
+.filter-pill, .tipitaka-pill {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-header);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.22s ease;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.filter-pill:hover, .tipitaka-pill:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-gold);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.filter-pill.active, .tipitaka-pill.active {
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark, var(--accent-gold)));
+  color: #120e0b;
+  border-color: var(--accent-gold);
+  font-weight: 700;
+  box-shadow: 0 3px 12px var(--accent-gold-glow);
+  transform: translateY(-1px);
+}
+
+/* Midnight Theme Filter Pills */
+body.theme-midnight .filter-pill.active,
+body.theme-midnight .tipitaka-pill.active {
+  background: linear-gradient(135deg, #58a6ff, #1f6feb);
+  color: #090c10;
+  border-color: #58a6ff;
+  box-shadow: 0 3px 12px rgba(88, 166, 255, 0.4);
+}
+
+/* Cosmic Theme Filter Pills */
+body.theme-cosmic .filter-pill.active,
+body.theme-cosmic .tipitaka-pill.active {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  color: #1a0f00;
+  border-color: #fbbf24;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.4);
+}
+
+/* Parchment Theme Filter Pills */
+body.theme-parchment .filter-pill,
+body.theme-parchment .tipitaka-pill {
+  background: rgba(255, 253, 248, 0.95);
+  border-color: rgba(180, 145, 95, 0.35);
+  color: #5a422b;
+}
+
+body.theme-parchment .filter-pill:hover,
+body.theme-parchment .tipitaka-pill:hover {
+  background: rgba(250, 245, 237, 1);
+  border-color: #9a6514;
+  color: #2b1d0c;
+}
+
+body.theme-parchment .filter-pill.active,
+body.theme-parchment .tipitaka-pill.active {
+  background: linear-gradient(135deg, #d4af37, #9a6514);
+  color: #ffffff;
+  border-color: #9a6514;
+  box-shadow: 0 3px 12px rgba(154, 101, 20, 0.25);
 }
 
 /* Cards Grid */

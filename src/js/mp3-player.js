@@ -1,71 +1,135 @@
 /**
  * Tamma OS - Real Monastic MP3 Chanting Audio Player Engine
- * High-fidelity streaming & offline audio playback for authentic Buddhist chanting.
+ * High-fidelity streaming for authentic Buddhist chanting from reputable Theravada monasteries.
  */
 
 export const CHANTING_AUDIO_TRACKS = [
   {
     id: 'track-morning-chanting',
     title: 'ทำวัตรเช้า (แปลไทย-บาลี)',
-    temple: 'วัดป่านานาชาติ / วัดมาบจันทร์',
-    src: 'https://archive.org/download/wat-pah-nanachat-morning-chant/morning_chant.mp3',
-    durationEst: '15:20',
+    temple: 'วัดอัมรวดี / สายวัดป่าหนองป่าพง',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-English-Wat_Amaravati-Morning_Chanting.mp3',
+    durationEst: '26:37',
     category: 'ทำวัตร'
   },
   {
     id: 'track-evening-chanting',
     title: 'ทำวัตรเย็น (แปลไทย-บาลี)',
-    temple: 'วัดป่านานาชาติ / วัดมาบจันทร์',
-    src: 'https://archive.org/download/wat-pah-nanachat-evening-chant/evening_chant.mp3',
-    durationEst: '18:45',
+    temple: 'วัดอัมรวดี / สายวัดป่าหนองป่าพง',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-12-Evening_Chanting.mp3',
+    durationEst: '09:34',
     category: 'ทำวัตร'
   },
   {
     id: 'track-chinabanchorn',
     title: 'พระคาถาชินบัญชร (สมเด็จโต)',
-    temple: 'วัดระฆังโฆสิตาราม',
-    src: 'https://archive.org/download/chinabanchorn-chant/chinabanchorn.mp3',
-    durationEst: '05:30',
+    temple: 'พระคาถาชินบัญชรฉบับโบราณ',
+    src: 'https://ia800706.us.archive.org/14/items/JinapanjaraGatha/Jinapanjara%20Gatha.mp3',
+    durationEst: '07:27',
     category: 'คาถาศักดิ์สิทธิ์'
   },
   {
     id: 'track-phahung-mahaka',
     title: 'พุทธชัยมงคลคาถา (พาหุง-มหากา)',
-    temple: 'วัดอัมพวัน (หลวงพ่อจรัญ)',
-    src: 'https://archive.org/download/phahung-mahaka-charan/phahung.mp3',
-    durationEst: '07:15',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bahum_Sahassam-abhinimmita.mp3',
+    durationEst: '02:29',
     category: 'ชัยมงคลคาถา'
   },
   {
-    id: 'track-maha-metta-yai',
-    title: 'มหาเมตตาใหญ่ (เมตตาพรหมวิหาระผะระณา)',
-    temple: 'วัดอัมพวัน',
-    src: 'https://archive.org/download/maha-metta-yai/maha_metta_yai.mp3',
-    durationEst: '12:10',
+    id: 'track-karaniya-metta',
+    title: 'กรณียเมตตสูตร (แผ่เมตตา)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Karaniyamattha_kusalena.mp3',
+    durationEst: '02:10',
     category: 'แผ่เมตตา'
   },
   {
     id: 'track-dhammacakka',
     title: 'ธัมมจักกัปปวัตตนสูตร (ปฐมเทศนา)',
-    temple: 'วัดถ้ำพระบำเพ็ญบุญ',
-    src: 'https://archive.org/download/dhammacakka-sutta/dhammacakka.mp3',
-    durationEst: '14:30',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Dhammacakkappavattana.mp3',
+    durationEst: '12:54',
     category: 'พระสูตรสำคัญ'
   },
   {
-    id: 'track-satipatthana',
-    title: 'มหาสติปัฏฐานสูตร (สวดสรภัญญะ)',
-    temple: 'คณะสงฆ์วัดบวรนิเวศวิหาร',
-    src: 'https://archive.org/download/satipatthana-sutta-chant/satipatthana.mp3',
-    durationEst: '16:00',
+    id: 'track-anattalakkhana',
+    title: 'อนัตตลักขณสูตร (ขันธ์ ๕ เป็นอนัตตา)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Anatta_Sutta.mp3',
+    durationEst: '10:39',
     category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-adittapariyaya',
+    title: 'อาทิตตปริยายสูตร (ไฟราคะ-โทสะ-โมหะ)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Aditta-Pariyaya_Sutta.mp3',
+    durationEst: '07:45',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-mangala-sutta',
+    title: 'มงคลสูตร (มงคล ๓๘ ประการ)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Asevana_Ca_Balanam.mp3',
+    durationEst: '01:58',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-ratana-sutta',
+    title: 'รัตนสูตร (ดับภัยพิบัติและโรคระบาด)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yankinci_Vittam.mp3',
+    durationEst: '01:57',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-khandha-paritta',
+    title: 'ขันธปริตร (ป้องกันสัตว์มีพิษและอสรพิษ)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Virupakkehi_Me_Mettam.mp3',
+    durationEst: '01:15',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-bojjhanga-paritta',
+    title: 'โพชฌังคปริตร (หายจากโรคภัยไข้เจ็บ)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Bojjango_Satisankhato.mp3',
+    durationEst: '01:32',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-abhaya-paritta',
+    title: 'อภยปริตร (ยันทุนนิมิตตัง ปัดเป่าฝันร้าย)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yandunnimittam_Avamangalanca.mp3',
+    durationEst: '00:47',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-angulimala-paritta',
+    title: 'อังคุลิมาลปริตร (คลอดบุตรง่าย ปลอดภัย)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yatoham_Bhagini_Ariyaya.mp3',
+    durationEst: '00:53',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-atanatiya-paritta',
+    title: 'อาฏานาฏิยปริตร (ภาณยักษ์ คุ้มครองจากภูตผี)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Atanatiya_Parittam.mp3',
+    durationEst: '08:33',
+    category: 'ชัยมงคลคาถา'
   },
   {
     id: 'track-12-tamnan-paritta',
-    title: 'พระปริตร ๑๒ ตำนาน (รวมบทคุ้มครอง)',
-    temple: 'วัดถ้ำพระบำเพ็ญบุญ',
-    src: 'https://archive.org/download/12-tamnan-paritta/paritta.mp3',
-    durationEst: '25:40',
+    title: 'พระปริตร ๑๒ ตำนาน (รวมบทสวดคุ้มครองครบชุด)',
+    temple: 'วัดอัมรวดี / สายวัดป่า',
+    src: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Parittas-All.mp3',
+    durationEst: '18:40',
     category: 'บทสวดประจำวัน'
   }
 ];
@@ -86,7 +150,7 @@ class MP3ChantingAudioEngine {
     if (typeof window === 'undefined' || typeof Audio === 'undefined') return;
 
     this.audioElement = new Audio();
-    this.audioElement.preload = 'metadata';
+    this.audioElement.preload = 'auto';
 
     this.audioElement.addEventListener('play', () => {
       this.isPlaying = true;
@@ -113,11 +177,17 @@ class MP3ChantingAudioEngine {
       const current = this.audioElement.currentTime || 0;
       const duration = this.audioElement.duration || 0;
       const percent = duration > 0 ? (current / duration) * 100 : 0;
-      this.onProgressCallbacks.forEach(cb => cb({ current, duration, percent, formattedCurrent: this.formatTime(current), formattedDuration: this.formatTime(duration) }));
+      this.onProgressCallbacks.forEach(cb => cb({
+        current,
+        duration,
+        percent,
+        formattedCurrent: this.formatTime(current),
+        formattedDuration: this.formatTime(duration)
+      }));
     });
 
     this.audioElement.addEventListener('error', (e) => {
-      console.warn('MP3 Playback notice (fallback/offline mode):', e);
+      console.warn('MP3 Playback notice:', e);
       this.isPlaying = false;
       this._notifyState();
     });
@@ -125,23 +195,27 @@ class MP3ChantingAudioEngine {
 
   _setupMediaSession() {
     if (typeof navigator !== 'undefined' && 'mediaSession' in navigator && this.currentTrack) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: this.currentTrack.title,
-        artist: this.currentTrack.temple,
-        album: 'ธรรมะ E-Book บทสวดมนต์',
-        artwork: [
-          { src: 'src/assets/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'src/assets/icon-512.png', sizes: '512x512', type: 'image/png' }
-        ]
-      });
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: this.currentTrack.title,
+          artist: this.currentTrack.temple,
+          album: 'ธรรมะ E-Book บทสวดมนต์',
+          artwork: [
+            { src: 'src/assets/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'src/assets/icon-512.png', sizes: '512x512', type: 'image/png' }
+          ]
+        });
 
-      navigator.mediaSession.setActionHandler('play', () => this.play());
-      navigator.mediaSession.setActionHandler('pause', () => this.pause());
-      navigator.mediaSession.setActionHandler('seekto', (details) => {
-        if (details.seekTime && this.audioElement) {
-          this.seek(details.seekTime);
-        }
-      });
+        navigator.mediaSession.setActionHandler('play', () => this.play());
+        navigator.mediaSession.setActionHandler('pause', () => this.pause());
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          if (details.seekTime && this.audioElement) {
+            this.seek(details.seekTime);
+          }
+        });
+      } catch (err) {
+        console.log('MediaSession setup:', err);
+      }
     }
   }
 
@@ -149,53 +223,86 @@ class MP3ChantingAudioEngine {
     return CHANTING_AUDIO_TRACKS;
   }
 
+  /**
+   * Returns matching audio track for the prayer, or NULL if this prayer has no real recording.
+   * Ensures the UI only displays the audio button when real monastic audio actually exists!
+   */
   getTrackForPrayer(prayer) {
-    if (!prayer) return CHANTING_AUDIO_TRACKS[0];
+    if (!prayer) return null;
     
     const title = (prayer.title || '').toLowerCase();
     const id = (prayer.id || '').toLowerCase();
 
     // 1. Specific Prayer Title & ID matching
     if (title.includes('ชินบัญชร') || id.includes('chinabanchorn')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-chinabanchorn') || CHANTING_AUDIO_TRACKS[0];
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-chinabanchorn') || null;
     }
     if (title.includes('ทำวัตรเย็น') || id.includes('evening')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-evening-chanting') || CHANTING_AUDIO_TRACKS[0];
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-evening-chanting') || null;
     }
     if (title.includes('ทำวัตรเช้า') || id.includes('morning')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-morning-chanting') || CHANTING_AUDIO_TRACKS[0];
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-morning-chanting') || null;
     }
-    if (title.includes('พาหุง') || id.includes('phahung')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-phahung-mahaka') || CHANTING_AUDIO_TRACKS[0];
+    if (title.includes('พาหุง') || id.includes('phahung') || id.includes('jayamongkol')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-phahung-mahaka') || null;
     }
-    if (title.includes('มหาเมตตาใหญ่') || title.includes('แผ่เมตตา') || id.includes('metta')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-maha-metta-yai') || CHANTING_AUDIO_TRACKS[0];
+    if (title.includes('กรณียเมตตสูตร') || id.includes('karaniya')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-karaniya-metta') || null;
     }
     if (title.includes('ธัมมจัก') || id.includes('dhammacakka')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-dhammacakka') || CHANTING_AUDIO_TRACKS[0];
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-dhammacakka') || null;
     }
-    if (title.includes('สติปัฏฐาน') || id.includes('satipatthana')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-satipatthana') || CHANTING_AUDIO_TRACKS[0];
+    if (title.includes('อนัตตลักขณสูตร') || id.includes('anattalakkhana')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-anattalakkhana') || null;
     }
-    if (title.includes('ปริตร') || title.includes('ตำนาน')) {
-      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-12-tamnan-paritta') || CHANTING_AUDIO_TRACKS[0];
+    if (title.includes('อาทิตตปริยายสูตร') || id.includes('adittapariyaya')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-adittapariyaya') || null;
+    }
+    if (title.includes('มงคลสูตร') || id.includes('mangala-sutta')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-mangala-sutta') || null;
+    }
+    if (title.includes('รัตนสูตร') || id.includes('ratana-sutta')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-ratana-sutta') || null;
+    }
+    if (title.includes('ขันธปริตร') || id.includes('khandha')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-khandha-paritta') || null;
+    }
+    if (title.includes('โพชฌังคปริตร') || id.includes('bojjhanga')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-bojjhanga-paritta') || null;
+    }
+    if (title.includes('อภยปริตร') || id.includes('abhaya')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-abhaya-paritta') || null;
+    }
+    if (title.includes('อังคุลิมาลปริตร') || id.includes('angulimala')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-angulimala-paritta') || null;
+    }
+    if (title.includes('อาฏานาฏิย') || id.includes('atanatiya')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-atanatiya-paritta') || null;
+    }
+    if (title.includes('๑๒ ตำนาน') || title.includes('12 ตำนาน') || id.includes('12-tamnan')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-12-tamnan-paritta') || null;
     }
 
-    // 2. Category matching fallback
-    const categoryMatched = CHANTING_AUDIO_TRACKS.find(t => t.category === prayer.category);
-    return categoryMatched || CHANTING_AUDIO_TRACKS[0];
+    // No direct matching real audio file for this prayer
+    return null;
+  }
+
+  hasAudioForPrayer(prayer) {
+    return !!this.getTrackForPrayer(prayer);
   }
 
   loadTrack(trackIdOrObj) {
     const track = typeof trackIdOrObj === 'string'
-      ? CHANTING_AUDIO_TRACKS.find(t => t.id === trackIdOrObj) || CHANTING_AUDIO_TRACKS[0]
+      ? CHANTING_AUDIO_TRACKS.find(t => t.id === trackIdOrObj) || null
       : trackIdOrObj;
 
     if (!track) return;
     this.currentTrack = track;
 
     if (this.audioElement) {
-      this.audioElement.src = track.src;
+      if (this.audioElement.src !== track.src) {
+        this.audioElement.src = track.src;
+      }
       this.audioElement.playbackRate = this.playbackRate;
       this.audioElement.loop = this.isLooping;
     }
@@ -206,15 +313,13 @@ class MP3ChantingAudioEngine {
   play(trackIdOrObj = null) {
     if (trackIdOrObj) {
       this.loadTrack(trackIdOrObj);
-    } else if (!this.currentTrack) {
-      this.loadTrack(CHANTING_AUDIO_TRACKS[0]);
     }
 
-    if (this.audioElement) {
+    if (this.audioElement && this.currentTrack) {
       const playPromise = this.audioElement.play();
       if (playPromise !== undefined) {
         playPromise.catch(err => {
-          console.log('Audio autoplay prevented or offline:', err);
+          console.log('Audio playback notice:', err);
         });
       }
     }
