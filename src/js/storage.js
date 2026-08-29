@@ -20,10 +20,22 @@ class DhammaStorageEngine {
   }
 
   init() {
-    // Seed default prayers if not already present
+    // Seed and merge default prayers so new prayers are always available
     const existing = this.getPrayers();
     if (!existing || existing.length === 0) {
       this.save(STORAGE_KEYS.PRAYERS, DEFAULT_PRAYERS);
+    } else {
+      const existingIds = new Set(existing.map(p => p.id));
+      let hasNew = false;
+      DEFAULT_PRAYERS.forEach(dp => {
+        if (!existingIds.has(dp.id)) {
+          existing.push(dp);
+          hasNew = true;
+        }
+      });
+      if (hasNew) {
+        this.save(STORAGE_KEYS.PRAYERS, existing);
+      }
     }
   }
 
