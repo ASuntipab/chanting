@@ -31,8 +31,8 @@ export class DhammaShareEngine {
     const shareUrl = `${baseUrl}?import=${base64Prayer}`;
 
     const shareData = {
-      title: `${prayer.title} - ธรรมะ E-Book`,
-      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\n(วันนี้ฉันสวดสะสมแล้ว ${count} จบ, ต่อเนื่อง ${streak} วัน)\n\nกดลิงก์ด้านล่างเพื่อเปิดอ่านและเพิ่มเข้าแอปธรรมะ E-Book ของคุณได้ฟรี (ไม่ต้องโหลดแอป):`,
+      title: `${prayer.title} - บทสวดมนต์`,
+      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\n(วันนี้ฉันสวดสะสมแล้ว ${count} จบ, ต่อเนื่อง ${streak} วัน)\n\nกดลิงก์ด้านล่างเพื่อเปิดอ่านและเพิ่มเข้าคลังบทสวดมนต์ของคุณได้ฟรี:`,
       url: shareUrl
     };
 
@@ -100,7 +100,7 @@ export class DhammaShareEngine {
     ctx.textAlign = 'center';
     ctx.font = 'bold 20px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
-    ctx.fillText('❖ ธรรมะ E-BOOK • TAMMA OS ❖', width / 2, 85);
+    ctx.fillText('❖ บทสวดมนต์ • TAMMA OS ❖', width / 2, 85);
 
     // 5. Prayer Title (Auto-scaling & Word Wrapping)
     const titleText = prayer.title || 'บทสวดมนต์อันเป็นมงคล';
