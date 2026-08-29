@@ -34,6 +34,10 @@
       </div>
 
       <div class="header-actions">
+        <!-- Backup / Restore Button -->
+        <button id="btnOpenBackup" class="btn-icon" title="สำรอง / นำเข้าไฟล์บทสวดมนต์ (Export & Import)">
+          💾
+        </button>
         <!-- Add / Upload Prayer Button -->
         <button id="btnOpenUpload" class="btn-primary" style="padding: 8px 14px; font-size: 0.88rem;">
           <span>+ เพิ่มบทสวด</span>
@@ -111,41 +115,21 @@
       </div>
     </section>
 
-    <!-- TAB 4: ADMIN MODERATION VIEW -->
-    <section id="viewAdmin" class="tab-view" style="display: none;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <div>
-          <h2 style="font-family: var(--font-header); font-size: 1.3rem; color: var(--accent-gold);">🛡️ แผงควบคุมผู้ดูแลระบบ (Admin)</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">ตรวจสอบความถูกต้องและอนุมัติบทสวดมนต์ก่อนเผยแพร่สู่สาธารณะ</p>
-        </div>
-      </div>
-      <div id="adminQueueList" class="admin-list">
-        <!-- Rendered dynamically by JS -->
-      </div>
-    </section>
-
   </div>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Bottom Navigation Bar (3 Clean Tabs) -->
   <nav class="bottom-nav">
-    <button class="nav-item active" data-tab="library">
+    <button class="nav-item active" data-tab="library" style="width: 33%;">
       <span class="nav-icon">📚</span>
       <span>คลังบทสวด</span>
     </button>
-    <button class="nav-item" data-tab="tracker">
+    <button class="nav-item" data-tab="tracker" style="width: 33%;">
       <span class="nav-icon">📊</span>
       <span>บันทึกสวด</span>
     </button>
-    <button class="nav-item" data-tab="favorites">
+    <button class="nav-item" data-tab="favorites" style="width: 33%;">
       <span class="nav-icon">💖</span>
       <span>รายการโปรด</span>
-    </button>
-    <button class="nav-item" data-tab="admin">
-      <span class="nav-icon" style="position: relative;">
-        🛡️
-        <span id="adminBadgeCount" class="admin-badge" style="display: none; position: absolute; top: -6px; right: -12px; font-size: 0.65rem;">0</span>
-      </span>
-      <span>แอดมิน</span>
     </button>
   </nav>
 
@@ -257,7 +241,7 @@
             <textarea id="uploadContent" class="form-control" placeholder="พิมพ์หรือวางบทสวดและคำแปลที่นี่..." required></textarea>
           </div>
           <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
-            📤 ส่งบทสวดเพื่อรอการอนุมัติ
+            ✨ บันทึกลงคลังบทสวดทันที
           </button>
         </form>
       </div>
@@ -309,23 +293,32 @@
   </div>
 
   <!-- ==========================================================================
-       MODAL: ADMIN AUTH PASSCODE
+       MODAL: BACKUP & RESTORE (EXPORT / IMPORT JSON)
        ========================================================================== -->
-  <div id="adminAuthModal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 380px; text-align: center;">
-      <div style="font-size: 2.5rem; margin-bottom: 10px;">🔐</div>
-      <h3 style="font-family: var(--font-header); color: var(--accent-gold); margin-bottom: 6px;">ระบบผู้ดูแลระบบ (Admin)</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบอนุมัติบทสวด</p>
-      
-      <div class="form-group">
-        <input type="password" id="adminPasscodeInput" class="form-control" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px;" placeholder="••••••">
+  <div id="backupModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">💾 สำรอง & นำเข้าบทสวดมนต์</h3>
+        <button id="btnCloseBackup" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
       </div>
 
-      <div style="display: flex; gap: 8px;">
-        <button id="btnCloseAdminAuth" class="btn-secondary" style="flex: 1; justify-content: center;">ยกเลิก</button>
-        <button id="btnSubmitPasscode" class="btn-primary" style="flex: 1; justify-content: center;">เข้าสู่ระบบ</button>
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+        คุณสามารถส่งออก (Export) บทสวดมนต์ทั้งหมดและสถิติการสวดของคุณเป็นไฟล์ JSON เพื่อสำรองข้อมูล หรือนำเข้า (Import) เพื่อแชร์ให้เพื่อนๆ ได้โดยไม่ต้องมีเซิร์ฟเวอร์
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button id="btnExportJson" class="btn-primary" style="justify-content: center; width: 100%;">
+          📤 ส่งออกคลังบทสวดเป็นไฟล์ (Export JSON)
+        </button>
+
+        <div style="border-top: 1px solid var(--border-subtle); margin: 8px 0;"></div>
+
+        <label class="form-label" style="margin-bottom: 4px;">นำเข้าไฟล์บทสวดมนต์ (Import JSON)</label>
+        <input type="file" id="importFileInput" accept=".json" class="form-control" style="font-size: 0.85rem;">
+        <button id="btnImportJson" class="btn-secondary" style="justify-content: center; width: 100%;">
+          📥 นำเข้าไฟล์บทสวด (Import File)
+        </button>
       </div>
-      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">(รหัสผ่านเริ่มต้นสำหรับทดสอบ: admin123)</p>
     </div>
   </div>
 

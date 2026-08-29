@@ -4,12 +4,10 @@ import assert from 'node:assert/strict';
 // Mock-free in-memory storage simulator for Node test environment
 class StorageTester {
   constructor() {
-    this.store = {};
     this.prayers = [
       { id: 'p1', title: 'บทสวดที่ 1', status: 'approved' },
       { id: 'p2', title: 'บทสวดที่ 2', status: 'approved' }
     ];
-    this.pending = [];
     this.favorites = [];
     this.tracker = {
       todayDate: '2026-08-29',
@@ -20,31 +18,40 @@ class StorageTester {
     };
   }
 
-  addPending(item) {
-    item.status = 'pending';
-    this.pending.push(item);
+  savePrayer(item) {
+    item.status = 'approved';
+    const idx = this.prayers.findIndex(p => p.id === item.id);
+    if (idx >= 0) {
+      this.prayers[idx] = item;
+    } else {
+      this.prayers.push(item);
+    }
     return item;
   }
 
-  approvePending(id) {
-    const idx = this.pending.findIndex(p => p.id === id);
-    if (idx >= 0) {
-      const item = this.pending[idx];
-      item.status = 'approved';
-      this.prayers.push(item);
-      this.pending.splice(idx, 1);
-      return true;
-    }
-    return false;
+  deletePrayer(id) {
+    this.prayers = this.prayers.filter(p => p.id !== id);
   }
 
-  rejectPending(id) {
-    const idx = this.pending.findIndex(p => p.id === id);
-    if (idx >= 0) {
-      this.pending.splice(idx, 1);
-      return true;
-    }
-    return false;
+  exportData() {
+    return JSON.stringify({
+      version: '1.0.0',
+      prayers: this.prayers,
+      favorites: this.favorites
+    });
+  }
+
+  importData(rawJson) {
+    const data = JSON.parse(rawJson);
+    const existingIds = new Set(this.prayers.map(p => p.id));
+    let addedCount = 0;
+    data.prayers.forEach(p => {
+      if (!existingIds.has(p.id)) {
+        this.prayers.push(p);
+        addedCount++;
+      }
+    });
+    return { success: true, addedCount };
   }
 
   toggleFavorite(id) {
@@ -64,34 +71,34 @@ class StorageTester {
   }
 }
 
-test('Admin Approval Workflow: Pending prayer should transition to Approved and become public', () => {
+test('Direct Offline Save: User added prayer is saved directly to local library offline', () => {
   const tester = new StorageTester();
   
-  // 1. User uploads new prayer
-  const newSubmission = { id: 'user-sub-1', title: 'คาถาชินบัญชร ย่อ' };
-  tester.addPending(newSubmission);
+  // User adds prayer
+  const newPrayer = { id: 'user-custom-1', title: 'บทสวดพระมหาจักรพรรดิ ย่อ' };
+  tester.savePrayer(newPrayer);
   
-  assert.equal(tester.pending.length, 1);
-  assert.equal(tester.pending[0].status, 'pending');
-  assert.equal(tester.prayers.length, 2); // Not in public yet
-
-  // 2. Admin approves
-  const success = tester.approvePending('user-sub-1');
-  assert.ok(success);
-  assert.equal(tester.pending.length, 0); // Removed from queue
-  assert.equal(tester.prayers.length, 3); // Added to public library
-  assert.equal(tester.prayers[2].id, 'user-sub-1');
+  assert.equal(tester.prayers.length, 3);
+  assert.equal(tester.prayers[2].id, 'user-custom-1');
   assert.equal(tester.prayers[2].status, 'approved');
 });
 
-test('Admin Reject Workflow: Rejected prayer should be removed without adding to library', () => {
-  const tester = new StorageTester();
-  tester.addPending({ id: 'spam-1', title: 'เนื้อหาไม่เหมาะสม' });
-  assert.equal(tester.pending.length, 1);
+test('Zero-Database Backup & Restore: Export & Import JSON works seamlessly offline', () => {
+  const tester1 = new StorageTester();
+  tester1.savePrayer({ id: 'p3', title: 'บทสวดพิเศษจากเพื่อน' });
+  
+  const exportedJson = tester1.exportData();
+  assert.ok(exportedJson.includes('บทสวดพิเศษจากเพื่อน'));
 
-  tester.rejectPending('spam-1');
-  assert.equal(tester.pending.length, 0);
-  assert.equal(tester.prayers.length, 2);
+  // Another user imports the JSON
+  const tester2 = new StorageTester();
+  assert.equal(tester2.prayers.length, 2);
+
+  const res = tester2.importData(exportedJson);
+  assert.equal(res.success, true);
+  assert.equal(res.addedCount, 1);
+  assert.equal(tester2.prayers.length, 3);
+  assert.equal(tester2.prayers[2].id, 'p3');
 });
 
 test('Favorites & Chanting Counter State', () => {

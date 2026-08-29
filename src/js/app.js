@@ -1,15 +1,9 @@
-/**
- * Tamma OS - Main Application Controller
- * Coordinates Reader, Library, Tracker, URL Scraper, Share, Admin & Native Capacitor Bridge
- */
-
 import { storage } from './storage.js';
 import { audio } from './audio.js';
 import { ComicReaderEngine } from './reader.js';
 import { tracker } from './tracker.js';
 import { scraper } from './scraper.js';
 import { shareEngine } from './share.js';
-import { adminEngine } from './admin.js';
 import { starfield } from './starfield.js';
 
 class TammaApp {
@@ -30,15 +24,14 @@ class TammaApp {
     // 3. Initialize Settings & Theme
     this.applyInitialSettings();
 
-    // 4. Render Views
+    // 4. Render Views (100% Offline-First)
     this.renderLibrary();
     tracker.render();
-    adminEngine.updateBadge();
 
     // 5. Bind Global UI Events
     this.bindEvents();
 
-    console.log('🙏 Tamma OS E-Book Engine Initialized Successfully in Cosmic Sanctuary.');
+    console.log('🙏 Tamma OS E-Book Engine Initialized (100% Offline-First).');
   }
 
   applyInitialSettings() {
@@ -109,7 +102,7 @@ class TammaApp {
       tabPaneUrl.style.display = 'block';
     });
 
-    // Form: Manual Upload
+    // Form: Manual Upload (บันทึกลงคลังบทสวดทันที)
     const formManual = document.getElementById('formManualUpload');
     formManual?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -126,16 +119,16 @@ class TammaApp {
       const newPrayer = scraper.parseRawTextToPrayer(title, content);
       newPrayer.category = category;
       newPrayer.author = author;
+      newPrayer.status = 'approved';
 
-      storage.addPendingPrayer(newPrayer);
+      storage.savePrayer(newPrayer);
       uploadModal?.classList.remove('open');
       formManual.reset();
-      this.showToast('ส่งบทสวดสำเร็จ! รอแอดมินตรวจสอบอนุมัติ 🙏');
-      adminEngine.updateBadge();
-      adminEngine.renderQueue(p => this.reader.open(p));
+      this.renderLibrary();
+      this.showToast(`เพิ่มบทสวด "${title}" ลงในคลังส่วนตัวเรียบร้อยแล้ว 🙏✨`);
     });
 
-    // Form: URL Import
+    // Form: URL Import (บันทึกลงคลังบทสวดทันที)
     const btnFetchUrl = document.getElementById('btnFetchUrl');
     btnFetchUrl?.addEventListener('click', async () => {
       const url = document.getElementById('uploadUrlInput').value.trim();
@@ -153,19 +146,67 @@ class TammaApp {
         btnFetchUrl.disabled = true;
 
         const importedPrayer = await scraper.extractFromUrl(url);
-        storage.addPendingPrayer(importedPrayer);
+        importedPrayer.status = 'approved';
+        storage.savePrayer(importedPrayer);
 
         uploadModal?.classList.remove('open');
         document.getElementById('uploadUrlInput').value = '';
-        this.showToast(`นำเข้าสำเร็จ: "${importedPrayer.title}" (ส่งเข้าคิวรออนุมัติ)`);
-        adminEngine.updateBadge();
-        adminEngine.renderQueue(p => this.reader.open(p));
+        this.renderLibrary();
+        this.showToast(`นำเข้าสำเร็จ: "${importedPrayer.title}" จัดแบ่งหน้า E-Book พร้อมอ่านทันที 🪷`);
       } catch (err) {
         alert(`เกิดข้อผิดพลาด: ${err.message}`);
       } finally {
         btnFetchUrl.disabled = false;
         if (statusEl) statusEl.style.display = 'none';
       }
+    });
+
+    // Backup & Restore Modal Triggers
+    const btnOpenBackup = document.getElementById('btnOpenBackup');
+    const backupModal = document.getElementById('backupModal');
+    const btnCloseBackup = document.getElementById('btnCloseBackup');
+    const btnExportJson = document.getElementById('btnExportJson');
+    const btnImportJson = document.getElementById('btnImportJson');
+    const importFileInput = document.getElementById('importFileInput');
+
+    btnOpenBackup?.addEventListener('click', () => backupModal?.classList.add('open'));
+    btnCloseBackup?.addEventListener('click', () => backupModal?.classList.remove('open'));
+
+    // Export JSON Action
+    btnExportJson?.addEventListener('click', () => {
+      const jsonStr = storage.exportData();
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tamma-prayers-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      this.showToast('ส่งออกไฟล์บทสวดมนต์ (JSON) เรียบร้อย 💾');
+    });
+
+    // Import JSON Action
+    btnImportJson?.addEventListener('click', () => {
+      const file = importFileInput?.files?.[0];
+      if (!file) {
+        alert('กรุณาเลือกไฟล์ .json ที่ต้องการนำเข้า');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = storage.importData(e.target.result);
+        if (result.success) {
+          this.renderLibrary();
+          tracker.render();
+          backupModal?.classList.remove('open');
+          importFileInput.value = '';
+          this.showToast(`นำเข้าสำเร็จ! เพิ่มบทสวดใหม่ ${result.addedCount} บท 🎉`);
+        } else {
+          alert(`นำเข้าไฟล์ไม่สำเร็จ: ${result.error}`);
+        }
+      };
+      reader.readAsText(file);
     });
 
     // Share Modal
@@ -187,29 +228,6 @@ class TammaApp {
       shareEngine.downloadCard(`dhamma-${this.currentSharePrayer?.id || 'card'}.png`);
       this.showToast('บันทึกรูปภาพการ์ดธรรมะเรียบร้อย 🪷');
     });
-
-    // Admin Passcode Modal
-    const adminAuthModal = document.getElementById('adminAuthModal');
-    const btnSubmitPasscode = document.getElementById('btnSubmitPasscode');
-    const btnCloseAdminAuth = document.getElementById('btnCloseAdminAuth');
-
-    btnCloseAdminAuth?.addEventListener('click', () => adminAuthModal?.classList.remove('open'));
-    btnSubmitPasscode?.addEventListener('click', () => {
-      const code = document.getElementById('adminPasscodeInput').value;
-      if (adminEngine.authenticate(code)) {
-        adminAuthModal?.classList.remove('open');
-        this.switchTab('admin');
-        this.showToast('เข้าสู่ระบบแอดมินสำเร็จ 🛡️');
-      } else {
-        alert('รหัสผ่านไม่ถูกต้อง (ค่าเริ่มต้นคือ: admin123)');
-      }
-    });
-
-    // Listen to prayer approved event
-    window.addEventListener('tamma:prayer-approved', () => {
-      this.renderLibrary();
-      this.showToast('อนุมัติบทสวดลงระบบสาธารณะเรียบร้อยแล้ว ✨');
-    });
   }
 
   switchTab(tabId) {
@@ -222,23 +240,15 @@ class TammaApp {
     const viewLibrary = document.getElementById('viewLibrary');
     const viewTracker = document.getElementById('viewTracker');
     const viewFavorites = document.getElementById('viewFavorites');
-    const viewAdmin = document.getElementById('viewAdmin');
 
     if (viewLibrary) viewLibrary.style.display = tabId === 'library' ? 'block' : 'none';
     if (viewTracker) viewTracker.style.display = tabId === 'tracker' ? 'block' : 'none';
     if (viewFavorites) viewFavorites.style.display = tabId === 'favorites' ? 'block' : 'none';
-    if (viewAdmin) viewAdmin.style.display = tabId === 'admin' ? 'block' : 'none';
 
     if (tabId === 'tracker') {
       tracker.render();
     } else if (tabId === 'favorites') {
       this.renderFavorites();
-    } else if (tabId === 'admin') {
-      if (!storage.isAdmin()) {
-        document.getElementById('adminAuthModal')?.classList.add('open');
-      } else {
-        adminEngine.renderQueue(p => this.reader.open(p));
-      }
     } else {
       this.renderLibrary();
     }

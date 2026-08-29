@@ -71,6 +71,7 @@ class DhammaStorageEngine {
   }
 
   savePrayer(prayer) {
+    prayer.status = 'approved';
     const prayers = this.getPrayers();
     const idx = prayers.findIndex(p => p.id === prayer.id);
     if (idx >= 0) {
@@ -79,6 +80,7 @@ class DhammaStorageEngine {
       prayers.unshift(prayer);
     }
     this.save(STORAGE_KEYS.PRAYERS, prayers);
+    return prayer;
   }
 
   deletePrayer(id) {
@@ -86,18 +88,50 @@ class DhammaStorageEngine {
     this.save(STORAGE_KEYS.PRAYERS, prayers);
   }
 
-  // --- Admin & Pending Prayers API ---
-  getPendingPrayers() {
-    return this.get(STORAGE_KEYS.PENDING_PRAYERS, []);
+  // --- Export & Import JSON Backup API ---
+  exportData() {
+    const data = {
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      prayers: this.getPrayers(),
+      favorites: this.getFavorites(),
+      tracker: this.getTrackerData()
+    };
+    return JSON.stringify(data, null, 2);
   }
 
-  addPendingPrayer(prayer) {
-    const pending = this.getPendingPrayers();
-    prayer.status = 'pending';
-    prayer.createdAt = new Date().toISOString();
-    pending.unshift(prayer);
-    this.save(STORAGE_KEYS.PENDING_PRAYERS, pending);
-    return prayer;
+  importData(rawJson) {
+    try {
+      const data = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+      if (!data || !Array.isArray(data.prayers)) {
+        throw new Error('โครงสร้างไฟล์ไม่ถูกต้อง');
+      }
+
+      // Merge prayers
+      const currentPrayers = this.getPrayers();
+      const currentIds = new Set(currentPrayers.map(p => p.id));
+      let addedCount = 0;
+
+      data.prayers.forEach(p => {
+        if (!currentIds.has(p.id)) {
+          currentPrayers.push(p);
+          addedCount++;
+        }
+      });
+      this.save(STORAGE_KEYS.PRAYERS, currentPrayers);
+
+      // Merge favorites if available
+      if (Array.isArray(data.favorites)) {
+        const currentFavs = new Set(this.getFavorites());
+        data.favorites.forEach(f => currentFavs.add(f));
+        this.save(STORAGE_KEYS.FAVORITES, Array.from(currentFavs));
+      }
+
+      return { success: true, addedCount };
+    } catch (e) {
+      console.error('Import error:', e);
+      return { success: false, error: e.message };
+    }
   }
 
   approvePendingPrayer(id) {
