@@ -258,120 +258,18 @@ export class ComicReaderEngine {
   }
 
   /**
-   * Smart Dynamic Auto-Pagination Flow Engine:
-   * Splits long chants into discrete pages dynamically based on current font size & screen height.
-   * Guarantees 0 scrollbars and perfect readability on any screen size.
-   */
-  calculateDynamicPages(prayer, fontSizeRem = 1.15) {
-    if (!prayer) return [];
-    const rawPages = prayer.pages || [];
-    if (rawPages.length === 0) {
-      return this.autoPaginateText(prayer.content || prayer.description || '');
-    }
-
-    const vh = typeof window !== 'undefined' ? (window.innerHeight || 800) : 800;
-    // Calculate character budget per page based on font size and screen height
-    const baseBudget = vh < 650 ? 190 : 270;
-    const fontFactor = 1.15 / Math.max(fontSizeRem, 0.7);
-    const charCapacity = Math.max(Math.floor(baseBudget * fontFactor * fontFactor), 75);
-
-    const dynamicPages = [];
-
-    rawPages.forEach((page, originalIdx) => {
-      const pali = (page.pali || '').trim();
-      const thai = (page.thai || '').trim();
-      const content = (page.content || '').trim();
-      const totalLen = pali.length + thai.length + content.length;
-
-      // If fits nicely within page capacity, keep as single page
-      if (totalLen <= charCapacity) {
-        dynamicPages.push({
-          ...page,
-          pageNumber: dynamicPages.length + 1,
-          verseTitle: page.verseTitle || `ตอนที่ ${originalIdx + 1}`
-        });
-        return;
-      }
-
-      // If text exceeds page capacity, intelligently split into sub-pages
-      const subChunks = [];
-
-      if (pali && thai) {
-        const paliStanzas = pali.split(/\n\s*\n/).filter(s => s.trim().length > 0);
-        const thaiStanzas = thai.split(/\n\s*\n/).filter(s => s.trim().length > 0);
-
-        if (paliStanzas.length > 1 && paliStanzas.length === thaiStanzas.length) {
-          for (let i = 0; i < paliStanzas.length; i++) {
-            subChunks.push({ pali: paliStanzas[i], thai: thaiStanzas[i] });
-          }
-        } else if (paliStanzas.length > 1) {
-          paliStanzas.forEach((stanza, i) => {
-            subChunks.push({
-              pali: stanza,
-              thai: i === paliStanzas.length - 1 ? thai : ''
-            });
-          });
-        } else {
-          // Long single stanza: Pali on Page 1, Thai translation on Page 2
-          subChunks.push({ pali: pali, thai: '' });
-          subChunks.push({ pali: '', thai: thai });
-        }
-      } else {
-        const textToSplit = pali || thai || content;
-        const paragraphs = textToSplit.split(/\n+/).filter(p => p.trim().length > 0);
-        let curChunk = [];
-        let curLen = 0;
-
-        paragraphs.forEach(p => {
-          if (curLen + p.length > charCapacity && curChunk.length > 0) {
-            subChunks.push({
-              pali: page.pali ? curChunk.join('\n') : '',
-              thai: page.thai ? curChunk.join('\n') : '',
-              content: page.content ? curChunk.join('\n') : ''
-            });
-            curChunk = [];
-            curLen = 0;
-          }
-          curChunk.push(p);
-          curLen += p.length;
-        });
-
-        if (curChunk.length > 0) {
-          subChunks.push({
-            pali: page.pali ? curChunk.join('\n') : '',
-            thai: page.thai ? curChunk.join('\n') : '',
-            content: page.content ? curChunk.join('\n') : ''
-          });
-        }
-      }
-
-      // Append sub-pages with clear numbering
-      const totalSub = subChunks.length;
-      subChunks.forEach((sub, subIdx) => {
-        const baseTitle = page.verseTitle || `ตอนที่ ${originalIdx + 1}`;
-        const titleWithSub = totalSub > 1 ? `${baseTitle} (${subIdx + 1}/${totalSub})` : baseTitle;
-        dynamicPages.push({
-          pageNumber: dynamicPages.length + 1,
-          verseTitle: titleWithSub,
-          pali: sub.pali || '',
-          thai: sub.thai || '',
-          content: sub.content || ''
-        });
-      });
-    });
-
-    return dynamicPages;
-  }
-
-  /**
    * Intelligently renders and paginates prayer content into Comic frames
+   * Guarantees 100% Zero-Loss Parity: Every Pali verse and Thai translation remains intact and perfectly paired.
    */
   renderPages(prayer) {
-    const settings = storage.getSettings();
-    const currentFontSize = settings.fontSize || 1.15;
+    let pages = prayer.pages;
 
-    // Use Smart Dynamic Auto-Pagination Flow Engine
-    const pages = this.calculateDynamicPages(prayer, currentFontSize);
+    // If pages not pre-split (e.g. raw text import from user), auto-paginate text cleanly
+    if (!pages || pages.length === 0) {
+      pages = this.autoPaginateText(prayer.content || prayer.description || '');
+      this.currentPrayer.pages = pages;
+    }
+
     this.totalPages = pages.length;
     this.comicTrack.innerHTML = '';
 

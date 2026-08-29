@@ -170,7 +170,7 @@
   transform-style: preserve-3d;
 }
 
-/* 3D Realistic Fullscreen Book Leaf Frame - Zero Scrollbars Guarantee */
+/* 3D Realistic Fullscreen Book Leaf Frame - 100% Zero-Loss Parity with Hidden Scrollbars */
 .page-frame {
   width: 100%;
   max-width: 780px;
@@ -181,14 +181,16 @@
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 28px 22px 24px 22px;
+  padding: 28px 24px 24px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  overflow: hidden; /* ZERO SCROLLBAR: Content auto-paginates cleanly across discrete pages */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow-y: auto; /* Natural smooth touch scrolling if text exceeds height on high zoom */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   
   /* 3D Book Page Spine & Shadows */
   box-shadow:
@@ -203,6 +205,7 @@
 .page-frame::-webkit-scrollbar,
 .page-verse-body::-webkit-scrollbar,
 .comic-stage::-webkit-scrollbar,
+.comic-page::-webkit-scrollbar,
 .reader-view::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;

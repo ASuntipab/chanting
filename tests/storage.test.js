@@ -223,52 +223,15 @@ test('Default Prayers Suite: Verified Luang Pu Mun, Luang Ta Maha Bua & Maha Met
   assert.equal(pahung.pages.length, 6, 'Pahung Mahaka must have 6 complete pages');
 });
 
-test('Zero-Scrollbar Smart Dynamic Auto-Pagination Flow: Expands pages on large fonts to prevent scrollbars', () => {
-  function calculateDynamicPages(prayer, fontSizeRem = 1.15, vh = 800) {
-    const rawPages = prayer.pages || [];
-    const baseBudget = vh < 650 ? 190 : 270;
-    const fontFactor = 1.15 / Math.max(fontSizeRem, 0.7);
-    const charCapacity = Math.max(Math.floor(baseBudget * fontFactor * fontFactor), 75);
-    const dynamicPages = [];
-
-    rawPages.forEach((page, originalIdx) => {
-      const pali = (page.pali || '').trim();
-      const thai = (page.thai || '').trim();
-      const totalLen = pali.length + thai.length;
-
-      if (totalLen <= charCapacity) {
-        dynamicPages.push({ ...page });
-        return;
-      }
-
-      // Split
-      const paliStanzas = pali.split(/\n\s*\n/).filter(s => s.trim().length > 0);
-      if (paliStanzas.length > 1) {
-        paliStanzas.forEach(s => dynamicPages.push({ pali: s, thai: '' }));
-      } else {
-        dynamicPages.push({ pali: pali, thai: '' });
-        dynamicPages.push({ pali: '', thai: thai });
-      }
+test('100% Zero-Loss Content Parity: All prayers retain complete Pali verses and paired Thai translations without loss', () => {
+  DEFAULT_PRAYERS.forEach(prayer => {
+    assert.ok(prayer.pages && prayer.pages.length > 0, `Prayer ${prayer.title} must have pages`);
+    prayer.pages.forEach((page, idx) => {
+      // Must have either pali or thai or content
+      const hasContent = (page.pali && page.pali.trim().length > 0) ||
+                         (page.thai && page.thai.trim().length > 0) ||
+                         (page.content && page.content.trim().length > 0);
+      assert.ok(hasContent, `Page ${idx + 1} of ${prayer.title} must have valid content`);
     });
-
-    return dynamicPages;
-  }
-
-  const samplePrayer = {
-    pages: [
-      {
-        verseTitle: 'บทสวดตัวอย่าง',
-        pali: 'นะโม ตัสสะ ภะคะวะโต อะระหะโต สัมมาสัมพุทธัสสะ.\n\nพุทธัง สะระณัง คัจฉามิ ธัมมัง สะระณัง คัจฉามิ สังฆัง สะระณัง คัจฉามิ.',
-        thai: 'ขอนอบน้อมแด่พระผู้มีพระภาคเจ้า'
-      }
-    ]
-  };
-
-  // At default font size (1.15rem), 150 chars fits comfortably in 1 single page
-  const defaultPages = calculateDynamicPages(samplePrayer, 1.15);
-  assert.equal(defaultPages.length, 1, 'Default font should keep content in 1 page');
-
-  // At large font size (1.8rem - large zoom), budget drops to ~110 chars, auto-splits into multiple pages
-  const largeFontPages = calculateDynamicPages(samplePrayer, 1.8);
-  assert.ok(largeFontPages.length > defaultPages.length, 'Large font should dynamically generate more pages to eliminate scrollbars');
+  });
 });

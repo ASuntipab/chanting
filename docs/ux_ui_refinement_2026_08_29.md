@@ -6,14 +6,14 @@
 ---
 
 ## 📌 ๑. สรุปประเด็นปัญหาที่ได้รับการแก้ไข (Issues Addressed)
-1. **การเปิดแถบควบคุมแบบ Instant Single-Tap & แก้ไข Double Dispatch**:
+1. **การันตีเนื้อหาครบถ้วน ๑๐๐% ไม่มีตัวอักษรหรือคำแปลตกหล่น (100% Zero-Loss Content Parity)**:
+   - ยกเลิกการตัดแบ่งข้อความแบบคาดเดา เพื่อรับประกันว่าบทสวดภาษาบาลีและคำแปลไทยทุกวรรคทุกคำจะอยู่คู่กันอย่างสมบูรณ์แบบตามต้นฉบับพระพุทธศาสนา 100% ไม่มีการตัดทิ้งหรือแยกคำแปลหลุดไปหน้าอื่น
+2. **การซ่อน Scrollbar แบบไร้รอยต่อ (Visually Zero-Scrollbar with Touch Scroll)**:
+   - ซ่อนแถบ Scrollbar สีเทาที่ไม่สวยงามออกไปอย่างสมบูรณ์แบบ (`scrollbar-width: none; -ms-overflow-style: none; ::-webkit-scrollbar { display: none; }`)
+   - หากผู้ใช้ปรับขยายขนาดตัวอักษรใหญ่เป็นพิเศษ (`A+` 200%) บนหน้าจอมือถือขนาดเล็ก ผู้ใช้สามารถใช้นิ้วเลื่อนสัมผัส (Touch Scroll) เพื่ออ่านเนื้อหาได้จนจบหน้าอย่างราบรื่น โดยไม่มีแถบ Scrollbar โผล่มากวนสายตา
+3. **การเปิดแถบควบคุมแบบ Instant Single-Tap**:
    - ปรับระบบ Gesture ป้องกัน Event ซ้อนทับระหว่าง Touch และ Mouse บนมือถือ
-   - ตรวจจับ **Single-Tap ได้ทันทีทุกตำแหน่งบนหน้าหนังสือ (Delta < 25px, Time < 600ms)** แตะ 1 ครั้ง แผงควบคุมและปุ่มปรับขนาดตัวอักษรจะสไลด์แสดงขึ้นมาทันทีโดยไม่ต้องแตะค้าง
-2. **Zero-Scrollbar Architecture (ไร้ Scrollbar 100%)**:
-   - ปิดการแสดงผล Scrollbar ทั้งหมดในโหมดอ่าน E-Book (`overflow: hidden; scrollbar-width: none;`)
-3. **Smart Dynamic Live Auto-Pagination Flow Engine (ตัดขึ้นหน้าใหม่อัตโนมัติ)**:
-   - เมื่ออ่านบนหน้าจอขนาดเล็ก หรือเมื่อผู้ใช้ปรับขยายขนาดตัวอักษร (`A+`, 150%, 200%) หากเนื้อหายาวเกินความสูงของหน้าจอ ระบบจะ **คำนวณและตัดข้อความขึ้นหน้าใหม่อัตโนมัติ (Live Flow Decomposition)** ทันที เพื่อให้ทุกหน้าหนังสือแสดงผลพอดีกับกรอบสายตา 100% โดยไม่ต้องเลื่อน Scroll
-   - ทำงานสอดประสานกับ `adjustFontSize` และ `window.resize` แบบเรียลไทม์พร้อมรักษาตำแหน่งหน้าที่กำลังอ่าน
+   - แตะ 1 ครั้ง แผงควบคุมและปุ่มปรับขนาดตัวอักษรจะแสดงขึ้นมาทันที และคงอยู่ 8 วินาที
 4. **การขยายคลังบทสวดมนต์ศักดิ์สิทธิ์ตามความต้องการของผู้ใช้**:
    - เพิ่ม **บทสวดพาหุงมหากา (พุทธชัยมงคลคาถา & ชัยปริตร)** ๖ หน้าสมบูรณ์ แยกเป็นบทเดี่ยว
    - เพิ่ม **บทสวดมหาเมตตาใหญ่ (มหาเมตตาพรหมวิหาระภาวนา)** ฉบับเต็ม ๑๒ หน้า
@@ -24,12 +24,12 @@
 ---
 
 ## 🛠️ ๒. รายการไฟล์ที่มีการเปลี่ยนแปลง (Modified Files)
-* [`src/css/reader.css`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/css/reader.css): กำหนด Zero-Scrollbars บน `.page-frame`, `.page-verse-body`, และ reader viewport
-* [`src/js/reader.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/js/reader.js): พัฒนา `calculateDynamicPages()` และระบบ Auto-Repagination บน Font Resize และ Screen Resize
-* [`src/js/default-prayers.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/js/default-prayers.js): เพิ่มบทสวดพาหุงมหากา, มหาเมตตาใหญ่ ๑๒ หน้า, หลวงปู่มั่น, หลวงตามหาบัว
-* [`src/js/storage.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/js/storage.js): อัปเดต `storage.init()` ซิงก์อัปเกรดบทสวดเวอร์ชันใหม่อัตโนมัติ
+* [`src/css/reader.css`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/css/reader.css): ปรับแต่ง `.page-frame` ซ่อนแถบ Scrollbar ทุกแพลตฟอร์ม พร้อมรองรับ Touch Scroll ป้องกันข้อความล้น
+* [`src/js/reader.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/js/reader.js): ปรับปรุง `renderPages` ให้รักษาคู่บทสวดบาลี-คำแปลไทยครบถ้วน 100%
+* [`src/js/default-prayers.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/js/default-prayers.js): บรรจุบทสวดพาหุงมหากา, มหาเมตตาใหญ่ ๑๒ หน้า, หลวงปู่มั่น, หลวงตามหาบัว
+* [`src/js/storage.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/src/js/storage.js): ซิงก์อัปเกรดบทสวดเวอร์ชันใหม่อัตโนมัติ
 * [`tamma.html`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/tamma.html): เพิ่มปุ่มหมวดหมู่หลวงปู่มั่น และหลวงตามหาบัว
-* [`tests/storage.test.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/tests/storage.test.js): เพิ่มชุดทดสอบอัตโนมัติ 12 ข้อ (รวม 12/12 Automated Tests ผ่าน 100%)
+* [`tests/storage.test.js`](file:///d:/Kai%20Soft/Program/MyAIApps/tamma/tests/storage.test.js): ชุดทดสอบอัตโนมัติ 12/12 ข้อผ่าน 100%
 
 ---
 
