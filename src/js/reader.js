@@ -349,55 +349,63 @@ export class ComicReaderEngine {
     for (let i = 0; i < this.totalPages; i++) {
       const dot = document.createElement('div');
       dot.className = `reader-dot ${i === this.currentPageIndex ? 'active' : ''}`;
-      dot.addEventListener('click', () => this.goToPage(i));
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.goToPage(i, true);
+      });
       this.readerPageDots.appendChild(dot);
     }
   }
 
-  goToPage(index, animateSound = true, direction = 'next') {
+  goToPage(index, animate = true, direction = 'next') {
     if (index < 0 || index >= this.totalPages) return;
-
-    const oldIndex = this.currentPageIndex;
-    const allPages = this.comicTrack.querySelectorAll('.comic-page');
-    const oldPage = allPages[oldIndex];
-    const newPage = allPages[index];
-
-    // Apply 3D Page Turning class
-    if (oldPage && oldIndex !== index) {
-      const turnClass = direction === 'next' ? 'turning-left' : 'turning-right';
-      oldPage.classList.add(turnClass);
-      setTimeout(() => {
-        oldPage.classList.remove('turning-left', 'turning-right');
-      }, 400);
-    }
-
+    const prevIndex = this.currentPageIndex;
     this.currentPageIndex = index;
 
-    // Shift comic track with 3D transform
-    const offsetPercent = -(this.currentPageIndex * 100);
-    this.comicTrack.style.transform = `translateX(${offsetPercent}%)`;
-
-    // Reset any manual inline drag transforms on page frames
-    allPages.forEach(p => {
+    const allPages = this.comicTrack.querySelectorAll('.comic-page');
+    allPages.forEach((p, idx) => {
+      p.classList.toggle('active-page', idx === index);
       const frame = p.querySelector('.page-frame');
-      if (frame) {
-        frame.style.transform = '';
-        frame.style.boxShadow = '';
-      }
+      if (frame) frame.style.transform = '';
     });
 
-    // Update Nav buttons
-    if (this.btnPrev) this.btnPrev.style.visibility = this.currentPageIndex === 0 ? 'hidden' : 'visible';
-    if (this.btnNext) this.btnNext.style.visibility = this.currentPageIndex === this.totalPages - 1 ? 'hidden' : 'visible';
+    // Animate 3D Page Turn
+    if (animate && this.comicTrack) {
+      const offsetPercent = -index * 100;
+      this.comicTrack.style.transform = `translateX(${offsetPercent}%)`;
 
-    // Update Dots
-    const dots = this.readerPageDots?.querySelectorAll('.reader-dot');
-    dots?.forEach((dot, idx) => {
+      // Visual page curl effect on turned page
+      const turnedPage = allPages[prevIndex];
+      if (turnedPage) {
+        turnedPage.classList.add(direction === 'next' ? 'page-turning-left' : 'page-turning-right');
+        setTimeout(() => {
+          turnedPage.classList.remove('page-turning-left', 'page-turning-right');
+        }, 400);
+      }
+    } else if (this.comicTrack) {
+      this.comicTrack.style.transform = `translateX(${-index * 100}%)`;
+    }
+
+    // Update Dots & Navigation states
+    this.updateDots();
+    this.updateNavButtons();
+  }
+
+  updateDots() {
+    if (!this.readerPageDots) return;
+    const dots = this.readerPageDots.querySelectorAll('.reader-dot');
+    dots.forEach((dot, idx) => {
       dot.classList.toggle('active', idx === this.currentPageIndex);
     });
+  }
 
-    if (animateSound) {
-      audio.playTick();
+  updateNavButtons() {
+    if (this.btnPrev) {
+      this.btnPrev.style.opacity = this.currentPageIndex === 0 ? '0.3' : '1';
+      this.btnPrev.style.pointerEvents = this.currentPageIndex === 0 ? 'none' : 'auto';
+    }
+    if (this.btnNext) {
+      this.btnNext.style.opacity = this.currentPageIndex === this.totalPages - 1 ? '0.3' : '1';
     }
   }
 
@@ -419,6 +427,7 @@ export class ComicReaderEngine {
   // --- 3D Touch Gesture Controllers with Live Page Lift & Tap Zones ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
+    this.lastTouchTime = Date.now();
     this.touchStartTime = Date.now();
     this.touchStartX = e.touches[0].clientX;
     this.touchStartY = e.touches[0].clientY;
@@ -446,6 +455,7 @@ export class ComicReaderEngine {
   handleTouchEnd(e) {
     if (!this.isSwiping) return;
     this.isSwiping = false;
+    this.lastTouchTime = Date.now();
     const deltaX = this.touchStartX - this.touchCurrentX;
     const currentY = e.changedTouches[0]?.clientY || this.touchStartY;
     const deltaY = Math.abs(this.touchStartY - currentY);
@@ -465,7 +475,7 @@ export class ComicReaderEngine {
         this.prevPage(); // Swipe Right -> Turn Page Prev
       }
     } 
-    // 2. Instant Single Tap Detected (No long press needed, taps anywhere toggle options)
+    // 2. Instant Single Tap Detected on mobile
     else if (elapsed < 600 && Math.abs(deltaX) < 25 && deltaY < 25) {
       this.toggleHUD();
     }
@@ -473,6 +483,9 @@ export class ComicReaderEngine {
 
   // --- Mouse Drag & Click Gestures for Desktop ---
   handleMouseDown(e) {
+    // If recently triggered by touch, ignore synthetic mouse event
+    if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
+
     this.isMouseDown = true;
     this.touchStartTime = Date.now();
     this.touchStartX = e.clientX;
@@ -499,6 +512,10 @@ export class ComicReaderEngine {
   handleMouseUp(e) {
     if (!this.isMouseDown) return;
     this.isMouseDown = false;
+
+    // If recently triggered by touch, ignore synthetic mouse event
+    if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
+
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = Math.abs(this.touchStartY - e.clientY);
     const elapsed = Date.now() - this.touchStartTime;
