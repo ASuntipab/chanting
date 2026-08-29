@@ -1,4 +1,4 @@
-﻿package com.kaisoft.chant;
+package com.kaisoft.chant;
 
 import com.getcapacitor.BridgeActivity;
 

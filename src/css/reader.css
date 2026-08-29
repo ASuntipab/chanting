@@ -46,7 +46,9 @@
 .reader-title-box {
   display: flex;
   flex-direction: column;
-  max-width: 40%;
+  flex: 1;
+  margin-left: 12px;
+  overflow: hidden;
 }
 
 .reader-title {
@@ -544,24 +546,21 @@ body.theme-cosmic .verse-pali {
   border-radius: var(--radius-full);
 }
 
-.btn-dock-theme {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: transparent;
-  border: 1px solid transparent;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* Finished Chanting Overlay Button */
+.finish-chant-overlay {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 50;
 }
-
-.btn-dock-theme:hover, .btn-dock-theme:active {
-  background: var(--bg-card);
-  border-color: var(--accent-gold);
-  transform: scale(1.15);
+.finish-chant-overlay.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .reader-chant-counter {

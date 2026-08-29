@@ -36,6 +36,10 @@
       </div>
 
       <div class="header-actions">
+        <!-- Theme Toggle Button -->
+        <button id="btnToggleTheme" class="btn-icon" title="สลับธีม">
+          🎨
+        </button>
         <!-- Backup / Restore Button -->
         <button id="btnOpenBackup" class="btn-icon" title="สำรอง / นำเข้าไฟล์บทสวดมนต์ (Export & Import)">
           💾
@@ -163,6 +167,13 @@
       </div>
       
       <button id="btnNextPage" class="comic-nav-btn next" aria-label="หน้าถัดไป">›</button>
+
+      <!-- Finished Chanting Pop-up Button -->
+      <div id="finishChantOverlay" class="finish-chant-overlay">
+        <button id="btnFinishChantBig" class="btn-primary" style="padding: 14px 28px; font-size: 1.1rem; border-radius: 30px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);">
+          🔔 อ่านจบแล้ว (บันทึกการสวด)
+        </button>
+      </div>
     </div>
 
     <!-- Reader Bottom Floating Bar (Auto-hiding HUD) - Fast Jump & Controls -->
@@ -186,14 +197,6 @@
           <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
           <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
           <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
-        </div>
-
-        <!-- Quick Theme Switcher directly in Bottom Bar -->
-        <div class="reader-theme-dock">
-          <button class="btn-dock-theme" data-set-theme="cosmic" title="ธีมจักรวาล">🌌</button>
-          <button class="btn-dock-theme" data-set-theme="gold" title="ธีมทองอร่าม">🌟</button>
-          <button class="btn-dock-theme" data-set-theme="parchment" title="ธีมใบลาน">📜</button>
-          <button class="btn-dock-theme" data-set-theme="midnight" title="ธีมราตรีสงบ">🌙</button>
         </div>
 
         <!-- Quick Chant Counter with Bell -->

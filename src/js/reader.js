@@ -118,15 +118,21 @@ export class ComicReaderEngine {
       this.scheduleAutoHide(5000);
     });
 
-    // Theme Switcher directly in Bottom HUD Dock
-    this.readerBottomBar?.querySelectorAll('[data-set-theme]')?.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const theme = btn.dataset.setTheme;
-        document.body.className = `theme-${theme}`;
-        storage.saveSettings({ theme });
-        this.scheduleAutoHide(5000);
-      });
+    // Finish Chanting Big Button (On last page)
+    this.btnFinishChantBig = document.getElementById('btnFinishChantBig');
+    this.btnFinishChantBig?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!this.currentPrayer) return;
+      audio.playBell(648);
+      nativeBridge.hapticSuccess();
+      const count = storage.incrementPrayerCount(this.currentPrayer.id);
+      this.updateChantDisplay(count);
+      
+      // Close reader or show success toast
+      window.tammaApp.showToast(`✨ อนุโมทนาบุญ! คุณสวดจบแล้ว ${count} ครั้ง`);
+      
+      // Auto close after short delay
+      setTimeout(() => this.close(), 1500);
     });
 
     // Prevent clicks inside Toolbar & Bottom bar from toggling page
@@ -433,13 +439,14 @@ export class ComicReaderEngine {
       this.readerPageBadge.textContent = `${index + 1} / ${this.totalViewportPages}`;
     }
 
-    // Update "มีต่อ ▼" Indicator
-    if (this.moreIndicator) {
-      if (index < this.totalViewportPages - 1) {
-        this.moreIndicator.classList.remove('hidden');
-      } else {
-        this.moreIndicator.classList.add('hidden');
-      }
+    // Update "มีต่อ ▼" Indicator & Finish Button
+    const finishOverlay = document.getElementById('finishChantOverlay');
+    if (index < this.totalViewportPages - 1) {
+      if (this.moreIndicator) this.moreIndicator.classList.remove('hidden');
+      if (finishOverlay) finishOverlay.classList.remove('show');
+    } else {
+      if (this.moreIndicator) this.moreIndicator.classList.add('hidden');
+      if (finishOverlay) finishOverlay.classList.add('show');
     }
 
     this.updateDots();
