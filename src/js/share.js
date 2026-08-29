@@ -32,7 +32,7 @@ export class DhammaShareEngine {
 
     const shareData = {
       title: `${prayer.title} - บทสวดมนต์`,
-      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\n(ฉันสวดสะสมแล้ว ${count} จบ, ต่อเนื่อง ${streak} วัน)\n\nกดลิงก์ด้านล่างเพื่อเพิ่มเข้าคลังบทสวดมนต์ของคุณได้ฟรี:`,
+      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\nกดลิงก์ด้านล่างเพื่อเพิ่มเข้าคลังบทสวดมนต์ของคุณได้ฟรี:`,
       url: shareUrl
     };
 
@@ -173,7 +173,7 @@ export class DhammaShareEngine {
 
     ctx.font = 'bold 22px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
-    ctx.fillText(`✨ สวดมนต์สะสม ${count} จบ • ต่อเนื่อง ${streak} วัน ✨`, width / 2, badgeY + 42);
+    ctx.fillText(`✨ ร่วมเจริญพระพุทธมนต์ สะสมบุญบารมี ✨`, width / 2, badgeY + 42);
 
     ctx.font = '16px "Sarabun", sans-serif';
     ctx.fillStyle = '#e5e7eb';

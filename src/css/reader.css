@@ -584,3 +584,99 @@ body.theme-cosmic .verse-pali {
   background: var(--accent-gold);
   color: #120e0b;
 }
+
+/* ==========================================================================
+   Parchment Theme Reader Styles (คัมภีร์ใบลาน คมชัดสูง สบายตา)
+   ========================================================================== */
+body.theme-parchment .reader-view {
+  background: radial-gradient(ellipse at 50% 0%, #fbf6ec 0%, #f4ead8 50%, #e8ddca 100%);
+}
+
+body.theme-parchment .reader-toolbar {
+  background: rgba(250, 245, 237, 0.95);
+  border-bottom: 1px solid rgba(140, 95, 35, 0.25);
+  box-shadow: 0 4px 16px rgba(90, 60, 30, 0.08);
+}
+
+body.theme-parchment .reader-title {
+  color: #684105;
+}
+
+body.theme-parchment .reader-subtitle {
+  color: #7a634e;
+}
+
+body.theme-parchment .page-frame {
+  background: #fbf6ec;
+  border: 1px solid rgba(160, 120, 60, 0.35);
+  box-shadow:
+    0 15px 35px rgba(90, 60, 30, 0.15),
+    inset 0 0 40px rgba(210, 185, 140, 0.25),
+    inset 3px 0 10px rgba(120, 85, 45, 0.15);
+}
+
+body.theme-parchment .page-frame::before {
+  background: linear-gradient(to right, rgba(120, 85, 45, 0.12) 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+}
+
+body.theme-parchment .page-frame::after {
+  color: #8c5812;
+  opacity: 0.85;
+}
+
+body.theme-parchment .page-verse-header {
+  color: #7c4a03;
+  border-bottom: 1px dashed rgba(140, 95, 35, 0.3);
+}
+
+body.theme-parchment .page-verse-flow {
+  color: #2b1d0c;
+  text-shadow: none !important;
+}
+
+body.theme-parchment .verse-pali {
+  color: #7c2d12;
+  font-weight: 700;
+  text-shadow: none !important;
+}
+
+body.theme-parchment .verse-thai {
+  color: #4a3420;
+  text-shadow: none !important;
+}
+
+body.theme-parchment .reader-bottom-bar {
+  background: rgba(250, 245, 237, 0.95);
+  border: 1px solid rgba(140, 95, 35, 0.25);
+  box-shadow: 0 8px 32px rgba(90, 60, 30, 0.18);
+}
+
+body.theme-parchment .btn-scrubber-nav {
+  background: rgba(140, 95, 35, 0.1);
+  color: #5a3c18;
+  border-color: rgba(140, 95, 35, 0.25);
+}
+
+body.theme-parchment .reader-scrubber-badge {
+  color: #5a3c18;
+  background: rgba(140, 95, 35, 0.1);
+}
+
+body.theme-parchment .reader-font-dock {
+  background: rgba(140, 95, 35, 0.1);
+  border-color: rgba(140, 95, 35, 0.2);
+}
+
+body.theme-parchment .btn-dock-font {
+  color: #5a3c18;
+}
+
+body.theme-parchment .font-dock-badge {
+  color: #5a3c18;
+}
+
+body.theme-parchment .reader-chant-counter {
+  background: rgba(154, 101, 20, 0.12);
+  border-color: rgba(154, 101, 20, 0.35);
+  color: #684105;
+}
