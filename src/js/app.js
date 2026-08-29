@@ -268,6 +268,14 @@ class TammaApp {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  refreshCurrentViews() {
+    this.renderLibrary();
+    tracker.render();
+    if (this.activeTab === 'favorites') {
+      this.renderFavorites();
+    }
+  }
+
   renderLibrary() {
     const container = document.getElementById('prayerGrid');
     if (!container) return;
