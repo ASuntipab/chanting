@@ -4,7 +4,9 @@
  * and other essential Thai Buddhist Chants with Pali + Thai Translations
  */
 
-export const DEFAULT_PRAYERS = [
+import { EXTRA_BUDDHIST_PRAYERS } from './extra-buddhist-prayers.js';
+
+const BASE_PRAYERS = [
   // =========================================================================
   // 1. ชุดสวดมนต์ประจำวัน หลวงพ่อจรัญ วัดอัมพวัน (ฉบับสมบูรณ์)
   // =========================================================================
@@ -603,3 +605,5 @@ export const DEFAULT_PRAYERS = [
     ]
   }
 ];
+
+export const DEFAULT_PRAYERS = [...BASE_PRAYERS, ...EXTRA_BUDDHIST_PRAYERS];
