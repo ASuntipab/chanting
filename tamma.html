@@ -135,19 +135,22 @@
         <p style="font-size: 0.85rem; color: var(--text-muted);">พระวินัยปิฎก (๑-๘), พระสุตตันตปิฎก (๙-๓๓), พระอภิธรรมปิฎก (๓๔-๔๕)</p>
       </div>
 
-      <!-- Tipitaka Filter Pills & Search -->
-      <div class="search-container" style="margin-bottom: 12px;">
+      <!-- Compact 1-Line Tipitaka Search & Pitaka Dropdown -->
+      <div class="search-container">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
           <input type="text" id="tipitakaSearchInput" class="search-input" placeholder="ค้นหาพระไตรปิฎก เช่น ธรรมบท, มหาปรินิพพาน, ปาราชิก...">
         </div>
-      </div>
-
-      <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px;">
-        <button class="filter-pill tipitaka-pill active" data-pitaka="all">✨ ทั้งหมด (๔๕ เล่ม)</button>
-        <button class="filter-pill tipitaka-pill" data-pitaka="พระวินัยปิฎก">📜 พระวินัย (๘)</button>
-        <button class="filter-pill tipitaka-pill" data-pitaka="พระสุตตันตปิฎก">📖 พระสุตตันตะ (๒๕)</button>
-        <button class="filter-pill tipitaka-pill" data-pitaka="พระอภิธรรมปิฎก">💎 พระอภิธรรม (๑๒)</button>
+        <!-- Native Styled Pitaka Dropdown -->
+        <div class="category-dropdown-wrap">
+          <select id="tipitakaSelect" class="category-select" title="เลือกปิฎก">
+            <option value="all">✨ ทุกปิฎก (๔๕ เล่ม)</option>
+            <option value="พระวินัยปิฎก">📜 พระวินัยปิฎก (๘ เล่ม)</option>
+            <option value="พระสุตตันตปิฎก">📖 พระสุตตันตปิฎก (๒๕ เล่ม)</option>
+            <option value="พระอภิธรรมปิฎก">💎 พระอภิธรรมปิฎก (๑๒ เล่ม)</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
       </div>
 
       <!-- Tipitaka Volumes Grid -->

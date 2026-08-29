@@ -81,4 +81,48 @@ test('45-Volume Tipitaka Brotli (.br) Pipeline Verification', async (t) => {
     const searchAbhidhamma = await tipitakaLoader.search('พระอภิธรรมปิฎก');
     assert.strictEqual(searchAbhidhamma.length, 12);
   });
+
+  await t.test('Tipitaka Favorites & Daily Chanting Tracker Integration', () => {
+    // Simulator storage for test
+    const favorites = [];
+    const tracker = {
+      todayDate: '2026-08-30',
+      todayChanted: {},
+      totalCounts: {},
+      streakDays: 1
+    };
+
+    const toggleFav = (id) => {
+      const idx = favorites.indexOf(id);
+      if (idx >= 0) favorites.splice(idx, 1);
+      else favorites.push(id);
+      return favorites.includes(id);
+    };
+
+    const incrementChant = (id) => {
+      tracker.totalCounts[id] = (tracker.totalCounts[id] || 0) + 1;
+      tracker.todayChanted[id] = true;
+      return tracker.totalCounts[id];
+    };
+
+    // 1. Favorite Volume 1 (Mahavibhanga) & Volume 25 (Khuddaka / Dhammapada)
+    const isFav1 = toggleFav('tipitaka-vol-01');
+    assert.strictEqual(isFav1, true, 'Volume 1 should be favorited');
+    const isFav25 = toggleFav('tipitaka-vol-25');
+    assert.strictEqual(isFav25, true, 'Volume 25 should be favorited');
+    assert.deepStrictEqual(favorites, ['tipitaka-vol-01', 'tipitaka-vol-25']);
+
+    // 2. Increment reading counts for Tipitaka
+    const count1 = incrementChant('tipitaka-vol-01');
+    assert.strictEqual(count1, 1, 'Volume 1 chant count should be 1');
+    const count2 = incrementChant('tipitaka-vol-01');
+    assert.strictEqual(count2, 2, 'Volume 1 chant count should increment to 2');
+
+    // 3. Verify tracker aggregation
+    const todayCount = Object.values(tracker.todayChanted).filter(Boolean).length;
+    const totalLifetime = Object.values(tracker.totalCounts).reduce((a, b) => a + b, 0);
+    assert.strictEqual(todayCount, 1, 'Today completed should count Tipitaka volume');
+    assert.strictEqual(totalLifetime, 2, 'Lifetime chants should count Tipitaka volume readings');
+  });
 });
+

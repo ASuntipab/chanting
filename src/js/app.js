@@ -126,14 +126,11 @@ class TammaApp {
       this.renderTipitaka();
     });
 
-    // Tipitaka Filter Pills
-    document.querySelectorAll('.tipitaka-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        document.querySelectorAll('.tipitaka-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        this.tipitakaPitaka = pill.dataset.pitaka || 'all';
-        this.renderTipitaka();
-      });
+    // Tipitaka Pitaka Select Dropdown
+    const tipitakaSelect = document.getElementById('tipitakaSelect');
+    tipitakaSelect?.addEventListener('change', (e) => {
+      this.tipitakaPitaka = e.target.value || 'all';
+      this.renderTipitaka();
     });
 
     // Suggest / Request Prayer Modal Triggers (+)
@@ -554,18 +551,44 @@ class TammaApp {
     this.renderPrayerCards(container, prayers);
   }
 
-  renderFavorites() {
+  async renderFavorites() {
     const container = document.getElementById('favoritesGrid');
     if (!container) return;
 
     const favIds = storage.getFavorites();
     const allPrayers = storage.getPrayers();
-    const favPrayers = allPrayers.filter(p => favIds.includes(p.id));
+    let favPrayers = allPrayers.filter(p => favIds.includes(p.id));
+
+    // Also include favorited Tipitaka volumes
+    const tipitakaFavIds = favIds.filter(id => id.startsWith('tipitaka-vol-'));
+    if (tipitakaFavIds.length > 0) {
+      try {
+        const index = await tipitakaLoader.loadIndex();
+        (index.volumes || []).forEach(vol => {
+          const volId = `tipitaka-vol-${String(vol.volume).padStart(2, '0')}`;
+          if (tipitakaFavIds.includes(volId) && !favPrayers.some(p => p.id === volId)) {
+            favPrayers.push({
+              id: volId,
+              isTipitaka: true,
+              volumeNumber: vol.volume,
+              title: `พระไตรปิฎก เล่มที่ ${vol.volume}: ${vol.bookTitle}`,
+              category: vol.pitaka,
+              author: `พระไตรปิฎก (${vol.bookPali})`,
+              description: vol.description,
+              status: 'approved',
+              pages: []
+            });
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to load Tipitaka index in favorites:', err);
+      }
+    }
 
     const favCountSubtitle = document.querySelector('#viewFavorites p');
     if (favCountSubtitle) {
       const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
-      favCountSubtitle.textContent = `บทสวดมนต์ที่คุณบันทึกไว้เปิดสวดเป็นประจำ (${toThai(favPrayers.length)} บท)`;
+      favCountSubtitle.textContent = `บทสวดมนต์และพระไตรปิฎกที่คุณบันทึกไว้ (${toThai(favPrayers.length)} รายการ)`;
     }
 
     if (favPrayers.length === 0) {
@@ -573,7 +596,7 @@ class TammaApp {
         <div style="grid-column: 1/-1; text-align: center; padding: 48px 16px; color: var(--text-muted);">
           <div style="font-size: 3rem; margin-bottom: 10px;">💖</div>
           <div style="font-family: var(--font-header); font-size: 1.1rem;">ยังไม่มีรายการโปรด</div>
-          <div style="font-size: 0.85rem; margin-top: 4px;">กดไอคอนหัวใจที่บทสวดเพื่อบันทึกเป็นบทสวดประจำตัว</div>
+          <div style="font-size: 0.85rem; margin-top: 4px;">กดไอคอนหัวใจที่บทสวดหรือพระไตรปิฎกเพื่อบันทึกเป็นรายการโปรด</div>
         </div>
       `;
       return;
@@ -589,7 +612,6 @@ class TammaApp {
     prayers.forEach(prayer => {
       const isFav = storage.isFavorite(prayer.id);
       const chantCount = trackerData.totalCounts[prayer.id] || 0;
-      const pageCount = prayer.pages?.length || 1;
 
       const card = document.createElement('div');
       card.className = 'prayer-card';
@@ -619,10 +641,14 @@ class TammaApp {
         </div>
       `;
 
-      // Card Click -> Open Comic Reader
+      // Card Click -> Open Comic Reader or Tipitaka
       card.addEventListener('click', (e) => {
         if (e.target.closest('.card-fav-btn') || e.target.closest('.btn-card-share')) return;
-        this.reader.open(prayer);
+        if (prayer.isTipitaka && prayer.volumeNumber) {
+          this.openTipitakaVolume(prayer.volumeNumber);
+        } else {
+          this.reader.open(prayer);
+        }
       });
 
       // Favorite toggle
@@ -634,6 +660,7 @@ class TammaApp {
         e.currentTarget.textContent = active ? '❤️' : '🤍';
         this.showToast(active ? `เพิ่ม "${prayer.title}" ในรายการโปรดแล้ว` : 'นำออกจากรายการโปรด');
         if (this.activeTab === 'favorites') this.renderFavorites();
+        tracker.render();
       });
 
       // Share button
@@ -679,9 +706,14 @@ class TammaApp {
       }
 
       container.innerHTML = '';
+      const trackerData = storage.getTrackerData();
+
       volumes.forEach(vol => {
         const card = document.createElement('div');
         card.className = 'prayer-card';
+        const volId = `tipitaka-vol-${String(vol.volume).padStart(2, '0')}`;
+        const isFav = storage.isFavorite(volId);
+        const chantCount = trackerData.totalCounts[volId] || 0;
         
         let pitakaBadgeClass = 'rgba(218, 165, 32, 0.15)';
         let pitakaColor = 'var(--accent-gold)';
@@ -699,7 +731,12 @@ class TammaApp {
               <span class="card-category" style="color: ${pitakaColor}; background: ${pitakaBadgeClass}; border: 1px solid ${pitakaColor};">
                 ${vol.pitaka} • เล่มที่ ${vol.volume}
               </span>
-              <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">⚡ .br (${vol.brSizeKb} KB)</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">⚡ .br (${vol.brSizeKb} KB)</span>
+                <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${volId}" aria-label="รายการโปรด">
+                  ${isFav ? '❤️' : '🤍'}
+                </button>
+              </div>
             </div>
             <div class="card-title">${vol.bookTitle}</div>
             <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 6px; font-style: italic;">${vol.bookPali}</div>
@@ -708,15 +745,47 @@ class TammaApp {
           <div class="card-footer" style="margin-top: 12px;">
             <div class="card-stats">
               <span class="card-stat-item">📑 ${vol.totalSections} กัณฑ์/สูตร</span>
+              <span class="card-stat-item" style="margin-left: 8px;">🔔 ${chantCount} จบ</span>
             </div>
-            <button class="btn-primary btn-read-card" style="padding: 4px 14px; font-size: 0.85rem;">
-              📖 เปิดอ่าน
-            </button>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-icon btn-card-share" data-id="${volId}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์">
+                📤
+              </button>
+              <button class="btn-primary btn-read-card" style="padding: 4px 14px; font-size: 0.85rem;">
+                📖 เปิดอ่าน
+              </button>
+            </div>
           </div>
         `;
 
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.card-fav-btn') || e.target.closest('.btn-card-share')) return;
           this.openTipitakaVolume(vol.volume);
+        });
+
+        // Favorite Toggle
+        card.querySelector('.card-fav-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          audio.playTick();
+          const active = storage.toggleFavorite(volId);
+          e.currentTarget.classList.toggle('active', active);
+          e.currentTarget.textContent = active ? '❤️' : '🤍';
+          this.showToast(active ? `เพิ่ม "พระไตรปิฎก เล่มที่ ${vol.volume}" ในรายการโปรดแล้ว` : 'นำออกจากรายการโปรด');
+          if (this.activeTab === 'favorites') this.renderFavorites();
+          tracker.render();
+        });
+
+        // Share button
+        card.querySelector('.btn-card-share')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const prayerObj = {
+            id: volId,
+            title: `พระไตรปิฎก เล่มที่ ${vol.volume}: ${vol.bookTitle}`,
+            category: vol.pitaka,
+            author: `พระไตรปิฎก (${vol.bookPali})`,
+            description: vol.description
+          };
+          this.openShareModal(prayerObj);
         });
 
         container.appendChild(card);
