@@ -316,10 +316,6 @@ export class ComicReaderEngine {
       if (page.verseTitle && rawPages.length > 1) {
         const titleEl = document.createElement('div');
         titleEl.className = 'verse-section-title';
-        titleEl.style.fontSize = '0.92rem';
-        titleEl.style.color = 'var(--accent-gold)';
-        titleEl.style.opacity = '0.85';
-        titleEl.style.marginBottom = '4px';
         titleEl.textContent = page.verseTitle;
         section.appendChild(titleEl);
       }

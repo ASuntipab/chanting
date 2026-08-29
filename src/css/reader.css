@@ -227,7 +227,7 @@ body.theme-cosmic .verse-pali {
 .page-verse-header {
   text-align: center;
   font-family: var(--font-header);
-  font-size: 1.15rem;
+  font-size: calc(var(--reader-font-size, 1.15rem) * 1.05);
   color: var(--accent-gold);
   margin: 0 auto 12px auto;
   max-width: 920px;
@@ -275,6 +275,17 @@ body.theme-cosmic .verse-pali {
   padding: 4px 0;
 }
 
+.verse-section-title {
+  font-family: var(--font-header);
+  font-size: calc(var(--reader-font-size, 1.15rem) * 0.82);
+  color: var(--accent-gold);
+  opacity: 0.9;
+  margin-bottom: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
 .verse-section-divider {
   width: 48px;
   height: 1px;
@@ -316,12 +327,12 @@ body.theme-cosmic .verse-pali {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 0.82rem;
+  font-size: calc(var(--reader-font-size, 1.15rem) * 0.72);
   font-family: var(--font-header);
   color: var(--accent-gold);
   background: rgba(212, 175, 55, 0.15);
   border: 1px solid rgba(212, 175, 55, 0.35);
-  padding: 3px 14px;
+  padding: 4px 16px;
   border-radius: var(--radius-full);
   margin-bottom: 4px;
   cursor: pointer;
@@ -343,7 +354,7 @@ body.theme-cosmic .verse-pali {
 
 .page-counter-badge {
   text-align: center;
-  font-size: 0.8rem;
+  font-size: calc(var(--reader-font-size, 1.15rem) * 0.68);
   color: var(--text-muted);
 }
 
