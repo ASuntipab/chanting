@@ -98,9 +98,9 @@ export class DhammaShareEngine {
 
     // 4. Header & App Branding
     ctx.textAlign = 'center';
-    ctx.font = 'bold 20px "Prompt", sans-serif';
+    ctx.font = 'bold 22px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
-    ctx.fillText('❖ บทสวดมนต์ • TAMMA OS ❖', width / 2, 85);
+    ctx.fillText('❖ บทสวดมนต์ ❖', width / 2, 85);
 
     // 5. Prayer Title (Auto-scaling & Word Wrapping)
     const titleText = prayer.title || 'บทสวดมนต์อันเป็นมงคล';
