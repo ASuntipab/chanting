@@ -208,7 +208,7 @@ class DhammaStorageEngine {
   // --- Settings API ---
   getSettings() {
     return this.get(STORAGE_KEYS.SETTINGS, {
-      theme: 'gold',
+      theme: 'cosmic',
       fontSize: 1.15,
       soundEnabled: true
     });

@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Tamma OS - Comic-Book Style E-Book Reader Engine
-   Horizontal Touch Swipe, 3D Page Turn, Typography & Immersive Reading
+   Tamma OS - 3D Realistic Book Page Flip Reader Engine
+   Authentic Book Spine, Page Curl Dynamics & Cosmic Sanctuary Aesthetics
    ========================================================================== */
 
 .reader-view {
@@ -63,7 +63,7 @@
   gap: 8px;
 }
 
-/* Comic Book Stage & Viewport */
+/* 3D Book Stage & Viewport */
 .comic-stage {
   flex: 1;
   position: relative;
@@ -71,15 +71,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1200px;
+  perspective: 2000px;
+  perspective-origin: 50% 50%;
 }
 
 .comic-track {
   display: flex;
   width: 100%;
   height: 100%;
-  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
+  transform-style: preserve-3d;
 }
 
 .comic-page {
@@ -89,12 +91,13 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 24px 20px 80px 20px;
+  padding: 20px 16px 80px 16px;
   position: relative;
   user-select: text;
+  transform-style: preserve-3d;
 }
 
-/* E-Book Page Card / Frame */
+/* 3D Realistic Book Leaf Frame */
 .page-frame {
   width: 100%;
   max-width: 720px;
@@ -105,37 +108,98 @@
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 28px 24px;
+  padding: 30px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: var(--shadow-md), 0 0 30px rgba(0, 0, 0, 0.4);
   position: relative;
   overflow-y: auto;
   scrollbar-width: thin;
+  
+  /* 3D Book Page Spine & Shadows */
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.6),
+    inset 0 0 40px rgba(0, 0, 0, 0.3),
+    inset 4px 0 10px rgba(0, 0, 0, 0.4);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
+  will-change: transform, box-shadow;
 }
 
-/* Comic Decorative Corner Borders */
-.page-frame::before,
+/* Book Spine Gutter Light & Shadow Overlay */
+.page-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  pointer-events: none;
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+}
+
+/* Decorative Cosmic Corner Ornaments */
 .page-frame::after {
   content: '❖';
   position: absolute;
+  top: 12px;
+  right: 14px;
   color: var(--accent-gold);
   font-size: 1.1rem;
   opacity: 0.6;
 }
-.page-frame::before { top: 10px; left: 12px; }
-.page-frame::after { bottom: 10px; right: 12px; }
+
+/* 3D Turning Animations (เปิดหนังสือสมจริง) */
+.comic-page.turning-left .page-frame {
+  transform: rotateY(-35deg) scale(0.96) translateZ(20px);
+  box-shadow: -25px 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-gold-glow);
+}
+
+.comic-page.turning-right .page-frame {
+  transform: rotateY(35deg) scale(0.96) translateZ(20px);
+  transform-origin: right center;
+  box-shadow: 25px 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-gold-glow);
+}
+
+/* Cosmic Reader Variations */
+body.theme-cosmic .reader-view {
+  background: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0d122e 45%, #050714 100%);
+}
+
+body.theme-cosmic .page-frame {
+  background: rgba(14, 21, 48, 0.86);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  box-shadow:
+    0 15px 40px rgba(2, 6, 23, 0.85),
+    0 0 35px rgba(251, 191, 36, 0.22),
+    0 0 60px rgba(99, 102, 241, 0.25),
+    inset 0 0 30px rgba(129, 140, 248, 0.15);
+}
+
+body.theme-cosmic .page-frame::after {
+  content: '✦';
+  color: var(--accent-gold);
+  text-shadow: 0 0 10px var(--accent-gold);
+  opacity: 0.95;
+}
+
+body.theme-cosmic .verse-pali {
+  color: #fde047;
+  text-shadow: 0 0 14px rgba(253, 224, 71, 0.4);
+}
 
 /* Page Content Typography */
 .page-verse-header {
   text-align: center;
   font-family: var(--font-header);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: var(--accent-gold);
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 1px dashed var(--border-subtle);
+  letter-spacing: 0.5px;
 }
 
 .page-verse-body {
@@ -144,6 +208,7 @@
   color: var(--text-primary);
   text-align: center;
   margin: auto 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .verse-pali {
@@ -168,13 +233,13 @@
   padding-top: 8px;
 }
 
-/* Floating Navigation Arrows (Desktop / Visual Cue) */
+/* Floating Navigation Arrows */
 .comic-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: var(--radius-full);
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
@@ -182,12 +247,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   cursor: pointer;
   z-index: 15;
   transition: all 0.2s ease;
   backdrop-filter: var(--glass-blur);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .comic-nav-btn:hover {
@@ -198,10 +263,10 @@
   box-shadow: var(--shadow-gold);
 }
 
-.comic-nav-btn.prev { left: 16px; }
-.comic-nav-btn.next { right: 16px; }
+.comic-nav-btn.prev { left: 14px; }
+.comic-nav-btn.next { right: 14px; }
 
-/* Floating Reader Bottom Bar (Page Indicator & Chanting Counter) */
+/* Floating Reader Bottom Bar */
 .reader-bottom-bar {
   position: absolute;
   bottom: 16px;
@@ -280,7 +345,7 @@
   pointer-events: none;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-md), var(--shadow-gold);
-  min-width: 280px;
+  min-width: 300px;
 }
 
 .reader-settings-drawer.open {

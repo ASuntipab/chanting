@@ -252,13 +252,37 @@ export class ComicReaderEngine {
     }
   }
 
-  goToPage(index, animateSound = true) {
+  goToPage(index, animateSound = true, direction = 'next') {
     if (index < 0 || index >= this.totalPages) return;
+
+    const oldIndex = this.currentPageIndex;
+    const allPages = this.comicTrack.querySelectorAll('.comic-page');
+    const oldPage = allPages[oldIndex];
+    const newPage = allPages[index];
+
+    // Apply 3D Page Turning class
+    if (oldPage && oldIndex !== index) {
+      const turnClass = direction === 'next' ? 'turning-left' : 'turning-right';
+      oldPage.classList.add(turnClass);
+      setTimeout(() => {
+        oldPage.classList.remove('turning-left', 'turning-right');
+      }, 400);
+    }
+
     this.currentPageIndex = index;
 
     // Shift comic track with 3D transform
     const offsetPercent = -(this.currentPageIndex * 100);
     this.comicTrack.style.transform = `translateX(${offsetPercent}%)`;
+
+    // Reset any manual inline drag transforms on page frames
+    allPages.forEach(p => {
+      const frame = p.querySelector('.page-frame');
+      if (frame) {
+        frame.style.transform = '';
+        frame.style.boxShadow = '';
+      }
+    });
 
     // Update Nav buttons
     if (this.btnPrev) this.btnPrev.style.visibility = this.currentPageIndex === 0 ? 'hidden' : 'visible';
@@ -277,7 +301,7 @@ export class ComicReaderEngine {
 
   nextPage() {
     if (this.currentPageIndex < this.totalPages - 1) {
-      this.goToPage(this.currentPageIndex + 1);
+      this.goToPage(this.currentPageIndex + 1, true, 'next');
     } else {
       // Reached the end! Play celebration bell
       audio.playBell(648);
@@ -286,11 +310,11 @@ export class ComicReaderEngine {
 
   prevPage() {
     if (this.currentPageIndex > 0) {
-      this.goToPage(this.currentPageIndex - 1);
+      this.goToPage(this.currentPageIndex - 1, true, 'prev');
     }
   }
 
-  // --- Touch Gesture Controllers ---
+  // --- 3D Touch Gesture Controllers with Live Page Lift ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
     this.touchStartX = e.touches[0].clientX;
@@ -302,6 +326,18 @@ export class ComicReaderEngine {
   handleTouchMove(e) {
     if (!this.isSwiping || e.touches.length !== 1) return;
     this.touchCurrentX = e.touches[0].clientX;
+
+    const deltaX = this.touchStartX - this.touchCurrentX;
+    const allPages = this.comicTrack.querySelectorAll('.comic-page');
+    const curPage = allPages[this.currentPageIndex];
+    const frame = curPage?.querySelector('.page-frame');
+
+    if (frame && Math.abs(deltaX) > 10) {
+      // Rotate 3D page dynamically with finger movement
+      const angle = Math.max(Math.min((deltaX / window.innerWidth) * -60, 45), -45);
+      const lift = Math.min(Math.abs(deltaX) * 0.2, 25);
+      frame.style.transform = `rotateY(${angle}deg) translateZ(${lift}px) scale(0.98)`;
+    }
   }
 
   handleTouchEnd(e) {
@@ -310,12 +346,18 @@ export class ComicReaderEngine {
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = Math.abs(this.touchStartY - (e.changedTouches[0]?.clientY || this.touchStartY));
 
+    // Reset frame tilt
+    const allPages = this.comicTrack.querySelectorAll('.comic-page');
+    const curPage = allPages[this.currentPageIndex];
+    const frame = curPage?.querySelector('.page-frame');
+    if (frame) frame.style.transform = '';
+
     // Horizontal swipe dominant
     if (Math.abs(deltaX) > this.swipeThreshold && Math.abs(deltaX) > deltaY) {
       if (deltaX > 0) {
-        this.nextPage(); // Swipe Left -> Next Page
+        this.nextPage(); // Swipe Left -> Turn Page Next
       } else {
-        this.prevPage(); // Swipe Right -> Prev Page
+        this.prevPage(); // Swipe Right -> Turn Page Prev
       }
     }
   }
@@ -331,12 +373,29 @@ export class ComicReaderEngine {
   handleMouseMove(e) {
     if (!this.isMouseDown) return;
     this.touchCurrentX = e.clientX;
+
+    const deltaX = this.touchStartX - this.touchCurrentX;
+    const allPages = this.comicTrack.querySelectorAll('.comic-page');
+    const curPage = allPages[this.currentPageIndex];
+    const frame = curPage?.querySelector('.page-frame');
+
+    if (frame && Math.abs(deltaX) > 10) {
+      const angle = Math.max(Math.min((deltaX / window.innerWidth) * -50, 40), -40);
+      const lift = Math.min(Math.abs(deltaX) * 0.15, 20);
+      frame.style.transform = `rotateY(${angle}deg) translateZ(${lift}px) scale(0.98)`;
+    }
   }
 
   handleMouseUp(e) {
     if (!this.isMouseDown) return;
     this.isMouseDown = false;
     const deltaX = this.touchStartX - this.touchCurrentX;
+
+    const allPages = this.comicTrack.querySelectorAll('.comic-page');
+    const curPage = allPages[this.currentPageIndex];
+    const frame = curPage?.querySelector('.page-frame');
+    if (frame) frame.style.transform = '';
+
     if (Math.abs(deltaX) > this.swipeThreshold) {
       if (deltaX > 0) this.nextPage();
       else this.prevPage();

@@ -10,6 +10,7 @@ import { tracker } from './tracker.js';
 import { scraper } from './scraper.js';
 import { shareEngine } from './share.js';
 import { adminEngine } from './admin.js';
+import { starfield } from './starfield.js';
 
 class TammaApp {
   constructor() {
@@ -20,26 +21,29 @@ class TammaApp {
   }
 
   init() {
-    // 1. Initialize Reader Engine
+    // 1. Initialize Cosmic Starfield
+    starfield.init();
+
+    // 2. Initialize Reader Engine
     this.reader = new ComicReaderEngine();
 
-    // 2. Initialize Settings & Theme
+    // 3. Initialize Settings & Theme
     this.applyInitialSettings();
 
-    // 3. Render Views
+    // 4. Render Views
     this.renderLibrary();
     tracker.render();
     adminEngine.updateBadge();
 
-    // 4. Bind Global UI Events
+    // 5. Bind Global UI Events
     this.bindEvents();
 
-    console.log('🙏 Tamma OS E-Book Engine Initialized Successfully.');
+    console.log('🙏 Tamma OS E-Book Engine Initialized Successfully in Cosmic Sanctuary.');
   }
 
   applyInitialSettings() {
     const settings = storage.getSettings();
-    document.body.className = `theme-${settings.theme || 'gold'}`;
+    document.body.className = `theme-${settings.theme || 'cosmic'}`;
   }
 
   bindEvents() {

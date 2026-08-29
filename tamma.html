@@ -15,7 +15,10 @@
   <link rel="stylesheet" href="src/css/reader.css">
   <link rel="stylesheet" href="src/css/admin.css">
 </head>
-<body class="theme-gold">
+<body class="theme-cosmic">
+
+  <!-- Realtime 60fps Cosmic Dhamma Starfield Background -->
+  <canvas id="cosmicCanvas" style="position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1;"></canvas>
 
   <!-- Main App Shell -->
   <div class="app-container">
@@ -202,6 +205,7 @@
       <div class="setting-row">
         <span>โทนสีการอ่าน</span>
         <div style="display: flex; gap: 6px;">
+          <button class="btn-small" data-set-theme="cosmic" title="ธีมจักรวาลธรรมะ (Cosmic Dhamma)">🌌</button>
           <button class="btn-small" data-set-theme="gold" title="ธีมทองอร่าม">🌟</button>
           <button class="btn-small" data-set-theme="parchment" title="ธีมใบลาน">📜</button>
           <button class="btn-small" data-set-theme="midnight" title="ธีมราตรีสงบ">🌙</button>

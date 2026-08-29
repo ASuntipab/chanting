@@ -58,6 +58,54 @@ body.theme-parchment {
   --shadow-gold: 0 0 16px rgba(179, 139, 30, 0.15);
 }
 
+/* Theme: Cosmic Dhamma (จักรวาลธรรมะ - Flagship Theme) */
+body.theme-cosmic {
+  --bg-primary: #050714;
+  --bg-secondary: #0c1029;
+  --bg-card: rgba(16, 24, 52, 0.72);
+  --bg-card-hover: rgba(26, 38, 78, 0.85);
+  --bg-modal: #0e1430;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #818cf8;
+  
+  --accent-gold: #fbbf24;
+  --accent-gold-glow: rgba(251, 191, 36, 0.45);
+  --accent-gold-dark: #b45309;
+  --accent-amber: #f59e0b;
+  --accent-lotus: #f472b6;
+  --accent-nebula: #818cf8;
+  --accent-cyan: #38bdf8;
+  
+  --border-subtle: rgba(129, 140, 248, 0.25);
+  --border-strong: rgba(251, 191, 36, 0.45);
+  --shadow-sm: 0 4px 16px rgba(5, 7, 20, 0.5);
+  --shadow-md: 0 10px 32px rgba(2, 6, 23, 0.75);
+  --shadow-gold: 0 0 25px rgba(251, 191, 36, 0.35), 0 0 50px rgba(129, 140, 248, 0.25);
+}
+
+body.theme-cosmic {
+  background: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0d122e 40%, #050714 100%);
+  background-attachment: fixed;
+}
+
+body.theme-cosmic .top-header,
+body.theme-cosmic .bottom-nav {
+  background: rgba(12, 18, 43, 0.8);
+  border-color: var(--border-subtle);
+}
+
+body.theme-cosmic .prayer-card {
+  background: rgba(15, 23, 49, 0.65);
+  border-color: rgba(129, 140, 248, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.theme-cosmic .prayer-card:hover {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.3), 0 0 35px rgba(99, 102, 241, 0.25);
+}
+
 /* Theme: Midnight Calm (ราตรีสงบ) */
 body.theme-midnight {
   --bg-primary: #090c10;
