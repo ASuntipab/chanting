@@ -12,12 +12,17 @@ export class ComicReaderEngine {
     this.currentPageIndex = 0;
     this.totalPages = 0;
     
-    // Touch tracking
+    // HUD & Fullscreen State
+    this.hudVisible = true;
+    this.autoHideTimer = null;
+
+    // Touch & Gesture Tracking
     this.touchStartX = 0;
     this.touchStartY = 0;
     this.touchCurrentX = 0;
+    this.touchStartTime = 0;
     this.isSwiping = false;
-    this.swipeThreshold = 45; // min px for swipe trigger
+    this.swipeThreshold = 40; // min px for swipe trigger
 
     this.initElements();
     this.bindEvents();
@@ -25,6 +30,8 @@ export class ComicReaderEngine {
 
   initElements() {
     this.readerView = document.getElementById('readerView');
+    this.readerToolbar = document.getElementById('readerToolbar');
+    this.readerBottomBar = document.getElementById('readerBottomBar');
     this.comicTrack = document.getElementById('comicTrack');
     this.readerTitle = document.getElementById('readerTitle');
     this.readerSubtitle = document.getElementById('readerSubtitle');
@@ -35,9 +42,15 @@ export class ComicReaderEngine {
     this.btnClose = document.getElementById('btnCloseReader');
     this.btnSettings = document.getElementById('btnReaderSettings');
     this.settingsDrawer = document.getElementById('readerSettingsDrawer');
+    
+    // Font Sizing in Toolbar & Drawer
+    this.btnToolbarFontPlus = document.getElementById('btnToolbarFontPlus');
+    this.btnToolbarFontMinus = document.getElementById('btnToolbarFontMinus');
+    this.toolbarFontSize = document.getElementById('toolbarFontSize');
     this.btnFontPlus = document.getElementById('btnFontPlus');
     this.btnFontMinus = document.getElementById('btnFontMinus');
     this.fontSizeDisplay = document.getElementById('fontSizeDisplay');
+    this.btnToggleFullscreen = document.getElementById('btnToggleFullscreen');
     this.btnChantInReader = document.getElementById('btnChantInReader');
   }
 
@@ -45,23 +58,37 @@ export class ComicReaderEngine {
     if (!this.readerView) return;
 
     // Navigation buttons
-    this.btnPrev?.addEventListener('click', () => this.prevPage());
-    this.btnNext?.addEventListener('click', () => this.nextPage());
-    this.btnClose?.addEventListener('click', () => this.close());
+    this.btnPrev?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.prevPage();
+      this.scheduleAutoHide();
+    });
+    this.btnNext?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.nextPage();
+      this.scheduleAutoHide();
+    });
+    this.btnClose?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.close();
+    });
 
     // Chanting counter inside reader
-    this.btnChantInReader?.addEventListener('click', () => {
+    this.btnChantInReader?.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (!this.currentPrayer) return;
       audio.playBell();
       const count = storage.incrementPrayerCount(this.currentPrayer.id);
       this.updateChantDisplay(count);
       this.animateCounterBump();
+      this.scheduleAutoHide();
     });
 
     // Settings Toggle
     this.btnSettings?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.settingsDrawer?.classList.toggle('open');
+      this.scheduleAutoHide(6000);
     });
 
     document.addEventListener('click', (e) => {
@@ -70,9 +97,38 @@ export class ComicReaderEngine {
       }
     });
 
-    // Font Sizing
-    this.btnFontPlus?.addEventListener('click', () => this.adjustFontSize(0.1));
-    this.btnFontMinus?.addEventListener('click', () => this.adjustFontSize(-0.1));
+    // Font Sizing (Toolbar & Drawer)
+    this.btnToolbarFontPlus?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.adjustFontSize(0.1);
+      this.scheduleAutoHide(4500);
+    });
+    this.btnToolbarFontMinus?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.adjustFontSize(-0.1);
+      this.scheduleAutoHide(4500);
+    });
+    this.btnFontPlus?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.adjustFontSize(0.1);
+      this.scheduleAutoHide(6000);
+    });
+    this.btnFontMinus?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.adjustFontSize(-0.1);
+      this.scheduleAutoHide(6000);
+    });
+
+    // Fullscreen Toggle
+    this.btnToggleFullscreen?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleFullscreen();
+      this.scheduleAutoHide();
+    });
+
+    // Prevent clicks inside Toolbar & Bottom bar from toggling page
+    this.readerToolbar?.addEventListener('click', (e) => e.stopPropagation());
+    this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
 
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
@@ -88,17 +144,56 @@ export class ComicReaderEngine {
       }
     });
 
-    // Touch Swipe Gestures
+    // Touch Gestures & Tap Zones on Stage
     const stage = document.getElementById('comicStage');
     if (stage) {
       stage.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
       stage.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: true });
       stage.addEventListener('touchend', (e) => this.handleTouchEnd(e));
       
-      // Mouse drag gestures for desktop
+      // Mouse drag & click gestures for desktop
       stage.addEventListener('mousedown', (e) => this.handleMouseDown(e));
       window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
       window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+    }
+  }
+
+  // --- HUD Auto-Hide & Toggle Mechanics ---
+  showHUD() {
+    this.hudVisible = true;
+    this.readerView?.classList.remove('hud-hidden');
+    this.scheduleAutoHide(4000);
+  }
+
+  hideHUD() {
+    this.hudVisible = false;
+    this.readerView?.classList.add('hud-hidden');
+    this.settingsDrawer?.classList.remove('open');
+    if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
+  }
+
+  toggleHUD() {
+    if (this.hudVisible) {
+      this.hideHUD();
+    } else {
+      this.showHUD();
+    }
+  }
+
+  scheduleAutoHide(delay = 3500) {
+    if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
+    this.autoHideTimer = setTimeout(() => {
+      if (this.isOpen() && this.hudVisible && !this.settingsDrawer?.classList.contains('open')) {
+        this.hideHUD();
+      }
+    }, delay);
+  }
+
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
     }
   }
 
@@ -123,19 +218,26 @@ export class ComicReaderEngine {
     const count = trackerData.totalCounts[prayer.id] || 0;
     this.updateChantDisplay(count);
 
-    // Show View
+    // Show View and start in HUD mode, then auto-hide
     this.readerView.classList.add('active');
     document.body.style.overflow = 'hidden';
 
     // Go to Start Page
     this.goToPage(this.currentPageIndex, false);
     audio.playBell(528); // Miraculous tone on open
+
+    // Show HUD briefly, then smoothly fade into zen fullscreen reading
+    this.showHUD();
   }
 
   close() {
     this.readerView.classList.remove('active');
     this.settingsDrawer?.classList.remove('open');
+    if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
   }
 
   isOpen() {
@@ -314,9 +416,10 @@ export class ComicReaderEngine {
     }
   }
 
-  // --- 3D Touch Gesture Controllers with Live Page Lift ---
+  // --- 3D Touch Gesture Controllers with Live Page Lift & Tap Zones ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
+    this.touchStartTime = Date.now();
     this.touchStartX = e.touches[0].clientX;
     this.touchStartY = e.touches[0].clientY;
     this.touchCurrentX = this.touchStartX;
@@ -332,7 +435,7 @@ export class ComicReaderEngine {
     const curPage = allPages[this.currentPageIndex];
     const frame = curPage?.querySelector('.page-frame');
 
-    if (frame && Math.abs(deltaX) > 10) {
+    if (frame && Math.abs(deltaX) > 12) {
       // Rotate 3D page dynamically with finger movement
       const angle = Math.max(Math.min((deltaX / window.innerWidth) * -60, 45), -45);
       const lift = Math.min(Math.abs(deltaX) * 0.2, 25);
@@ -345,6 +448,7 @@ export class ComicReaderEngine {
     this.isSwiping = false;
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = Math.abs(this.touchStartY - (e.changedTouches[0]?.clientY || this.touchStartY));
+    const elapsed = Date.now() - this.touchStartTime;
 
     // Reset frame tilt
     const allPages = this.comicTrack.querySelectorAll('.comic-page');
@@ -352,19 +456,36 @@ export class ComicReaderEngine {
     const frame = curPage?.querySelector('.page-frame');
     if (frame) frame.style.transform = '';
 
-    // Horizontal swipe dominant
+    // 1. Horizontal swipe dominant -> Turn Page
     if (Math.abs(deltaX) > this.swipeThreshold && Math.abs(deltaX) > deltaY) {
       if (deltaX > 0) {
         this.nextPage(); // Swipe Left -> Turn Page Next
       } else {
         this.prevPage(); // Swipe Right -> Turn Page Prev
       }
+    } 
+    // 2. Clean Tap Detected (Short duration, minimal movement)
+    else if (elapsed < 350 && Math.abs(deltaX) < 15 && deltaY < 15) {
+      const tapX = this.touchStartX;
+      const screenWidth = window.innerWidth;
+
+      if (tapX < screenWidth * 0.22) {
+        // Tap Left Margin -> Previous Page
+        this.prevPage();
+      } else if (tapX > screenWidth * 0.78) {
+        // Tap Right Margin -> Next Page
+        this.nextPage();
+      } else {
+        // Tap Center -> Toggle Floating Control HUD & Font Controls!
+        this.toggleHUD();
+      }
     }
   }
 
-  // --- Mouse Drag Gestures for Desktop ---
+  // --- Mouse Drag & Click Gestures for Desktop ---
   handleMouseDown(e) {
     this.isMouseDown = true;
+    this.touchStartTime = Date.now();
     this.touchStartX = e.clientX;
     this.touchStartY = e.clientY;
     this.touchCurrentX = e.clientX;
@@ -379,7 +500,7 @@ export class ComicReaderEngine {
     const curPage = allPages[this.currentPageIndex];
     const frame = curPage?.querySelector('.page-frame');
 
-    if (frame && Math.abs(deltaX) > 10) {
+    if (frame && Math.abs(deltaX) > 12) {
       const angle = Math.max(Math.min((deltaX / window.innerWidth) * -50, 40), -40);
       const lift = Math.min(Math.abs(deltaX) * 0.15, 20);
       frame.style.transform = `rotateY(${angle}deg) translateZ(${lift}px) scale(0.98)`;
@@ -390,6 +511,8 @@ export class ComicReaderEngine {
     if (!this.isMouseDown) return;
     this.isMouseDown = false;
     const deltaX = this.touchStartX - this.touchCurrentX;
+    const deltaY = Math.abs(this.touchStartY - e.clientY);
+    const elapsed = Date.now() - this.touchStartTime;
 
     const allPages = this.comicTrack.querySelectorAll('.comic-page');
     const curPage = allPages[this.currentPageIndex];
@@ -399,14 +522,25 @@ export class ComicReaderEngine {
     if (Math.abs(deltaX) > this.swipeThreshold) {
       if (deltaX > 0) this.nextPage();
       else this.prevPage();
+    } else if (elapsed < 350 && Math.abs(deltaX) < 10 && deltaY < 10) {
+      const clickX = e.clientX;
+      const screenWidth = window.innerWidth;
+
+      if (clickX < screenWidth * 0.22) {
+        this.prevPage();
+      } else if (clickX > screenWidth * 0.78) {
+        this.nextPage();
+      } else {
+        this.toggleHUD();
+      }
     }
   }
 
-  // --- Font & Customization ---
+  // --- Font Scaling & Preference Persistence ---
   adjustFontSize(delta) {
     const settings = storage.getSettings();
     let current = settings.fontSize || 1.15;
-    current = Math.min(Math.max(current + delta, 0.85), 2.2);
+    current = Math.min(Math.max(current + delta, 0.75), 2.2);
     settings.fontSize = parseFloat(current.toFixed(2));
     storage.saveSettings(settings);
     this.applyFontSize(settings.fontSize);
@@ -414,8 +548,12 @@ export class ComicReaderEngine {
 
   applyFontSize(sizeRem) {
     document.documentElement.style.setProperty('--reader-font-size', `${sizeRem}rem`);
+    const percentStr = `${Math.round((sizeRem / 1.15) * 100)}%`;
     if (this.fontSizeDisplay) {
-      this.fontSizeDisplay.textContent = `${Math.round(sizeRem * 100)}%`;
+      this.fontSizeDisplay.textContent = percentStr;
+    }
+    if (this.toolbarFontSize) {
+      this.toolbarFontSize.textContent = percentStr;
     }
   }
 

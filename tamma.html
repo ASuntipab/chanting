@@ -134,8 +134,8 @@
        COMIC-BOOK STYLE FULLSCREEN E-BOOK READER
        ========================================================================== -->
   <div id="readerView" class="reader-view">
-    <!-- Reader Top Toolbar -->
-    <div class="reader-toolbar">
+    <!-- Reader Top Toolbar (Auto-hiding HUD) -->
+    <div id="readerToolbar" class="reader-toolbar">
       <button id="btnCloseReader" class="btn-icon" aria-label="ปิดโหมดอ่าน">
         ✕
       </button>
@@ -144,13 +144,22 @@
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
       </div>
       <div class="reader-toolbar-actions">
-        <button id="btnReaderSettings" class="btn-icon" title="ปรับขนาดตัวอักษรและธีม">
+        <!-- Quick Font Resizer in Toolbar -->
+        <div class="reader-font-quick">
+          <button id="btnToolbarFontMinus" class="btn-icon-small" title="ลดขนาดตัวอักษร">A-</button>
+          <span id="toolbarFontSize" class="font-size-badge">100%</span>
+          <button id="btnToolbarFontPlus" class="btn-icon-small" title="เพิ่มขนาดตัวอักษร">A+</button>
+        </div>
+        <button id="btnToggleFullscreen" class="btn-icon" title="ขยายเต็มจอ (Fullscreen)">
+          ⛶
+        </button>
+        <button id="btnReaderSettings" class="btn-icon" title="ปรับโทนสีการอ่าน">
           ⚙️
         </button>
       </div>
     </div>
 
-    <!-- Comic Book Swipe Stage & Track -->
+    <!-- Comic Book Swipe Stage & Track (Immersive Fullscreen) -->
     <div id="comicStage" class="comic-stage">
       <button id="btnPrevPage" class="comic-nav-btn prev" aria-label="หน้าก่อนหน้า">‹</button>
       
@@ -161,8 +170,8 @@
       <button id="btnNextPage" class="comic-nav-btn next" aria-label="หน้าถัดไป">›</button>
     </div>
 
-    <!-- Reader Bottom Floating Bar -->
-    <div class="reader-bottom-bar">
+    <!-- Reader Bottom Floating Bar (Auto-hiding HUD) -->
+    <div id="readerBottomBar" class="reader-bottom-bar">
       <!-- Dots Indicator -->
       <div id="readerPageDots" class="reader-page-dots"></div>
 
