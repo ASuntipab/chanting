@@ -12,21 +12,40 @@ export class DhammaScraperEngine {
       throw new Error('กรุณาระบุ URL ที่ถูกต้อง (ขึ้นต้นด้วย http:// หรือ https://)');
     }
 
-    try {
-      // Try direct fetch or open proxy for web content
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-      const response = await fetch(proxyUrl);
-      if (!response.ok) {
-        throw new Error('ไม่สามารถดึงข้อมูลจากเว็บไซต์เป้าหมายได้ (Network error)');
+    // List of resilient CORS proxy gateways
+    const proxies = [
+      (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+    ];
+
+    let lastError = null;
+
+    for (let i = 0; i < proxies.length; i++) {
+      try {
+        const targetProxy = proxies[i](url);
+        const response = await fetch(targetProxy, { signal: AbortSignal.timeout(8000) });
+        if (!response.ok) continue;
+
+        let rawHtml = '';
+        if (i === 0) {
+          // allorigins returns JSON { contents: "..." }
+          const data = await response.json();
+          rawHtml = data.contents;
+        } else {
+          rawHtml = await response.text();
+        }
+
+        if (rawHtml && rawHtml.length > 50) {
+          return this.parseHtmlToPrayer(rawHtml, url);
+        }
+      } catch (e) {
+        lastError = e;
+        console.warn(`Proxy ${i + 1} failed, trying next fallback...`, e);
       }
-      
-      const data = await response.json();
-      const rawHtml = data.contents;
-      return this.parseHtmlToPrayer(rawHtml, url);
-    } catch (e) {
-      console.warn('Proxy fetch fallback to direct parse:', e);
-      throw new Error(`ไม่สามารถดึงบทสวดจาก URL อัตโนมัติได้: ${e.message}`);
     }
+
+    throw new Error(`ไม่สามารถดึงบทสวดจาก URL อัตโนมัติได้ (${lastError?.message || 'เว็บเป้าหมายอาจจำกัดสิทธิ์'}) คุณสามารถคัดลอกข้อความมาวางในแท็บ 'พิมพ์บทสวดเอง' ได้ครับ`);
   }
 
   /**
