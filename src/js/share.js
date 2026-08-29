@@ -98,25 +98,32 @@ export class DhammaShareEngine {
 
     // 4. Header & App Branding
     ctx.textAlign = 'center';
-    ctx.font = 'bold 22px "Prompt", sans-serif';
+    ctx.font = 'bold 20px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
     ctx.fillText('❖ ธรรมะ E-BOOK • TAMMA OS ❖', width / 2, 85);
 
-    // 5. Prayer Title
-    ctx.font = 'bold 36px "Prompt", sans-serif';
+    // 5. Prayer Title (Auto-scaling & Word Wrapping)
+    const titleText = prayer.title || 'บทสวดมนต์อันเป็นมงคล';
+    let titleFontSize = 32;
+    if (titleText.length > 32) titleFontSize = 23;
+    else if (titleText.length > 20) titleFontSize = 27;
+
+    ctx.font = `bold ${titleFontSize}px "Prompt", sans-serif`;
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(prayer.title, width / 2, 160);
+    const titleEndY = this.wrapText(ctx, titleText, width / 2, 140, width - 140, titleFontSize * 1.35, 2);
 
     // Category / Origin Subtitle
-    ctx.font = '20px "Sarabun", sans-serif';
+    const subtitleY = titleEndY + 28;
+    ctx.font = '18px "Sarabun", sans-serif';
     ctx.fillStyle = '#d1c5b8';
-    ctx.fillText(prayer.author || prayer.category || 'บทสวดมนต์อันเป็นมงคล', width / 2, 205);
+    ctx.fillText(prayer.author || prayer.category || 'บทสวดมนต์อันเป็นมงคล', width / 2, subtitleY);
 
     // 6. Dividing Ornament Line
+    const dividerY = subtitleY + 20;
     ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
     ctx.beginPath();
-    ctx.moveTo(width / 2 - 120, 235);
-    ctx.lineTo(width / 2 + 120, 235);
+    ctx.moveTo(width / 2 - 120, dividerY);
+    ctx.lineTo(width / 2 + 120, dividerY);
     ctx.stroke();
 
     // 7. Key Excerpt / First Verse Body
@@ -124,17 +131,19 @@ export class DhammaShareEngine {
     const textPali = firstPage.pali || prayer.description || '';
     const textThai = firstPage.thai || '';
 
-    ctx.font = '22px "Sarabun", sans-serif';
+    const paliStartY = dividerY + 36;
+    ctx.font = '21px "Sarabun", sans-serif';
     ctx.fillStyle = '#f59e0b';
-    this.wrapText(ctx, textPali, width / 2, 310, width - 140, 36);
+    const paliEndY = this.wrapText(ctx, textPali, width / 2, paliStartY, width - 140, 32, 5);
 
     if (textThai) {
-      ctx.font = '18px "Sarabun", sans-serif';
+      const thaiStartY = Math.max(paliEndY + 22, 500);
+      ctx.font = '17px "Sarabun", sans-serif';
       ctx.fillStyle = '#a89d8f';
-      this.wrapText(ctx, `"${textThai}"`, width / 2, 540, width - 160, 30);
+      this.wrapText(ctx, `"${textThai}"`, width / 2, thaiStartY, width - 160, 28, 4);
     }
 
-    // 8. User Stats & Merit Badge Box
+    // 8. User Stats & Merit Badge Box (Local Device Timezone)
     const trackerData = storage.getTrackerData();
     const count = trackerData.totalCounts[prayer.id] || 1;
     const streak = trackerData.streakDays || 1;
@@ -161,29 +170,51 @@ export class DhammaShareEngine {
     return this.canvas.toDataURL('image/png');
   }
 
-  wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 5) {
+    if (!text) return y;
     const lines = text.split('\n');
     let curY = y;
+    let totalRendered = 0;
 
-    for (let i = 0; i < lines.length && curY < y + 200; i++) {
-      const line = lines[i];
-      const words = line.split(' ');
+    for (let i = 0; i < lines.length; i++) {
+      if (totalRendered >= maxLines) break;
+      const rawLine = lines[i].trim();
+      if (!rawLine) continue;
+
+      let tokens = [];
+      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+        try {
+          const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
+          tokens = Array.from(segmenter.segment(rawLine), s => s.segment);
+        } catch (e) {
+          tokens = rawLine.split(' ');
+        }
+      } else {
+        tokens = rawLine.split(' ');
+      }
+
       let currentLine = '';
-
-      for (let n = 0; n < words.length; n++) {
-        const testLine = currentLine + words[n] + ' ';
+      for (let n = 0; n < tokens.length; n++) {
+        const token = tokens[n];
+        const testLine = currentLine + token;
         const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
+        if (metrics.width > maxWidth && currentLine.length > 0) {
           ctx.fillText(currentLine.trim(), x, curY);
-          currentLine = words[n] + ' ';
+          currentLine = token;
           curY += lineHeight;
+          totalRendered++;
+          if (totalRendered >= maxLines) break;
         } else {
           currentLine = testLine;
         }
       }
-      ctx.fillText(currentLine.trim(), x, curY);
-      curY += lineHeight;
+      if (currentLine.length > 0 && totalRendered < maxLines) {
+        ctx.fillText(currentLine.trim(), x, curY);
+        curY += lineHeight;
+        totalRendered++;
+      }
     }
+    return curY;
   }
 
   roundRect(ctx, x, y, width, height, radius, fill, stroke) {

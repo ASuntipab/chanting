@@ -370,41 +370,44 @@ body {
   filter: drop-shadow(0 0 6px var(--accent-gold));
 }
 
-/* Category Filter Chips */
+/* Category Filter Chips - Clean Multi-Row Wrap Layout */
 .chip-group {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 12px 0 16px 0;
-  scrollbar-width: none;
-}
-.chip-group::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  gap: 8px 6px;
+  padding: 6px 0 14px 0;
+  align-items: center;
 }
 
 .chip {
-  padding: 8px 16px;
+  padding: 6px 13px;
   border-radius: var(--radius-full);
   background: var(--bg-card);
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
+  font-family: var(--font-header);
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .chip:hover {
   border-color: var(--accent-gold);
   color: var(--text-primary);
+  transform: translateY(-1px);
 }
 
 .chip.active {
-  background: var(--accent-gold);
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
   color: #120e0b;
   font-weight: 600;
   border-color: var(--accent-gold);
   box-shadow: 0 2px 10px var(--accent-gold-glow);
+  transform: scale(1.04);
 }
 
 /* Search & Filter Bar */

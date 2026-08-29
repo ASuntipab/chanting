@@ -190,7 +190,18 @@ class DhammaStorageEngine {
     return this.isFavorite(prayerId);
   }
 
-  // --- Daily Tracker & Chanting Counter API ---
+  // --- Daily Tracker & Chanting Counter API (Local Device Timezone) ---
+  getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  getTodayDateString() {
+    return this.getLocalDateString(new Date());
+  }
+
   getTrackerData() {
     const todayStr = this.getTodayDateString();
     const defaultData = {
@@ -203,7 +214,7 @@ class DhammaStorageEngine {
     };
     const data = this.get(STORAGE_KEYS.TRACKER, defaultData);
     
-    // Auto reset today checklist if date changed
+    // Auto reset today checklist if local calendar date changed
     if (data.todayDate !== todayStr) {
       data.todayDate = todayStr;
       data.todayChanted = {};
@@ -241,7 +252,7 @@ class DhammaStorageEngine {
     if (data.lastChantedDate !== todayStr) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yestStr = yesterday.toISOString().split('T')[0];
+      const yestStr = this.getLocalDateString(yesterday);
       
       if (data.lastChantedDate === yestStr) {
         data.streakDays = (data.streakDays || 0) + 1;
@@ -250,10 +261,6 @@ class DhammaStorageEngine {
       }
       data.lastChantedDate = todayStr;
     }
-  }
-
-  getTodayDateString() {
-    return new Date().toISOString().split('T')[0];
   }
 
   // --- Settings API ---

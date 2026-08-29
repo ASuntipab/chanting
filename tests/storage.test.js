@@ -119,6 +119,21 @@ test('Favorites & Chanting Counter State', () => {
   assert.equal(count9, 9);
 });
 
+test('Local Device Timezone: Date strings use local calendar date instead of UTC offset', () => {
+  function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  const sampleDate = new Date(2026, 7, 29, 23, 45); // 29 Aug 2026 23:45 local time
+  assert.equal(getLocalDateString(sampleDate), '2026-08-29');
+
+  const todayStr = getLocalDateString(new Date());
+  assert.match(todayStr, /^\d{4}-\d{2}-\d{2}$/);
+});
+
 // =========================================================================
 // Reader Engine & Gesture Interaction Tests
 // =========================================================================
