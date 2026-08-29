@@ -195,31 +195,27 @@
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
       </div>
 
-      <!-- Dual Audio Controls: TTS & Real MP3 Monastic Chanting -->
+      <!-- Top Audio Controls: AI TTS Play & Voice Control Options -->
       <div class="reader-audio-dock">
         <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงสังเคราะห์สวดนำ (AI)">
           <span id="ttsPlayIcon">🔊</span>
           <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
         </button>
-        <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
-          <span id="mp3PlayIcon">🎵</span>
-          <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
-        </button>
-        <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ตั้งค่าเสียงอ่าน">
-          ⚙️
+        <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ควบคุมและปรับแต่งเสียงสวดนำ (AI)">
+          🎛️
         </button>
       </div>
     </div>
 
-    <!-- Real Monastic MP3 Chanting Audio Deck -->
+    <!-- Real Monastic MP3 Chanting Audio Deck (Floating Bottom Player) -->
     <div id="mp3PlayerDeck" class="mp3-player-deck" style="display: none;">
       <div class="mp3-deck-header">
         <div class="mp3-track-info">
-          <span class="mp3-track-badge">🎵 เสียงพระสวดจริง</span>
+          <span class="mp3-track-badge">🎵 เสียงพระสวดจริง (MP3)</span>
           <h4 id="mp3TrackTitle" class="mp3-track-title">ทำวัตรเช้า (แปลไทย-บาลี)</h4>
           <span id="mp3TrackTemple" class="mp3-track-temple">วัดป่านานาชาติ / วัดมาบจันทร์</span>
         </div>
-        <button id="btnCloseMP3Deck" class="btn-icon" style="width: 28px; height: 28px;">✕</button>
+        <button id="btnCloseMP3Deck" class="btn-icon" style="width: 28px; height: 28px;" title="ปิดเครื่องเล่น">✕</button>
       </div>
 
       <!-- Track Selector Dropdown -->
@@ -257,8 +253,8 @@
     <div id="ttsSettingsModal" class="tts-settings-overlay" style="display: none;">
       <div class="tts-settings-card">
         <div class="tts-settings-header">
-          <h4>🔊 ตั้งค่าเสียงอ่านบทสวด</h4>
-          <button id="btnCloseTTSSettings" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;">✕</button>
+          <h4>🔊 ควบคุมเสียงสวดนำ (AI)</h4>
+          <button id="btnCloseTTSSettings" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;" title="ปิด">✕</button>
         </div>
         <div class="tts-settings-body">
           <div class="tts-setting-row">
@@ -322,7 +318,7 @@
 
       <div class="reader-dock-divider"></div>
 
-      <!-- Controls Row: Font Size + Themes + Counter -->
+      <!-- Controls Row: Font Size + MP3 Monk Chanting + Counter -->
       <div class="reader-controls-row">
         <!-- Font Size Resizer (Up to 300% for Elders) -->
         <div class="reader-font-dock">
@@ -330,6 +326,12 @@
           <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
           <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
         </div>
+
+        <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
+        <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
+          <span id="mp3PlayIcon">🎵</span>
+          <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
+        </button>
 
         <!-- Quick Chant Counter with Bell -->
         <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">

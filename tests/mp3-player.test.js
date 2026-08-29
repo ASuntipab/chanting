@@ -5,7 +5,7 @@ import { TIPITAKA_SUTTA_PRAYERS } from '../src/js/prayers-tipitaka-suttas.js';
 
 test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t) => {
   await t.test('CHANTING_AUDIO_TRACKS provides authentic public domain chanting sources', () => {
-    assert.ok(CHANTING_AUDIO_TRACKS.length >= 16);
+    assert.ok(CHANTING_AUDIO_TRACKS.length >= 28);
     
     CHANTING_AUDIO_TRACKS.forEach(track => {
       assert.ok(track.id, 'Track must have an ID');
@@ -37,6 +37,16 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
     const matchedDhamma = mp3Player.getTrackForPrayer(dhammacakka);
     assert.ok(matchedDhamma);
     assert.strictEqual(matchedDhamma.id, 'track-dhammacakka');
+
+    const jayaNoy = { id: 'jaya-noy-chant', title: 'ชัยน้อย', category: 'ชัยมงคลคาถา' };
+    const matchedJaya = mp3Player.getTrackForPrayer(jayaNoy);
+    assert.ok(matchedJaya);
+    assert.strictEqual(matchedJaya.id, 'track-jaya-noy');
+
+    const ovada = { id: 'ovada-patimokkha-chant', title: 'โอวาทปาติโมกข์', category: 'พระสูตรสำคัญ' };
+    const matchedOvada = mp3Player.getTrackForPrayer(ovada);
+    assert.ok(matchedOvada);
+    assert.strictEqual(matchedOvada.id, 'track-ovada-patimokkha');
 
     // Prayers without recorded audio must return NULL so button is NOT displayed
     const unrecordedPrayer = { id: 'luang-por-guay-chant', title: 'คาถาหลวงพ่อกวย', category: 'พระเกจิอาจารย์' };
