@@ -71,6 +71,7 @@
             <option value="บทสวดประจำวัน">🙏 บทสวดประจำวัน</option>
             <option value="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา</option>
             <option value="ทำวัตร">📜 ทำวัตรเช้า-เย็น</option>
+            <option value="บทสวดมนต์ทั่วไป">📚 บทสวดมนต์ทั่วไป (ดึงจากวิกิ)</option>
           </select>
           <span class="select-arrow">▼</span>
         </div>
@@ -155,6 +156,46 @@
       <div class="reader-title-box">
         <span id="readerTitle" class="reader-title">พระคาถาชินบัญชร</span>
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
+      </div>
+
+      <!-- TTS Voice Reading Controls -->
+      <div class="reader-audio-dock">
+        <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงอ่านบทสวด">
+          <span id="ttsPlayIcon">🔊</span>
+          <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
+        </button>
+        <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ตั้งค่าเสียงอ่าน">
+          ⚙️
+        </button>
+      </div>
+    </div>
+
+    <!-- TTS Settings Popover Card -->
+    <div id="ttsSettingsModal" class="tts-settings-overlay" style="display: none;">
+      <div class="tts-settings-card">
+        <div class="tts-settings-header">
+          <h4>🔊 ตั้งค่าเสียงอ่านบทสวด</h4>
+          <button id="btnCloseTTSSettings" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;">✕</button>
+        </div>
+        <div class="tts-settings-body">
+          <div class="tts-setting-row">
+            <label>รูปแบบการอ่าน:</label>
+            <div class="tts-mode-pills">
+              <button class="tts-mode-btn active" data-mode="both">บาลี + แปลไทย</button>
+              <button class="tts-mode-btn" data-mode="pali">เฉพาะบาลี</button>
+              <button class="tts-mode-btn" data-mode="thai">เฉพาะแปลไทย</button>
+            </div>
+          </div>
+          <div class="tts-setting-row">
+            <label>ความเร็วเสียงสวด:</label>
+            <div class="tts-speed-pills">
+              <button class="tts-speed-btn" data-speed="0.75">0.75x (ช้า/สงบ)</button>
+              <button class="tts-speed-btn active" data-speed="0.85">0.85x (มาตรฐาน)</button>
+              <button class="tts-speed-btn" data-speed="1.0">1.0x (ปกติ)</button>
+              <button class="tts-speed-btn" data-speed="1.15">1.15x (เร็ว)</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

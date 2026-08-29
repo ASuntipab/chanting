@@ -3,7 +3,10 @@
  * LocalStorage & Offline-First Persistence with Cloud Sync capability
  */
 
-import { DEFAULT_PRAYERS } from './default-prayers.js';
+import { DEFAULT_PRAYERS as BUDDHIST_PRAYERS } from './default-prayers.js';
+import { SCRAPED_PRAYERS } from './scraped-prayers.js';
+
+const DEFAULT_PRAYERS = [...BUDDHIST_PRAYERS, ...SCRAPED_PRAYERS];
 
 const STORAGE_KEYS = {
   PRAYERS: 'tamma_prayers_v1',

@@ -6,6 +6,7 @@
 import { audio } from './audio.js';
 import { storage } from './storage.js';
 import { nativeBridge } from './native-bridge.js';
+import { ttsEngine } from './tts-engine.js';
 
 export class ComicReaderEngine {
   constructor() {
@@ -27,6 +28,7 @@ export class ComicReaderEngine {
 
     this.initElements();
     this.bindEvents();
+    this.initTTSCallbacks();
   }
 
   initElements() {
@@ -53,6 +55,16 @@ export class ComicReaderEngine {
     this.readerPageBadge = document.getElementById('readerPageBadge');
     this.btnJumpFirst = document.getElementById('btnJumpFirst');
     this.btnJumpLast = document.getElementById('btnJumpLast');
+
+    // TTS Voice Controls
+    this.btnTTSPlay = document.getElementById('btnTTSPlay');
+    this.ttsPlayIcon = document.getElementById('ttsPlayIcon');
+    this.ttsPlayText = document.getElementById('ttsPlayText');
+    this.btnTTSSettings = document.getElementById('btnTTSSettings');
+    this.ttsSettingsModal = document.getElementById('ttsSettingsModal');
+    this.btnCloseTTSSettings = document.getElementById('btnCloseTTSSettings');
+    this.ttsModeBtns = document.querySelectorAll('.tts-mode-btn');
+    this.ttsSpeedBtns = document.querySelectorAll('.tts-speed-btn');
   }
 
   bindEvents() {
@@ -141,9 +153,55 @@ export class ComicReaderEngine {
       setTimeout(() => this.close(), 1500);
     });
 
+    // TTS Voice Controls Binding
+    this.btnTTSPlay?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleTTS();
+    });
+
+    this.btnTTSSettings?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleTTSSettings();
+    });
+
+    this.btnCloseTTSSettings?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideTTSSettings();
+    });
+
+    // TTS Mode selection pills
+    this.ttsModeBtns?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const mode = btn.dataset.mode;
+        this.ttsModeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ttsEngine.setMode(mode);
+        if (this.currentPrayer) {
+          const wasPlaying = ttsEngine.isPlaying;
+          ttsEngine.prepareQueue(this.currentPrayer);
+          if (wasPlaying) {
+            ttsEngine.play();
+          }
+        }
+      });
+    });
+
+    // TTS Speed selection pills
+    this.ttsSpeedBtns?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const speed = parseFloat(btn.dataset.speed);
+        this.ttsSpeedBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ttsEngine.setRate(speed);
+      });
+    });
+
     // Prevent clicks inside Toolbar & Bottom bar from toggling page
     this.readerToolbar?.addEventListener('click', (e) => e.stopPropagation());
     this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
+    this.ttsSettingsModal?.addEventListener('click', (e) => e.stopPropagation());
 
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
@@ -268,6 +326,8 @@ export class ComicReaderEngine {
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
+    ttsEngine.stop();
+    this.hideTTSSettings();
     if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
       window.tammaApp.refreshCurrentViews();
     }
@@ -312,10 +372,13 @@ export class ComicReaderEngine {
     rawPages.forEach((page, idx) => {
       const section = document.createElement('div');
       section.className = 'verse-section';
+      section.dataset.pageIndex = idx;
 
       if (page.verseTitle && rawPages.length > 1) {
         const titleEl = document.createElement('div');
         titleEl.className = 'verse-section-title';
+        titleEl.dataset.pageIndex = idx;
+        titleEl.dataset.type = 'title';
         titleEl.textContent = page.verseTitle;
         section.appendChild(titleEl);
       }
@@ -323,6 +386,8 @@ export class ComicReaderEngine {
       if (page.pali) {
         const paliEl = document.createElement('div');
         paliEl.className = 'verse-pali';
+        paliEl.dataset.pageIndex = idx;
+        paliEl.dataset.type = 'pali';
         paliEl.innerHTML = this.escapeHtml(page.pali).replace(/\n/g, '<br>');
         section.appendChild(paliEl);
       }
@@ -330,6 +395,8 @@ export class ComicReaderEngine {
       if (page.thai) {
         const thaiEl = document.createElement('div');
         thaiEl.className = 'verse-thai';
+        thaiEl.dataset.pageIndex = idx;
+        thaiEl.dataset.type = 'thai';
         thaiEl.innerHTML = this.escapeHtml(page.thai).replace(/\n/g, '<br>');
         section.appendChild(thaiEl);
       }
@@ -337,6 +404,8 @@ export class ComicReaderEngine {
       if (!page.pali && !page.thai && page.content) {
         const contentEl = document.createElement('div');
         contentEl.className = 'verse-thai';
+        contentEl.dataset.pageIndex = idx;
+        contentEl.dataset.type = 'thai';
         contentEl.innerHTML = this.escapeHtml(page.content).replace(/\n/g, '<br>');
         section.appendChild(contentEl);
       }
@@ -351,6 +420,9 @@ export class ComicReaderEngine {
     });
 
     viewport.appendChild(flow);
+
+    // Prepare TTS Queue for current prayer
+    ttsEngine.prepareQueue(prayer);
 
     // Footer Container with Indicator and Progress
     const footer = document.createElement('div');
