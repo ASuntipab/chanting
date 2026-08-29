@@ -11,6 +11,8 @@ test('TTS Engine: Pali and Thai text normalization for speech synthesis', () => 
   assert.equal(clean.includes('(๓ จบ)'), false, 'Should replace (๓ จบ) with text');
   assert.equal(clean.includes('สามจบ'), true, 'Should pronounce (๓ จบ) as สามจบ');
   assert.equal(clean.includes('ยะ ธา พุท โม นะ'), true, 'Should expand hyphens into separated syllables for TTS');
+  assert.equal(clean.includes('ตัดสะ'), true, 'Should normalize ตัสสะ to phonetic ตัดสะ');
+  assert.equal(clean.includes('พะคะวะโต'), true, 'Should normalize ภะคะวะโต to phonetic พะคะวะโต');
 });
 
 test('TTS Engine: Queue Generation from Multi-Page Prayer', () => {

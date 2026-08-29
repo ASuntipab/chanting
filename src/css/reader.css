@@ -1009,3 +1009,43 @@ body.theme-parchment .reader-chant-counter {
   font-weight: 600;
 }
 
+/* TTS Accuracy Disclaimer Notice */
+.tts-disclaimer-box {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--radius-sm, 6px);
+}
+
+.theme-parchment .tts-disclaimer-box {
+  background: rgba(160, 82, 45, 0.08);
+  border-color: rgba(160, 82, 45, 0.25);
+}
+
+.tts-disclaimer-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme-parchment .tts-disclaimer-title {
+  color: #8b4513;
+}
+
+.tts-disclaimer-text {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.theme-parchment .tts-disclaimer-text {
+  color: #5c3a21;
+}
+
+
