@@ -775,4 +775,95 @@ export class ComicReaderEngine {
       }, 200);
     }
   }
+
+  // --- TTS Voice Reading & Karaoke Mechanics ---
+  initTTSCallbacks() {
+    ttsEngine.onHighlight = (chunkIndex, chunk) => this.handleTTSHighlight(chunkIndex, chunk);
+    ttsEngine.onStateChange = (state) => this.handleTTSState(state);
+    ttsEngine.onFinish = () => this.handleTTSFinish();
+  }
+
+  toggleTTS() {
+    if (!this.currentPrayer) return;
+    if (ttsEngine.queue.length === 0) {
+      ttsEngine.prepareQueue(this.currentPrayer);
+    }
+    ttsEngine.togglePlayPause();
+  }
+
+  toggleTTSSettings() {
+    if (!this.ttsSettingsModal) return;
+    if (this.ttsSettingsModal.style.display === 'none' || !this.ttsSettingsModal.style.display) {
+      this.ttsSettingsModal.style.display = 'block';
+    } else {
+      this.ttsSettingsModal.style.display = 'none';
+    }
+  }
+
+  hideTTSSettings() {
+    if (this.ttsSettingsModal) {
+      this.ttsSettingsModal.style.display = 'none';
+    }
+  }
+
+  handleTTSHighlight(chunkIndex, chunk) {
+    if (!this.flowEl) return;
+
+    // Remove active highlight from all elements
+    const actives = this.flowEl.querySelectorAll('.verse-reading-active');
+    actives.forEach(el => el.classList.remove('verse-reading-active'));
+
+    if (!chunk || chunkIndex < 0) return;
+
+    // Find the matching DOM node
+    let target = null;
+    if (chunk.type === 'title') {
+      target = this.flowEl.querySelector(`[data-page-index="${chunk.pageIndex}"][data-type="title"]`);
+    } else if (chunk.type === 'pali') {
+      target = this.flowEl.querySelector(`[data-page-index="${chunk.pageIndex}"][data-type="pali"]`);
+    } else if (chunk.type === 'thai') {
+      target = this.flowEl.querySelector(`[data-page-index="${chunk.pageIndex}"][data-type="thai"]`);
+    }
+
+    if (target) {
+      target.classList.add('verse-reading-active');
+
+      // Auto-scroll / Jump Viewport if target is outside current view
+      if (this.viewportStepPx) {
+        const elOffsetTop = target.offsetTop;
+        const targetViewport = Math.floor(elOffsetTop / this.viewportStepPx);
+        if (targetViewport !== this.viewportIndex && targetViewport >= 0 && targetViewport < this.totalViewportPages) {
+          this.goToViewport(targetViewport, true);
+        }
+      }
+    }
+  }
+
+  handleTTSState(state) {
+    if (!this.btnTTSPlay) return;
+
+    if (state === 'playing') {
+      this.btnTTSPlay.classList.add('playing');
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '⏸️';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'พักเสียง';
+      nativeBridge.setKeepAwake(true);
+    } else if (state === 'paused') {
+      this.btnTTSPlay.classList.remove('playing');
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '▶️';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดต่อ';
+    } else {
+      this.btnTTSPlay.classList.remove('playing');
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '🔊';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดนำ';
+    }
+  }
+
+  handleTTSFinish() {
+    audio.playBell(648);
+    if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
+      window.tammaApp.showToast('✨ สวดมนต์จบแล้ว อนุโมทนาบุญครับ 🙏');
+    }
+    // Jump to the last page to show completion button
+    this.goToViewport(this.totalViewportPages - 1, true);
+  }
 }
