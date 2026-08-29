@@ -262,6 +262,342 @@ export const CHANTING_AUDIO_TRACKS = [
     srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Ajan_Puriso-Patimokkha.mp3',
     durationEst: '45:00',
     category: 'พิธีกรรม'
+  },
+
+  // --- วัดธรรมมงคล (หลวงพ่อวิริยังค์) เพิ่มเติม ---
+  {
+    id: 'track-buddha-vandana-dhammamon',
+    title: 'พุทธวันทนา (บทนมัสการพระพุทธเจ้า)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Buddha_Vandana.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Buddha_Vandana.mp3',
+    durationEst: '05:30',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-bhojananga-dhammamon',
+    title: 'โภชนังคปริตร (พิจารณาอาหาร)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Bhojananga.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Bhojananga.mp3',
+    durationEst: '01:10',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-deva-aradhana-dhammamon',
+    title: 'อาราธนาเทวดา (ชุมนุมเทวดาฉบับวัดธรรมมงคล)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Deva_Aradhana.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Deva_Aradhana.mp3',
+    durationEst: '00:50',
+    category: 'พิธีกรรม'
+  },
+  {
+    id: 'track-dhammacakka-dhammamon',
+    title: 'ธัมมจักกัปปวัตตนสูตร (ฉบับวัดธรรมมงคล)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Dhammachakka_Pavathana_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Dhammachakka_Pavathana_Sutta.mp3',
+    durationEst: '07:15',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-karaniya-dhammamon',
+    title: 'กรณียเมตตสูตร (ฉบับวัดธรรมมงคล)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Karaniyametta_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Karaniyametta_Sutta.mp3',
+    durationEst: '01:25',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-ratana-dhammamon',
+    title: 'รัตนสูตร (ฉบับวัดธรรมมงคล)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Ratana_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Ratana_Sutta.mp3',
+    durationEst: '03:30',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-abhaya-dhammamon',
+    title: 'ยันทุนนิมิตตัง (ฉบับวัดธรรมมงคล)',
+    temple: 'วัดธรรมมงคล (หลวงพ่อวิริยังค์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Yandunnimittan.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Dhammamonkhon-Yandunnimittan.mp3',
+    durationEst: '00:35',
+    category: 'ชัยมงคลคาถา'
+  },
+
+  // --- วัดป่านานาชาติ เพิ่มเติม ---
+  {
+    id: 'track-metta-nanachat',
+    title: 'เมตตสูตร (ฉบับวัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Metta_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Metta_Sutta.mp3',
+    durationEst: '01:20',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-morning-nanachat-01',
+    title: 'ทำวัตรเช้าภาค ๑ (วัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Morning_Chanting_01.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Morning_Chanting_01.mp3',
+    durationEst: '11:00',
+    category: 'ทำวัตร'
+  },
+  {
+    id: 'track-salutation-nanachat',
+    title: 'นมัสการพระรัตนตรัย (วัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Salutation_Of_The_Triple_Gem.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Salutation_Of_The_Triple_Gem.mp3',
+    durationEst: '04:15',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-merit-sharing-nanachat',
+    title: 'แผ่ส่วนบุญแก่สรรพสัตว์ (วัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Sharing_Merit_with_all_Beings.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Sharing_Merit_with_all_Beings.mp3',
+    durationEst: '01:35',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-dhammacakka-nanachat',
+    title: 'ธัมมจักกัปปวัตตนสูตร (ฉบับวัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Turning_the_Wheel_of_Dhamma_-Dhammacakkappavattanasutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Turning_the_Wheel_of_Dhamma_-Dhammacakkappavattanasutta.mp3',
+    durationEst: '10:30',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-wellbeing-nanachat',
+    title: 'แผ่เมตตาสากล (วัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Reflection_on_Universal_wellbeing.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-Reflection_on_Universal_wellbeing.mp3',
+    durationEst: '02:50',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-buddha-words-nanachat',
+    title: 'พุทธพจน์แรกและสุดท้าย (วัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-The_Buddhas_First_and_Last_Words.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-English-Pali-Wat_Pah_Nanachat-The_Buddhas_First_and_Last_Words.mp3',
+    durationEst: '01:15',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-paritta-nanachat',
+    title: 'สวดพระปริตร (ฉบับวัดป่านานาชาติ)',
+    temple: 'วัดป่านานาชาติ (อุบลราชธานี)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Pah_Nanachat-Paritta_Chanting.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Pah_Nanachat-Paritta_Chanting.mp3',
+    durationEst: '14:30',
+    category: 'บทสวดประจำวัน'
+  },
+
+  // --- วัดมาบจันทร์ เพิ่มเติม ---
+  {
+    id: 'track-paritta-mabchan-01',
+    title: 'พระปริตร ภาค ๑ (วัดมาบจันทร์)',
+    temple: 'วัดมาบจันทร์ (หลวงพ่ออนันต์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Mab_Chan-Paritta_01.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Mab_Chan-Paritta_01.mp3',
+    durationEst: '14:40',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-paritta-mabchan-02',
+    title: 'พระปริตร ภาค ๒ (วัดมาบจันทร์)',
+    temple: 'วัดมาบจันทร์ (หลวงพ่ออนันต์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Mab_Chan-Paritta_02.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Mab_Chan-Paritta_02.mp3',
+    durationEst: '14:00',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-sutta-mabchan',
+    title: 'สวดพระสูตร (วัดมาบจันทร์)',
+    temple: 'วัดมาบจันทร์ (หลวงพ่ออนันต์)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Mab_Chan-Sutta_chanting.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Wat_Mab_Chan-Sutta_chanting.mp3',
+    durationEst: '05:40',
+    category: 'พระสูตรสำคัญ'
+  },
+
+  // --- วัดอัมรวดี เพิ่มเติม ---
+  {
+    id: 'track-buddha-vandana-amaravati',
+    title: 'พุทธวันทนา (วัดอัมรวดี)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Buddha_Vandana.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Buddha_Vandana.mp3',
+    durationEst: '06:15',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-namo-tassa',
+    title: 'นะโม ตัสสะ ภะคะวะโต (บทเปิดสวดมนต์)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Namo_Tassa.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Namo_Tassa.mp3',
+    durationEst: '00:25',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-tisarana-amaravati',
+    title: 'ไตรสรณคมน์ (พระพุทธ พระธรรม พระสงฆ์ — วัดอัมรวดี)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-The_Three_Refuges.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-The_Three_Refuges.mp3',
+    durationEst: '00:30',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-paritta-amaravati-01',
+    title: 'พระปริตร ภาค ๑ (วัดอัมรวดี)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Paritta-Part-01.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Paritta-Part-01.mp3',
+    durationEst: '14:50',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-paritta-amaravati-02',
+    title: 'พระปริตร ภาค ๒ (วัดอัมรวดี)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Paritta-Part-02.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Paritta-Part-02.mp3',
+    durationEst: '04:15',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-sharing-blessings',
+    title: 'แผ่ส่วนบุญ-ให้พร (วัดอัมรวดี)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-13-Reflections-Sharing_Blessings.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-13-Reflections-Sharing_Blessings.mp3',
+    durationEst: '01:25',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-yo-cakkhuma',
+    title: 'โย จักขุมา โมหะมะลัง (บทสรรเสริญพระธรรม)',
+    temple: 'วัดอัมรวดี (อังกฤษ)',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yo_Cakkhuma.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Western-Pali-Wat_Amaravati-Yo_Cakkhuma.mp3',
+    durationEst: '01:10',
+    category: 'บทสวดประจำวัน'
+  },
+
+  // --- ดนตรีประกอบเสียงสวด (ไทย) ---
+  {
+    id: 'track-jayamangala-music',
+    title: 'ชัยมงคลคาถา (ประกอบดนตรี)',
+    temple: 'บทสวดมนต์ประกอบดนตรีไทย',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-Jaya_Mangala_Gatha.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-Jaya_Mangala_Gatha.mp3',
+    durationEst: '01:45',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-chinabanchorn-music',
+    title: 'ชินบัญชร (ประกอบดนตรี)',
+    temple: 'บทสวดมนต์ประกอบดนตรีไทย',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-Jinapanjara_Gatha.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-Jinapanjara_Gatha.mp3',
+    durationEst: '03:30',
+    category: 'คาถาศักดิ์สิทธิ์'
+  },
+  {
+    id: 'track-blessing-music',
+    title: 'บทอวยพร (ประกอบดนตรี)',
+    temple: 'บทสวดมนต์ประกอบดนตรีไทย',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-The_Blessing_Chant.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-The_Blessing_Chant.mp3',
+    durationEst: '02:40',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-tipitaka-chant-music',
+    title: 'สวดพระไตรปิฎก (ประกอบดนตรี)',
+    temple: 'บทสวดมนต์ประกอบดนตรีไทย',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-Tripitaka_Chant.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Music-Tripitaka_Chant.mp3',
+    durationEst: '07:25',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-dhammacakka-thai',
+    title: 'ธัมมจักกัปปวัตตนสูตร (ฉบับไทย)',
+    temple: 'บทสวดมนต์ไทย',
+    srcWebm: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Dhammacakka_Pavathana_Sutta.ogg',
+    srcMp3: 'https://ia601609.us.archive.org/29/items/Buddhist.Chanting/Thailand-Pali-Dhammacakka_Pavathana_Sutta.mp3',
+    durationEst: '04:00',
+    category: 'พระสูตรสำคัญ'
+  },
+
+  // --- คลังเสียงภายนอก (IA Collections) ---
+  {
+    id: 'track-morning-pali-thai-1',
+    title: 'ทำวัตรเช้าบาลี-ไทย ภาค ๑',
+    temple: 'บทสวดมนต์ทำวัตรบาลี-ไทย',
+    srcWebm: 'https://ia601605.us.archive.org/0/items/MorningChantingPali-thai/m1.ogg',
+    srcMp3: 'https://ia601605.us.archive.org/0/items/MorningChantingPali-thai/m1.mp3',
+    durationEst: '10:30',
+    category: 'ทำวัตร'
+  },
+  {
+    id: 'track-morning-pali-thai-2',
+    title: 'ทำวัตรเช้าบาลี-ไทย ภาค ๒',
+    temple: 'บทสวดมนต์ทำวัตรบาลี-ไทย',
+    srcWebm: 'https://ia601605.us.archive.org/0/items/MorningChantingPali-thai/m2.ogg',
+    srcMp3: 'https://ia601605.us.archive.org/0/items/MorningChantingPali-thai/m2.mp3',
+    durationEst: '10:30',
+    category: 'ทำวัตร'
+  },
+  {
+    id: 'track-morning-pali-thai-3',
+    title: 'ทำวัตรเช้าบาลี-ไทย ภาค ๓',
+    temple: 'บทสวดมนต์ทำวัตรบาลี-ไทย',
+    srcWebm: 'https://ia601605.us.archive.org/0/items/MorningChantingPali-thai/m3.ogg',
+    srcMp3: 'https://ia601605.us.archive.org/0/items/MorningChantingPali-thai/m3.mp3',
+    durationEst: '07:15',
+    category: 'ทำวัตร'
+  },
+  {
+    id: 'track-karaniya-standalone',
+    title: 'กรณียเมตตสูตร (สวดบาลีฉบับเต็ม)',
+    temple: 'บทสวดบาลีเดี่ยว',
+    srcWebm: 'https://ia601503.us.archive.org/20/items/KaraniyaMettaSutta/Mettasuttam8.ogg',
+    srcMp3: 'https://ia601503.us.archive.org/20/items/KaraniyaMettaSutta/Mettasuttam8.mp3',
+    durationEst: '02:05',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-dhammapada-yamaka',
+    title: 'ธรรมบท: ยมกวรรค (คู่พระธรรม ว่าด้วยจิต)',
+    temple: 'สวดธรรมบทบาลี 26 วรรค',
+    srcWebm: 'https://dn801303.us.archive.org/0/items/Dhammapada-Chanted-in-Pali/01-Yamakavaggo.ogg',
+    srcMp3: 'https://dn801303.us.archive.org/0/items/Dhammapada-Chanted-in-Pali/01-Yamakavaggo.mp3',
+    durationEst: '09:10',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-dhammapada-buddha',
+    title: 'ธรรมบท: พุทธวรรค (ว่าด้วยพระพุทธเจ้า)',
+    temple: 'สวดธรรมบทบาลี 26 วรรค',
+    srcWebm: 'https://dn801303.us.archive.org/0/items/Dhammapada-Chanted-in-Pali/14-Buddhavaggo.ogg',
+    srcMp3: 'https://dn801303.us.archive.org/0/items/Dhammapada-Chanted-in-Pali/14-Buddhavaggo.mp3',
+    durationEst: '07:30',
+    category: 'พระสูตรสำคัญ'
   }
 ];
 
@@ -409,12 +745,12 @@ class MP3ChantingAudioEngine {
     if (title.includes('มหาการุณิโก') || id.includes('mahakaruniko')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-mahakaruniko') || null;
     }
-    // 4. แผ่เมตตา
+    // 4. แผ่เมตตา / กรณียเมตตสูตร
     if (title.includes('กรณียเมตตสูตร') || id.includes('karaniya') || title.includes('เมตตสูตร')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-karaniya-metta') || null;
     }
     // 5. พระสูตรสำคัญ
-    if (title.includes('ธัมมจัก') || id.includes('dhammacakka')) {
+    if (title.includes('ธัมมจัก') || id.includes('dhammacakka') || title.includes('ปฐมเทศนา')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-dhammacakka') || null;
     }
     if (title.includes('อนัตตลักขณสูตร') || id.includes('anattalakkhana')) {
@@ -438,6 +774,9 @@ class MP3ChantingAudioEngine {
     if (title.includes('อริยมรรค') || id.includes('ariya-magga') || title.includes('มรรคมีองค์')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-ariya-magga') || null;
     }
+    if (title.includes('ธรรมบท') || id.includes('dhammapada')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-dhammapada-yamaka') || null;
+    }
     // 6. พระปริตร ๗ / ๑๒ ตำนาน
     if (title.includes('มงคลสูตร') || id.includes('mangala-sutta')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-mangala-sutta') || null;
@@ -451,7 +790,10 @@ class MP3ChantingAudioEngine {
     if (title.includes('โพชฌังคปริตร') || id.includes('bojjhanga') || title.includes('โพชฌงค์')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-bojjhanga-paritta') || null;
     }
-    if (title.includes('อภยปริตร') || id.includes('abhaya')) {
+    if (title.includes('โภชนังค') || id.includes('bhojananga')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-bhojananga-dhammamon') || null;
+    }
+    if (title.includes('อภยปริตร') || id.includes('abhaya') || title.includes('ยันทุนนิมิตตัง')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-abhaya-paritta') || null;
     }
     if (title.includes('อังคุลิมาลปริตร') || id.includes('angulimala')) {
@@ -463,9 +805,15 @@ class MP3ChantingAudioEngine {
     if (title.includes('๑๒ ตำนาน') || title.includes('12 ตำนาน') || id.includes('12-tamnan')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-12-tamnan-paritta') || null;
     }
-    // 7. สรรเสริญพระพุทธคุณ / สรณคมน์ / ปาติโมกข์ / ชุมนุมเทวดา
+    // 7. สรรเสริญพระพุทธคุณ / สรณคมน์ / ปาติโมกข์ / ชุมนุมเทวดา / นะโม / พุทธวันทนา
+    if (title.includes('นะโม ตัสสะ') || title.includes('นะโมตัสสะ') || id.includes('namo-tassa')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-namo-tassa') || null;
+    }
     if (title.includes('อิติปิโส') || id.includes('itipiso') || title.includes('สรรเสริญพระพุทธคุณ')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-itipiso') || null;
+    }
+    if (title.includes('พุทธวันทนา') || id.includes('buddha-vandana')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-buddha-vandana-dhammamon') || null;
     }
     if (title.includes('ไตรสรณคมน์') || id.includes('tisarana') || title.includes('สรณคมน์')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-tisarana') || null;
@@ -476,9 +824,78 @@ class MP3ChantingAudioEngine {
     if (title.includes('ปาติโมกข์') || id.includes('patimokkha')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-patimokkha-full') || null;
     }
+    if (title.includes('แผ่เมตตา') || title.includes('แผ่ส่วนบุญ') || id.includes('metta-sharing')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-sharing-blessings') || null;
+    }
+    if (title.includes('โย จักขุมา') || id.includes('yo-cakkhuma')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-yo-cakkhuma') || null;
+    }
+    if (title.includes('พุทธพจน์') || id.includes('buddha-words')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-buddha-words-nanachat') || null;
+    }
+    if (title.includes('นมัสการพระรัตนตรัย') || id.includes('salutation')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-salutation-nanachat') || null;
+    }
 
     // No direct matching real audio file for this prayer
     return null;
+  }
+
+  /**
+   * Returns all alternative audio tracks for a prayer (multiple temples/versions).
+   * Used for the track selector dropdown when multiple recordings exist.
+   */
+  getAlternativeTracks(prayer) {
+    if (!prayer) return [];
+    
+    const title = (prayer.title || '').toLowerCase();
+    const id = (prayer.id || '').toLowerCase();
+    const results = [];
+
+    // ธัมมจักกัปปวัตตนสูตร — 4 versions
+    if (title.includes('ธัมมจัก') || id.includes('dhammacakka') || title.includes('ปฐมเทศนา')) {
+      ['track-dhammacakka', 'track-dhammacakka-dhammamon', 'track-dhammacakka-nanachat', 'track-dhammacakka-thai'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // กรณียเมตตสูตร — 4 versions
+    else if (title.includes('กรณียเมตตสูตร') || id.includes('karaniya') || title.includes('เมตตสูตร')) {
+      ['track-karaniya-metta', 'track-karaniya-dhammamon', 'track-metta-nanachat', 'track-karaniya-standalone'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // รัตนสูตร — 2 versions
+    else if (title.includes('รัตนสูตร') || id.includes('ratana-sutta')) {
+      ['track-ratana-sutta', 'track-ratana-dhammamon'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // ชินบัญชร — 2 versions
+    else if (title.includes('ชินบัญชร') || id.includes('chinabanchorn')) {
+      ['track-chinabanchorn', 'track-chinabanchorn-music'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // ยันทุนนิมิตตัง / อภยปริตร — 2 versions
+    else if (title.includes('อภยปริตร') || title.includes('ยันทุนนิมิตตัง') || id.includes('abhaya')) {
+      ['track-abhaya-paritta', 'track-abhaya-dhammamon'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // ทำวัตรเช้า — 4 versions
+    else if (title.includes('ทำวัตรเช้า') || id.includes('morning')) {
+      ['track-morning-chanting', 'track-morning-nanachat-01', 'track-morning-pali-thai-1', 'track-morning-pali-thai-2', 'track-morning-pali-thai-3'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+
+    return results;
   }
 
   hasAudioForPrayer(prayer) {

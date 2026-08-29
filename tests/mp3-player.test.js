@@ -5,7 +5,7 @@ import { TIPITAKA_SUTTA_PRAYERS } from '../src/js/prayers-tipitaka-suttas.js';
 
 test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t) => {
   await t.test('CHANTING_AUDIO_TRACKS provides authentic public domain chanting sources', () => {
-    assert.ok(CHANTING_AUDIO_TRACKS.length >= 28);
+    assert.ok(CHANTING_AUDIO_TRACKS.length >= 59, `Expected 59+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
     
     CHANTING_AUDIO_TRACKS.forEach(track => {
       assert.ok(track.id, 'Track must have an ID');
@@ -53,6 +53,33 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
     const matchedNone = mp3Player.getTrackForPrayer(unrecordedPrayer);
     assert.strictEqual(matchedNone, null, 'Unrecorded prayer must return null');
     assert.strictEqual(mp3Player.hasAudioForPrayer(unrecordedPrayer), false, 'hasAudioForPrayer must be false');
+
+    // New tracks added in expansion
+    const namo = { id: 'namo-tassa', title: 'นะโม ตัสสะ ภะคะวะโต' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(namo).id, 'track-namo-tassa');
+
+    const dhammapada = { id: 'dhammapada', title: 'ธรรมบท' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(dhammapada).id, 'track-dhammapada-yamaka');
+
+    const buddhaVandana = { id: 'buddha-vandana', title: 'พุทธวันทนา' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(buddhaVandana).id, 'track-buddha-vandana-dhammamon');
+
+    const bhojananga = { id: 'bhojananga', title: 'โภชนังคปริตร' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(bhojananga).id, 'track-bhojananga-dhammamon');
+
+    // All track IDs must be unique
+    const ids = CHANTING_AUDIO_TRACKS.map(t => t.id);
+    assert.strictEqual(ids.length, new Set(ids).size, 'All track IDs must be unique');
+
+    // Alternative tracks for multi-version prayers
+    const altDhammacakka = mp3Player.getAlternativeTracks({ title: 'ธัมมจักกัปปวัตตนสูตร' });
+    assert.ok(altDhammacakka.length >= 4, `ธัมมจักร should have 4+ versions, got ${altDhammacakka.length}`);
+
+    const altKaraniya = mp3Player.getAlternativeTracks({ title: 'กรณียเมตตสูตร' });
+    assert.ok(altKaraniya.length >= 4, `เมตตสูตร should have 4+ versions, got ${altKaraniya.length}`);
+
+    const altChinabanchorn = mp3Player.getAlternativeTracks({ title: 'ชินบัญชร' });
+    assert.ok(altChinabanchorn.length >= 2, `ชินบัญชร should have 2+ versions, got ${altChinabanchorn.length}`);
   });
 
   await t.test('MP3 player utility functions: time formatting, speed, loop', () => {
