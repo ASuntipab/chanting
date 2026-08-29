@@ -40,17 +40,11 @@ export class ComicReaderEngine {
     this.btnPrev = document.getElementById('btnPrevPage');
     this.btnNext = document.getElementById('btnNextPage');
     this.btnClose = document.getElementById('btnCloseReader');
-    this.btnSettings = document.getElementById('btnReaderSettings');
-    this.settingsDrawer = document.getElementById('readerSettingsDrawer');
     
-    // Font Sizing in Toolbar & Drawer
-    this.btnToolbarFontPlus = document.getElementById('btnToolbarFontPlus');
-    this.btnToolbarFontMinus = document.getElementById('btnToolbarFontMinus');
-    this.toolbarFontSize = document.getElementById('toolbarFontSize');
+    // Font Sizing in Bottom HUD Dock
     this.btnFontPlus = document.getElementById('btnFontPlus');
     this.btnFontMinus = document.getElementById('btnFontMinus');
     this.fontSizeDisplay = document.getElementById('fontSizeDisplay');
-    this.btnToggleFullscreen = document.getElementById('btnToggleFullscreen');
     this.btnChantInReader = document.getElementById('btnChantInReader');
   }
 
@@ -84,46 +78,27 @@ export class ComicReaderEngine {
       this.scheduleAutoHide();
     });
 
-    // Settings Toggle
-    this.btnSettings?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.settingsDrawer?.classList.toggle('open');
-      this.scheduleAutoHide(6000);
-    });
-
-    document.addEventListener('click', (e) => {
-      if (this.settingsDrawer?.classList.contains('open') && !this.settingsDrawer.contains(e.target) && e.target !== this.btnSettings) {
-        this.settingsDrawer.classList.remove('open');
-      }
-    });
-
-    // Font Sizing (Toolbar & Drawer)
-    this.btnToolbarFontPlus?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.adjustFontSize(0.1);
-      this.scheduleAutoHide(4500);
-    });
-    this.btnToolbarFontMinus?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.adjustFontSize(-0.1);
-      this.scheduleAutoHide(4500);
-    });
+    // Font Sizing in Bottom HUD Dock (Up to 300% for Elders)
     this.btnFontPlus?.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.adjustFontSize(0.1);
-      this.scheduleAutoHide(6000);
+      this.adjustFontSize(0.15);
+      this.scheduleAutoHide(5000);
     });
     this.btnFontMinus?.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.adjustFontSize(-0.1);
-      this.scheduleAutoHide(6000);
+      this.adjustFontSize(-0.15);
+      this.scheduleAutoHide(5000);
     });
 
-    // Fullscreen Toggle
-    this.btnToggleFullscreen?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.toggleFullscreen();
-      this.scheduleAutoHide();
+    // Theme Switcher directly in Bottom HUD Dock
+    this.readerBottomBar?.querySelectorAll('[data-set-theme]')?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const theme = btn.dataset.setTheme;
+        document.body.className = `theme-${theme}`;
+        storage.saveSettings({ theme });
+        this.scheduleAutoHide(5000);
+      });
     });
 
     // Prevent clicks inside Toolbar & Bottom bar from toggling page
@@ -215,9 +190,12 @@ export class ComicReaderEngine {
     this.currentPrayer = prayer;
     this.currentPageIndex = startPage;
 
-    // Apply User Font Preference
+    // Apply User Font & Theme Preference automatically
     const settings = storage.getSettings();
     this.applyFontSize(settings.fontSize || 1.15);
+    if (settings.theme) {
+      document.body.className = `theme-${settings.theme}`;
+    }
 
     // Update Headers
     if (this.readerTitle) this.readerTitle.textContent = prayer.title;
@@ -245,12 +223,8 @@ export class ComicReaderEngine {
 
   close() {
     this.readerView.classList.remove('active');
-    this.settingsDrawer?.classList.remove('open');
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.().catch(() => {});
-    }
   }
 
   isOpen() {
@@ -597,11 +571,12 @@ export class ComicReaderEngine {
     }
   }
 
-  // --- Font Scaling & Preference Persistence with Viewport Recalculation ---
+  // --- Font Scaling & Preference Persistence (Up to 300% for Elders) ---
   adjustFontSize(delta) {
     const settings = storage.getSettings();
     let current = settings.fontSize || 1.15;
-    current = Math.min(Math.max(current + delta, 0.75), 2.2);
+    // Allow scaling from 0.75rem (~65%) up to 3.45rem (300%)
+    current = Math.min(Math.max(current + delta, 0.75), 3.45);
     settings.fontSize = parseFloat(current.toFixed(2));
     storage.saveSettings(settings);
     this.applyFontSize(settings.fontSize);
@@ -622,9 +597,6 @@ export class ComicReaderEngine {
     const percentStr = `${Math.round((sizeRem / 1.15) * 100)}%`;
     if (this.fontSizeDisplay) {
       this.fontSizeDisplay.textContent = percentStr;
-    }
-    if (this.toolbarFontSize) {
-      this.toolbarFontSize.textContent = percentStr;
     }
   }
 

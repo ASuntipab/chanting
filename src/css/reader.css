@@ -64,53 +64,6 @@
   color: var(--text-muted);
 }
 
-.reader-toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Quick Font Resizer Capsule in Toolbar */
-.reader-font-quick {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(16, 24, 52, 0.75);
-  border: 1px solid var(--border-subtle);
-  padding: 2px 6px;
-  border-radius: var(--radius-full);
-}
-
-.btn-icon-small {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  color: var(--accent-gold);
-  font-weight: 700;
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-icon-small:hover, .btn-icon-small:active {
-  background: var(--accent-gold);
-  color: #120e0b;
-  transform: scale(1.1);
-}
-
-.font-size-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 42px;
-  text-align: center;
-}
-
 /* Auto-hiding HUD States */
 .reader-view.hud-hidden .reader-toolbar {
   transform: translateY(-100%);
@@ -125,11 +78,6 @@
 }
 
 .reader-view.hud-hidden .comic-nav-btn {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.reader-view.hud-hidden .reader-settings-drawer {
   opacity: 0;
   pointer-events: none;
 }
@@ -439,38 +387,91 @@ body.theme-cosmic .verse-pali {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-full);
-  padding: 8px 18px;
+  padding: 6px 14px;
   z-index: 100;
-  box-shadow: var(--shadow-gold);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), var(--shadow-gold);
   transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.35s ease;
+  max-width: 96vw;
 }
 
-.reader-page-dots {
+/* Font Resizer Dock in Bottom Bar (Up to 300%) */
+.reader-font-dock {
   display: flex;
-  gap: 5px;
   align-items: center;
-  max-width: 140px;
-  overflow: hidden;
-}
-
-.reader-dot {
-  width: 7px;
-  height: 7px;
+  gap: 4px;
+  background: rgba(16, 24, 52, 0.65);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
   border-radius: var(--radius-full);
-  background: var(--text-muted);
-  transition: all 0.25s ease;
 }
 
-.reader-dot.active {
-  width: 18px;
+.btn-dock-font {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-gold);
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dock-font:hover, .btn-dock-font:active {
   background: var(--accent-gold);
-  box-shadow: 0 0 8px var(--accent-gold);
+  color: #120e0b;
+  transform: scale(1.12);
+}
+
+.font-dock-badge {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 44px;
+  text-align: center;
+  user-select: none;
+}
+
+/* Theme Switcher Dock in Bottom Bar */
+.reader-theme-dock {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(16, 24, 52, 0.65);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 6px;
+  border-radius: var(--radius-full);
+}
+
+.btn-dock-theme {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dock-theme:hover, .btn-dock-theme:active {
+  background: var(--bg-card);
+  border-color: var(--accent-gold);
+  transform: scale(1.15);
 }
 
 .reader-chant-counter {
@@ -479,71 +480,18 @@ body.theme-cosmic .verse-pali {
   gap: 6px;
   background: rgba(212, 175, 55, 0.15);
   border: 1px solid var(--border-subtle);
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: var(--radius-full);
   font-family: var(--font-header);
   font-size: 0.85rem;
   color: var(--accent-gold);
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .reader-chant-counter:active {
   transform: scale(0.95);
   background: var(--accent-gold);
   color: #120e0b;
-}
-
-/* Font Resizer & Settings Floating Drawer */
-.reader-settings-drawer {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--bg-modal);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  z-index: 30;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-md), var(--shadow-gold);
-  min-width: 300px;
-}
-
-.reader-settings-drawer.open {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
-}
-
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.font-size-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-small {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
 }

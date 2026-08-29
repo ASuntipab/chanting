@@ -155,7 +155,7 @@ class ReaderGestureTester {
 
   adjustFontSize(delta) {
     let current = this.fontSize + delta;
-    current = Math.min(Math.max(current, 0.75), 2.2);
+    current = Math.min(Math.max(current, 0.75), 3.45);
     this.fontSize = parseFloat(current.toFixed(2));
     const percent = Math.round((this.fontSize / 1.15) * 100);
     return { fontSize: this.fontSize, percent: `${percent}%` };
@@ -221,19 +221,24 @@ test('Viewport Snap Metric Calculation: Accurately calculates total viewport pag
   assert.equal(calculateViewportPages(450, 1800), 5, '1800px content on 450px screen should be 5 sections');
 });
 
-test('Font Size Rescaling: Scaling clamps safely and calculates percentage accurately', () => {
+test('Font Size Rescaling: Scaling up to 300% (3.45rem) for elders and persists percentage', () => {
   const tester = new ReaderGestureTester();
   assert.equal(tester.fontSize, 1.15);
 
-  // Zoom In (+0.1)
-  const zoomIn = tester.adjustFontSize(0.1);
-  assert.equal(zoomIn.fontSize, 1.25);
-  assert.equal(zoomIn.percent, '109%');
+  // Zoom In (+0.15)
+  const zoomIn = tester.adjustFontSize(0.15);
+  assert.equal(zoomIn.fontSize, 1.30);
+  assert.equal(zoomIn.percent, '113%');
 
-  // Zoom Out (-0.3)
-  const zoomOut = tester.adjustFontSize(-0.3);
-  assert.equal(zoomOut.fontSize, 0.95);
-  assert.equal(zoomOut.percent, '83%');
+  // Zoom to Maximum 300% (3.45rem)
+  const maxZoom = tester.adjustFontSize(2.5);
+  assert.equal(maxZoom.fontSize, 3.45, 'Font size should clamp at 3.45rem (300%)');
+  assert.equal(maxZoom.percent, '300%');
+
+  // Zoom Out (-2.7)
+  const zoomOut = tester.adjustFontSize(-2.7);
+  assert.equal(zoomOut.fontSize, 0.75, 'Font size should clamp at 0.75rem (~65%)');
+  assert.equal(zoomOut.percent, '65%');
 });
 
 test('Default Prayers Suite: Verified Luang Pu Mun, Luang Ta Maha Bua & Maha Metta Yai (12 pages)', () => {
