@@ -8,10 +8,12 @@ import { starfield } from './starfield.js';
 import { nativeBridge } from './native-bridge.js';
 import { renderQRCodeToCanvas } from './qrcode.js';
 import { tipitakaLoader } from './tipitaka-loader.js';
+import { adManager } from './ad-manager.js';
 
 class TammaApp {
   constructor() {
     this.reader = null;
+    this.adManager = adManager;
     this.currentCategory = 'all';
     this.searchQuery = '';
     this.tipitakaPitaka = 'all';
@@ -22,6 +24,9 @@ class TammaApp {
   init() {
     // 0. Initialize Native Mobile Bridge (iOS & Android)
     nativeBridge.init();
+
+    // 0.1 Initialize Top-Only Ad Banner Manager
+    this.adManager.init();
 
     // 1. Initialize Cosmic Starfield
     starfield.init();
