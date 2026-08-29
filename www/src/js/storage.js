@@ -105,46 +105,70 @@ class DhammaStorageEngine {
     this.save(STORAGE_KEYS.PRAYERS, prayers);
   }
 
-  // --- Export & Import JSON Backup API ---
+  // --- Export & Import User Data Backup API (Favorites, Stats & Settings only) ---
   exportData() {
     const data = {
-      version: '1.0.0',
+      version: '2.0.0',
       exportedAt: new Date().toISOString(),
-      prayers: this.getPrayers(),
       favorites: this.getFavorites(),
-      tracker: this.getTrackerData()
+      tracker: this.getTrackerData(),
+      settings: this.getSettings()
     };
     return JSON.stringify(data, null, 2);
   }
 
+  exportBackupCode() {
+    const jsonStr = this.exportData();
+    return btoa(encodeURIComponent(jsonStr));
+  }
+
   importData(rawJson) {
     try {
-      const data = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
-      if (!data || !Array.isArray(data.prayers)) {
-        throw new Error('โครงสร้างไฟล์ไม่ถูกต้อง');
+      let data = rawJson;
+      if (typeof rawJson === 'string') {
+        rawJson = rawJson.trim();
+        // Check if Base64 string
+        if (rawJson.startsWith('{') || rawJson.startsWith('[')) {
+          data = JSON.parse(rawJson);
+        } else {
+          try {
+            data = JSON.parse(decodeURIComponent(atob(rawJson)));
+          } catch {
+            data = JSON.parse(rawJson);
+          }
+        }
       }
 
-      // Merge prayers
-      const currentPrayers = this.getPrayers();
-      const currentIds = new Set(currentPrayers.map(p => p.id));
-      let addedCount = 0;
+      if (!data || typeof data !== 'object') {
+        throw new Error('โครงสร้างข้อมูลไม่ถูกต้อง');
+      }
 
-      data.prayers.forEach(p => {
-        if (!currentIds.has(p.id)) {
-          currentPrayers.push(p);
-          addedCount++;
-        }
-      });
-      this.save(STORAGE_KEYS.PRAYERS, currentPrayers);
-
-      // Merge favorites if available
+      // 1. Restore Favorites
       if (Array.isArray(data.favorites)) {
         const currentFavs = new Set(this.getFavorites());
         data.favorites.forEach(f => currentFavs.add(f));
         this.save(STORAGE_KEYS.FAVORITES, Array.from(currentFavs));
       }
 
-      return { success: true, addedCount };
+      // 2. Restore Tracker & Stats
+      if (data.tracker && typeof data.tracker === 'object') {
+        const currentTracker = this.getTrackerData();
+        if (data.tracker.totalCounts) {
+          currentTracker.totalCounts = { ...currentTracker.totalCounts, ...data.tracker.totalCounts };
+        }
+        if (data.tracker.todayChanted) {
+          currentTracker.todayChanted = { ...currentTracker.todayChanted, ...data.tracker.todayChanted };
+        }
+        currentTracker.streakDays = Math.max(currentTracker.streakDays || 1, data.tracker.streakDays || 1);
+        this.save(STORAGE_KEYS.TRACKER, currentTracker);
+      }
+
+      // 3. Restore Settings
+      if (data.settings && typeof data.settings === 'object') {
+        this.saveSettings(data.settings);
+      }
+
+      return { success: true };
     } catch (e) {
       console.error('Import error:', e);
       return { success: false, error: e.message };

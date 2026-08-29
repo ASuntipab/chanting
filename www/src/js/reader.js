@@ -209,6 +209,7 @@ export class ComicReaderEngine {
   }
 
   scheduleAutoHide(delay = 3500) {
+    if (!this.hudVisible) return;
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     this.autoHideTimer = setTimeout(() => {
       if (this.isOpen() && this.hudVisible && !this.settingsDrawer?.classList.contains('open')) {
@@ -362,10 +363,14 @@ export class ComicReaderEngine {
     const moreIndicator = document.createElement('div');
     moreIndicator.className = 'scroll-more-indicator';
     moreIndicator.innerHTML = '<span>มีต่อ</span> <span>▼</span>';
-    moreIndicator.addEventListener('click', (e) => {
+    const handleMoreClick = (e) => {
+      e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
       this.nextPage();
-    });
+    };
+    moreIndicator.addEventListener('click', handleMoreClick);
+    moreIndicator.addEventListener('touchend', handleMoreClick);
     this.moreIndicator = moreIndicator;
 
     const counterBadge = document.createElement('div');
@@ -557,6 +562,13 @@ export class ComicReaderEngine {
   // --- Touch Gesture Controllers (Swipe Left/Right & Up/Down to Snap Viewport) ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
+    const target = e.target;
+    // Ignore interactive controls to prevent button/HUD clash
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+      this.isSwiping = false;
+      this.touchStartTime = 0;
+      return;
+    }
     this.lastTouchTime = Date.now();
     this.touchStartTime = Date.now();
     this.touchStartX = e.touches[0].clientX;
@@ -573,9 +585,14 @@ export class ComicReaderEngine {
   }
 
   handleTouchEnd(e) {
-    if (!this.isSwiping) return;
+    if (!this.isSwiping || !this.touchStartTime) return;
     this.isSwiping = false;
     this.lastTouchTime = Date.now();
+
+    const target = e.target;
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+      return;
+    }
 
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - (e.changedTouches[0]?.clientY || this.touchCurrentY);
@@ -589,8 +606,8 @@ export class ComicReaderEngine {
     else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
       this.prevPage();
     } 
-    // 3. Instant Single Tap Detected on mobile
-    else if (elapsed < 600 && Math.abs(deltaX) < 25 && Math.abs(deltaY) < 25) {
+    // 3. Clean Tap on reading text area -> Toggle HUD
+    else if (elapsed < 500 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
       this.toggleHUD();
     }
   }
@@ -598,6 +615,13 @@ export class ComicReaderEngine {
   // --- Mouse Drag & Click Gestures for Desktop ---
   handleMouseDown(e) {
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
+    const target = e.target;
+    // Ignore interactive controls to prevent button/HUD clash
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+      this.isMouseDown = false;
+      this.touchStartTime = 0;
+      return;
+    }
     this.isMouseDown = true;
     this.touchStartTime = Date.now();
     this.touchStartX = e.clientX;
@@ -613,9 +637,14 @@ export class ComicReaderEngine {
   }
 
   handleMouseUp(e) {
-    if (!this.isMouseDown) return;
+    if (!this.isMouseDown || !this.touchStartTime) return;
     this.isMouseDown = false;
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
+
+    const target = e.target;
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+      return;
+    }
 
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - e.clientY;
@@ -629,8 +658,8 @@ export class ComicReaderEngine {
     else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
       this.prevPage();
     } 
-    // Instant Single Click -> Toggle HUD
-    else if (elapsed < 600 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
+    // Clean Click on reading text area -> Toggle HUD
+    else if (elapsed < 500 && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
       this.toggleHUD();
     }
   }
