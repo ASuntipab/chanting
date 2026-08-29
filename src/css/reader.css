@@ -667,12 +667,110 @@ body.theme-parchment .btn-dock-font {
   color: #5a3c18;
 }
 
-body.theme-parchment .font-dock-badge {
-  color: #5a3c18;
-}
-
 body.theme-parchment .reader-chant-counter {
   background: rgba(154, 101, 20, 0.12);
   border-color: rgba(154, 101, 20, 0.35);
   color: #684105;
+}
+
+/* ==========================================================================
+   iPad & Tablet Reader Mode Upgrades (>= 768px)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .reader-toolbar {
+    height: 72px;
+    padding: 0 28px;
+  }
+
+  .reader-title {
+    font-size: 1.35rem;
+  }
+
+  .reader-subtitle {
+    font-size: 0.95rem;
+  }
+
+  #btnCloseReader {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+
+  .page-frame {
+    padding: calc(var(--safe-top) + 80px) 36px calc(var(--safe-bottom) + 110px) 36px;
+  }
+
+  .page-verse-header {
+    font-size: 1.35rem;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+  }
+
+  .comic-nav-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 2rem;
+  }
+
+  .comic-nav-btn.prev { left: 24px; }
+  .comic-nav-btn.next { right: 24px; }
+
+  .reader-bottom-bar {
+    max-width: 640px;
+    width: 86vw;
+    padding: 14px 24px;
+    gap: 12px;
+    bottom: 24px;
+    border-radius: var(--radius-lg);
+  }
+
+  .btn-scrubber-nav {
+    padding: 7px 18px;
+    font-size: 0.92rem;
+  }
+
+  .reader-scrubber-badge {
+    font-size: 0.98rem;
+    min-width: 56px;
+  }
+
+  .reader-scrubber-slider {
+    height: 8px;
+  }
+
+  .reader-scrubber-slider::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+  }
+
+  .reader-font-dock {
+    padding: 4px 10px;
+    gap: 6px;
+  }
+
+  .btn-dock-font {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+
+  .font-dock-badge {
+    font-size: 0.92rem;
+    min-width: 48px;
+  }
+
+  .reader-chant-counter {
+    padding: 8px 20px;
+    font-size: 1rem;
+    gap: 8px;
+  }
+
+  .finish-chant-overlay {
+    bottom: 140px;
+  }
+
+  .finish-chant-overlay button {
+    padding: 18px 36px !important;
+    font-size: 1.25rem !important;
+  }
 }
