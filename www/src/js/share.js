@@ -32,13 +32,31 @@ export class DhammaShareEngine {
 
     const shareData = {
       title: `${prayer.title} - บทสวดมนต์`,
-      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\n(วันนี้ฉันสวดสะสมแล้ว ${count} จบ, ต่อเนื่อง ${streak} วัน)\n\nกดลิงก์ด้านล่างเพื่อเปิดอ่านและเพิ่มเข้าคลังบทสวดมนต์ของคุณได้ฟรี:`,
+      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\n(ฉันสวดสะสมแล้ว ${count} จบ, ต่อเนื่อง ${streak} วัน)\n\nกดลิงก์ด้านล่างเพื่อเพิ่มเข้าคลังบทสวดมนต์ของคุณได้ฟรี:`,
       url: shareUrl
     };
 
+    let fullPrayerText = '';
+    if (prayer.pages && prayer.pages.length > 0) {
+      fullPrayerText = prayer.pages.map(p => {
+        let text = '';
+        if (p.verseTitle) text += `[ ${p.verseTitle} ]\n`;
+        if (p.pali) text += `${p.pali.replace(/<br>/g, '\n')}\n`;
+        if (p.thai) text += `${p.thai.replace(/<br>/g, '\n')}\n`;
+        return text.trim();
+      }).join('\n\n');
+    } else {
+      fullPrayerText = prayer.description || '';
+    }
+    
+    const combinedText = `${shareData.text}\n${shareData.url}\n\n=== เนื้อหาบทสวด ===\n${fullPrayerText}`;
+
     if (navigator.share) {
       try {
-        await navigator.share(shareData);
+        await navigator.share({
+          title: shareData.title,
+          text: combinedText,
+        });
         return true;
       } catch (e) {
         if (e.name !== 'AbortError') {
@@ -49,7 +67,7 @@ export class DhammaShareEngine {
 
     // Fallback: Copy to Clipboard
     try {
-      await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+      await navigator.clipboard.writeText(combinedText);
       return 'copied';
     } catch (e) {
       return false;
@@ -98,9 +116,9 @@ export class DhammaShareEngine {
 
     // 4. Header & App Branding
     ctx.textAlign = 'center';
-    ctx.font = 'bold 20px "Prompt", sans-serif';
+    ctx.font = 'bold 22px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
-    ctx.fillText('❖ บทสวดมนต์ • TAMMA OS ❖', width / 2, 85);
+    ctx.fillText('❖ บทสวดมนต์ ❖', width / 2, 85);
 
     // 5. Prayer Title (Auto-scaling & Word Wrapping)
     const titleText = prayer.title || 'บทสวดมนต์อันเป็นมงคล';
