@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.kaisoft.tamma;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -5,10 +5,14 @@
   "main": "tamma.html",
   "type": "module",
   "scripts": {
+    "build": "node scripts/build.js",
     "test": "node --test tests/*.test.js",
-    "cap:sync": "npx cap sync",
+    "cap:build": "npm run build && npx cap sync",
+    "cap:sync": "npm run build && npx cap sync",
     "cap:open:android": "npx cap open android",
-    "cap:open:ios": "npx cap open ios"
+    "cap:open:ios": "npx cap open ios",
+    "cap:run:android": "npm run build && npx cap run android",
+    "cap:run:ios": "npm run build && npx cap run ios"
   },
   "keywords": [
     "dharma",
