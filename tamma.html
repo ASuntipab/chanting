@@ -27,10 +27,7 @@
     <header class="top-header">
       <div class="brand" onclick="window.tammaApp.switchTab('library')">
         <span class="brand-icon">🪷</span>
-        <div>
-          <div class="brand-name">ธรรมะ E-Book</div>
-        </div>
-        <span class="brand-tag">Tamma OS</span>
+        <div class="brand-name">ธรรมะ E-Book</div>
       </div>
 
       <div class="header-actions">
@@ -38,9 +35,9 @@
         <button id="btnOpenBackup" class="btn-icon" title="สำรอง / นำเข้าไฟล์บทสวดมนต์ (Export & Import)">
           💾
         </button>
-        <!-- Add / Upload Prayer Button -->
-        <button id="btnOpenUpload" class="btn-primary" style="padding: 8px 14px; font-size: 0.88rem;">
-          <span>+ เพิ่มบทสวด</span>
+        <!-- Add / Suggest Prayer Button (+) -->
+        <button id="btnOpenUpload" class="btn-circle-add" title="แนะนำ / ขอเพิ่มบทสวดมนต์">
+          +
         </button>
       </div>
     </header>
@@ -199,66 +196,49 @@
   </div>
 
   <!-- ==========================================================================
-       MODALS: UPLOAD / URL IMPORT
+       MODALS: SUGGEST / REQUEST PRAYER (EMAIL TO ADMIN@KAISOFT.NET)
        ========================================================================== -->
   <div id="uploadModal" class="modal-overlay">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 480px;">
       <div class="modal-header">
-        <h3 class="modal-title">📥 เพิ่มและนำเข้าบทสวดมนต์</h3>
+        <h3 class="modal-title">💌 แนะนำ / ขอเพิ่มบทสวดมนต์</h3>
         <button id="btnCloseUpload" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
       </div>
 
-      <!-- Sub-Tabs: Manual vs URL Import -->
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button id="tabBtnManual" class="chip active" style="flex: 1;">✍️ พิมพ์บทสวดเอง</button>
-        <button id="tabBtnUrl" class="chip" style="flex: 1;">🌐 นำเข้าจาก URL เว็บ</button>
-      </div>
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.6;">
+        อยากให้เพิ่มบทสวดของพระอาจารย์ท่านไหน หรือบทใด? สามารถส่งรายละเอียดมาที่ <strong style="color: var(--accent-gold); text-decoration: underline;">admin@kaisoft.net</strong> แล้วทีมงานจะจัดทำและนำเข้ามาบรรจุในแอปให้ทุกคนได้ร่วมสวดมนต์ครับ 🙏
+      </p>
 
-      <!-- Pane 1: Manual Form -->
-      <div id="tabPaneManual">
-        <form id="formManualUpload">
-          <div class="form-group">
-            <label class="form-label">ชื่อบทสวดมนต์ *</label>
-            <input type="text" id="uploadTitle" class="form-control" placeholder="เช่น คาถามหาจักรพรรดิ" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">หมวดหมู่</label>
-            <select id="uploadCategory" class="form-control">
-              <option value="คาถาศักดิ์สิทธิ์">คาถาศักดิ์สิทธิ์</option>
-              <option value="บทสวดประจำวัน">บทสวดประจำวัน</option>
-              <option value="ชัยมงคลคาถา">ชัยมงคลคาถา</option>
-              <option value="แผ่เมตตา">แผ่เมตตา</option>
-              <option value="ทำวัตร">ทำวัตร</option>
-              <option value="บทสวดทั่วไป">บทสวดทั่วไป</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">ที่มา / ผู้รจนา</label>
-            <input type="text" id="uploadAuthor" class="form-control" placeholder="เช่น หลวงปู่ดู่, คัมภีร์โบราณ">
-          </div>
-          <div class="form-group">
-            <label class="form-label">เนื้อหาบทสวดมนต์ * (ระบบจะแบ่งหน้า E-Book ให้อัตโนมัติ)</label>
-            <textarea id="uploadContent" class="form-control" placeholder="พิมพ์หรือวางบทสวดและคำแปลที่นี่..." required></textarea>
-          </div>
-          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
-            ✨ บันทึกลงคลังบทสวดทันที
-          </button>
-        </form>
-      </div>
-
-      <!-- Pane 2: URL Importer -->
-      <div id="tabPaneUrl" style="display: none;">
+      <form id="formSuggestPrayer">
         <div class="form-group">
-          <label class="form-label">URL ลิงก์หน้าเว็บธรรมะ / บทสวดมนต์</label>
-          <input type="url" id="uploadUrlInput" class="form-control" placeholder="https://example.com/prayer-article">
+          <label class="form-label">ชื่อบทสวด / พระอาจารย์ / วัด</label>
+          <input type="text" id="suggestTitle" class="form-control" placeholder="เช่น คาถามหาจักรพรรดิ (หลวงปู่ดู่), หลวงพ่อกวย วัดโฆสิตาราม">
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
-          💡 ระบบจะทำการสกัดเฉพาะเนื้อหาบทสวดมนต์ กรองโฆษณาออก และจัดแบ่งหน้าสไตล์ E-Book การ์ตูนให้อัตโนมัติ
-        </p>
-        <div id="urlFetchStatus" style="display: none; font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 12px;"></div>
-        <button id="btnFetchUrl" class="btn-primary" style="width: 100%; justify-content: center;">
-          ⚡ ดึงข้อมูลและสร้างหน้า E-Book
-        </button>
+
+        <div class="form-group">
+          <label class="form-label">ลิงก์เว็บไซต์ หรือ YouTube (ถ้ามี)</label>
+          <input type="url" id="suggestUrl" class="form-control" placeholder="https://example.com/prayer หรือ ลิงก์ยูทูป/บทความ">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">เนื้อหาบทสวด หรือข้อความที่อยากบอก</label>
+          <textarea id="suggestNotes" class="form-control" style="min-height: 90px;" placeholder="พิมพ์เฉพาะชื่อบท, วางเนื้อหาบทสวดทั้งบท, หรือพิมพ์ข้อความบอกอะไรก็ได้ครับ..."></textarea>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
+          <button type="button" id="btnSendEmailAdmin" class="btn-primary" style="justify-content: center; width: 100%; font-size: 0.95rem;">
+            📧 เปิดส่งอีเมลหาทีมงาน (admin@kaisoft.net)
+          </button>
+          <button type="button" id="btnCopyEmailContent" class="btn-secondary" style="justify-content: center; width: 100%;">
+            📋 คัดลอกข้อความ & ที่อยู่อีเมล
+          </button>
+        </div>
+      </form>
+
+      <div style="margin-top: 14px; padding: 10px 12px; background: rgba(251, 191, 36, 0.08); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); text-align: center;">
+        <span style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; display: block;">
+          💡 จะส่งมาเป็นชื่ออย่างเดียว, ทั้งบท, หรือแค่ URL ก็ได้ครับ ทีมงานจะนำไปจัดหน้า E-Book ให้อย่างสวยงาม
+        </span>
       </div>
     </div>
   </div>

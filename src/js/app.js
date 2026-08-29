@@ -110,89 +110,59 @@ class TammaApp {
       });
     });
 
-    // Upload / Import Modal Triggers
+    // Suggest / Request Prayer Modal Triggers (+)
     const btnOpenUpload = document.getElementById('btnOpenUpload');
     const uploadModal = document.getElementById('uploadModal');
     const btnCloseUpload = document.getElementById('btnCloseUpload');
+    const btnSendEmailAdmin = document.getElementById('btnSendEmailAdmin');
+    const btnCopyEmailContent = document.getElementById('btnCopyEmailContent');
+
     btnOpenUpload?.addEventListener('click', () => uploadModal?.classList.add('open'));
     btnCloseUpload?.addEventListener('click', () => uploadModal?.classList.remove('open'));
 
-    // Upload Tabs (Manual vs URL)
-    const tabBtnManual = document.getElementById('tabBtnManual');
-    const tabBtnUrl = document.getElementById('tabBtnUrl');
-    const tabPaneManual = document.getElementById('tabPaneManual');
-    const tabPaneUrl = document.getElementById('tabPaneUrl');
+    const getSuggestionPayload = () => {
+      const title = document.getElementById('suggestTitle')?.value.trim() || 'ขอแนะนำบทสวดมนต์';
+      const url = document.getElementById('suggestUrl')?.value.trim() || '-';
+      const notes = document.getElementById('suggestNotes')?.value.trim() || '(ไม่มีข้อความเพิ่มเติม)';
 
-    tabBtnManual?.addEventListener('click', () => {
-      tabBtnManual.classList.add('active');
-      tabBtnUrl.classList.remove('active');
-      tabPaneManual.style.display = 'block';
-      tabPaneUrl.style.display = 'none';
+      const emailSubject = encodeURIComponent(`[แนะนำบทสวดมนต์] ${title}`);
+      const emailBody = encodeURIComponent(
+        `สวัสดีทีมงาน / แอดมิน (admin@kaisoft.net),\n\n` +
+        `ฉันขอแนะนำ/ขอเพิ่มบทสวดมนต์เข้าสู่ระบบ ธรรมะ E-Book ดังนี้ครับ:\n\n` +
+        `📌 ชื่อบทสวด / พระอาจารย์ / วัด: ${title}\n` +
+        `🔗 ลิงก์เว็บไซต์ หรือ YouTube: ${url}\n` +
+        `📝 เนื้อหาบทสวด / ข้อความที่ต้องการบอก:\n${notes}\n\n` +
+        `รบกวนช่วยนำเข้าสู่ระบบด้วยนะครับ ขอบคุณครับ 🙏`
+      );
+
+      const plainText = 
+        `ส่งถึง: admin@kaisoft.net\n` +
+        `หัวข้อ: [แนะนำบทสวดมนต์] ${title}\n\n` +
+        `📌 ชื่อบทสวด / พระอาจารย์ / วัด: ${title}\n` +
+        `🔗 ลิงก์ที่มา: ${url}\n` +
+        `📝 เนื้อหา / รายละเอียด:\n${notes}`;
+
+      return {
+        mailtoUrl: `mailto:admin@kaisoft.net?subject=${emailSubject}&body=${emailBody}`,
+        plainText
+      };
+    };
+
+    // Action: Send Email via Mail Client
+    btnSendEmailAdmin?.addEventListener('click', () => {
+      const payload = getSuggestionPayload();
+      window.location.href = payload.mailtoUrl;
+      this.showToast('กำลังเปิดแอปพลิเคชันอีเมลของคุณ... 📧');
     });
 
-    tabBtnUrl?.addEventListener('click', () => {
-      tabBtnUrl.classList.add('active');
-      tabBtnManual.classList.remove('active');
-      tabPaneManual.style.display = 'none';
-      tabPaneUrl.style.display = 'block';
-    });
-
-    // Form: Manual Upload (บันทึกลงคลังบทสวดทันที)
-    const formManual = document.getElementById('formManualUpload');
-    formManual?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const title = document.getElementById('uploadTitle').value.trim();
-      const category = document.getElementById('uploadCategory').value;
-      const author = document.getElementById('uploadAuthor').value.trim() || 'ผู้มีจิตศรัทธา';
-      const content = document.getElementById('uploadContent').value.trim();
-
-      if (!title || !content) {
-        alert('กรุณากรอกชื่อบทสวดและเนื้อหา');
-        return;
-      }
-
-      const newPrayer = scraper.parseRawTextToPrayer(title, content);
-      newPrayer.category = category;
-      newPrayer.author = author;
-      newPrayer.status = 'approved';
-
-      storage.savePrayer(newPrayer);
-      uploadModal?.classList.remove('open');
-      formManual.reset();
-      this.renderLibrary();
-      this.showToast(`เพิ่มบทสวด "${title}" ลงในคลังส่วนตัวเรียบร้อยแล้ว 🙏✨`);
-    });
-
-    // Form: URL Import (บันทึกลงคลังบทสวดทันที)
-    const btnFetchUrl = document.getElementById('btnFetchUrl');
-    btnFetchUrl?.addEventListener('click', async () => {
-      const url = document.getElementById('uploadUrlInput').value.trim();
-      const statusEl = document.getElementById('urlFetchStatus');
-      if (!url) {
-        alert('กรุณาระบุ URL เว็บไซต์บทสวด');
-        return;
-      }
-
+    // Action: Copy Formatted Content & Email
+    btnCopyEmailContent?.addEventListener('click', async () => {
+      const payload = getSuggestionPayload();
       try {
-        if (statusEl) {
-          statusEl.textContent = '⏳ กำลังดึงและจัดหน้าบทสวดจากเว็บ...';
-          statusEl.style.display = 'block';
-        }
-        btnFetchUrl.disabled = true;
-
-        const importedPrayer = await scraper.extractFromUrl(url);
-        importedPrayer.status = 'approved';
-        storage.savePrayer(importedPrayer);
-
-        uploadModal?.classList.remove('open');
-        document.getElementById('uploadUrlInput').value = '';
-        this.renderLibrary();
-        this.showToast(`นำเข้าสำเร็จ: "${importedPrayer.title}" จัดแบ่งหน้า E-Book พร้อมอ่านทันที 🪷`);
+        await navigator.clipboard.writeText(payload.plainText);
+        this.showToast('📋 คัดลอกข้อความและอีเมล admin@kaisoft.net เรียบร้อย!');
       } catch (err) {
-        alert(`เกิดข้อผิดพลาด: ${err.message}`);
-      } finally {
-        btnFetchUrl.disabled = false;
-        if (statusEl) statusEl.style.display = 'none';
+        alert(`กรุณาส่งข้อมูลมาที่: admin@kaisoft.net\n\n${payload.plainText}`);
       }
     });
 
