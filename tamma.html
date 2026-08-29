@@ -51,6 +51,19 @@
       </div>
     </header>
 
+    <!-- Top Ad Banner (แสดงด้านบนอย่างเดียว / Top-Only Banner) -->
+    <div id="topAdBanner" class="top-ad-banner" role="region" aria-label="โฆษณาแบนเนอร์ด้านบน">
+      <div class="ad-banner-inner" role="complementary" aria-label="พื้นที่โฆษณา">
+        <span class="ad-badge">โฆษณา</span>
+        <div class="ad-content-slot">
+          <div class="ad-dharma-promo">
+            <span class="ad-promo-icon">🪷</span>
+            <span class="ad-promo-text">สนับสนุนแอปพลิเคชันบทสวดมนต์ & ธรรมทาน</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- TAB 1: PRAYER LIBRARY VIEW -->
     <main id="viewLibrary" class="tab-view">
       <!-- Compact 1-Line Search & Category Dropdown -->
@@ -318,13 +331,24 @@
 
       <div class="reader-dock-divider"></div>
 
-      <!-- Controls Row: Font Size + MP3 Monk Chanting + Counter -->
+      <!-- Controls Row: Font Size + Pali Script + MP3 Monk Chanting + Counter -->
       <div class="reader-controls-row">
         <!-- Font Size Resizer (Up to 300% for Elders) -->
         <div class="reader-font-dock">
           <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
           <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
           <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+        </div>
+
+        <!-- Pali Script Switcher (PaliScript Engine) -->
+        <div class="reader-script-dock">
+          <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
+            <option value="thai-phonetic" selected>🇹🇭 ไทย (คำอ่าน)</option>
+            <option value="thai-pinthu">🇹🇭 ไทย (พินทุแท้)</option>
+            <option value="roman-iast">🌍 โรมัน (IAST)</option>
+            <option value="devanagari">🇮🇳 เทวนาครี</option>
+            <option value="burmese">🇲🇲 พม่า</option>
+          </select>
         </div>
 
         <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
