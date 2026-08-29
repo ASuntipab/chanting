@@ -5,6 +5,10 @@
  */
 
 import { EXTRA_BUDDHIST_PRAYERS } from './extra-buddhist-prayers.js';
+import { TIPITAKA_SUTTA_PRAYERS } from './prayers-tipitaka-suttas.js';
+import { CEREMONY_CHANT_PRAYERS } from './prayers-ceremony-chants.js';
+import { FAMOUS_MONKS_PRAYERS } from './prayers-famous-monks.js';
+import { PARITTA_DAILY_PRAYERS } from './prayers-paritta-daily.js';
 
 const BASE_PRAYERS = [
   // =========================================================================
@@ -606,4 +610,11 @@ const BASE_PRAYERS = [
   }
 ];
 
-export const DEFAULT_PRAYERS = [...BASE_PRAYERS, ...EXTRA_BUDDHIST_PRAYERS];
+export const DEFAULT_PRAYERS = [
+  ...BASE_PRAYERS,
+  ...EXTRA_BUDDHIST_PRAYERS,
+  ...TIPITAKA_SUTTA_PRAYERS,
+  ...CEREMONY_CHANT_PRAYERS,
+  ...FAMOUS_MONKS_PRAYERS,
+  ...PARITTA_DAILY_PRAYERS
+];
