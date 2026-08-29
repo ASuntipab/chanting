@@ -35,23 +35,44 @@ class StorageTester {
 
   exportData() {
     return JSON.stringify({
-      version: '1.0.0',
-      prayers: this.prayers,
-      favorites: this.favorites
+      version: '2.0.0',
+      favorites: this.favorites,
+      tracker: this.tracker
     });
   }
 
+  exportBackupCode() {
+    return btoa(encodeURIComponent(this.exportData()));
+  }
+
   importData(rawJson) {
-    const data = JSON.parse(rawJson);
-    const existingIds = new Set(this.prayers.map(p => p.id));
-    let addedCount = 0;
-    data.prayers.forEach(p => {
-      if (!existingIds.has(p.id)) {
-        this.prayers.push(p);
-        addedCount++;
+    let data = rawJson;
+    if (typeof rawJson === 'string') {
+      rawJson = rawJson.trim();
+      if (rawJson.startsWith('{') || rawJson.startsWith('[')) {
+        data = JSON.parse(rawJson);
+      } else {
+        try {
+          data = JSON.parse(decodeURIComponent(atob(rawJson)));
+        } catch {
+          data = JSON.parse(rawJson);
+        }
       }
-    });
-    return { success: true, addedCount };
+    }
+
+    if (Array.isArray(data.favorites)) {
+      const currentFavs = new Set(this.favorites);
+      data.favorites.forEach(f => currentFavs.add(f));
+      this.favorites = Array.from(currentFavs);
+    }
+
+    if (data.tracker) {
+      this.tracker.totalCounts = { ...this.tracker.totalCounts, ...(data.tracker.totalCounts || {}) };
+      this.tracker.todayChanted = { ...this.tracker.todayChanted, ...(data.tracker.todayChanted || {}) };
+      this.tracker.streakDays = Math.max(this.tracker.streakDays || 1, data.tracker.streakDays || 1);
+    }
+
+    return { success: true };
   }
 
   toggleFavorite(id) {
@@ -83,22 +104,24 @@ test('Direct Offline Save: User added prayer is saved directly to local library 
   assert.equal(tester.prayers[2].status, 'approved');
 });
 
-test('Zero-Database Backup & Restore: Export & Import JSON works seamlessly offline', () => {
+test('Zero-Database Backup & Restore: Lightweight User Stats & Favorites Backup via JSON and Code', () => {
   const tester1 = new StorageTester();
-  tester1.savePrayer({ id: 'p3', title: 'บทสวดพิเศษจากเพื่อน' });
-  
-  const exportedJson = tester1.exportData();
-  assert.ok(exportedJson.includes('บทสวดพิเศษจากเพื่อน'));
+  tester1.toggleFavorite('p1');
+  tester1.incrementCount('p1', 5);
 
-  // Another user imports the JSON
+  // 1. Export as code
+  const backupCode = tester1.exportBackupCode();
+  assert.ok(backupCode.length > 10);
+
+  // 2. Another user / new phone imports the code
   const tester2 = new StorageTester();
-  assert.equal(tester2.prayers.length, 2);
+  assert.deepEqual(tester2.favorites, []);
+  assert.equal(tester2.tracker.totalCounts['p1'] || 0, 0);
 
-  const res = tester2.importData(exportedJson);
+  const res = tester2.importData(backupCode);
   assert.equal(res.success, true);
-  assert.equal(res.addedCount, 1);
-  assert.equal(tester2.prayers.length, 3);
-  assert.equal(tester2.prayers[2].id, 'p3');
+  assert.deepEqual(tester2.favorites, ['p1']);
+  assert.equal(tester2.tracker.totalCounts['p1'], 5);
 });
 
 test('Favorites & Chanting Counter State', () => {

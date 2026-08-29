@@ -289,51 +289,98 @@
        MODAL: BACKUP & RESTORE (USER STATS & FAVORITES)
        ========================================================================== -->
   <div id="backupModal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 440px;">
+    <div class="modal-card" style="max-width: 480px;">
       <div class="modal-header">
-        <h3 class="modal-title">💾 สำรอง & ย้ายข้อมูล</h3>
+        <h3 class="modal-title">💾 สำรอง & ย้ายข้อมูลข้ามเครื่อง</h3>
         <button id="btnCloseBackup" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
       </div>
 
-      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
-        สำรองข้อมูล<strong>รายการโปรด, ยอดสวดสะสม และสถิติของคุณ</strong> เพื่อนำไปใช้บนเครื่องใหม่หรือป้องกันข้อมูลสูญหาย
-      </p>
+      <!-- 3-Step Visual Guide for Elders & Non-Tech Users -->
+      <div class="backup-guide-box">
+        <div class="backup-guide-title">✨ วิธีง่าย ๆ ในการย้ายเครื่อง (3 สเต็ป)</div>
+        <div class="backup-guide-steps">
+          <div class="guide-step-item">
+            <span class="step-num">1</span>
+            <span>📱 <strong>เครื่องเก่า:</strong> กด "คัดลอกรหัส" ส่งเข้า LINE หรือกด "แสดง QR Code"</span>
+          </div>
+          <div class="guide-step-item">
+            <span class="step-num">2</span>
+            <span>📲 <strong>เครื่องใหม่:</strong> เปิดแอป "บทสวดมนต์" แล้วกดปุ่ม 💾</span>
+          </div>
+          <div class="guide-step-item">
+            <span class="step-num">3</span>
+            <span>🎉 <strong>เสร็จสิ้น:</strong> กด "วางรหัส" หรือ "สแกน QR" สถิติจะมาทันที!</span>
+          </div>
+        </div>
+      </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <!-- Easy Option 1: Copy Code for LINE -->
-        <button id="btnCopyBackupCode" class="btn-primary" style="justify-content: center; width: 100%;">
-          📋 คัดลอกรหัสสำรอง (ส่งเข้า LINE / จดบันทึก)
+      <!-- Method Tabs -->
+      <div class="backup-method-tabs">
+        <button id="tabBackupLine" class="btn-backup-tab active">📋 รหัสส่ง LINE</button>
+        <button id="tabBackupQr" class="btn-backup-tab">📷 สแกน QR Code</button>
+        <button id="tabBackupFile" class="btn-backup-tab">📁 บันทึกไฟล์</button>
+      </div>
+
+      <!-- PANEL 1: LINE Backup Code -->
+      <div id="panelBackupLine" class="backup-panel active">
+        <button id="btnCopyBackupCode" class="btn-primary" style="justify-content: center; width: 100%; font-size: 0.95rem; margin-bottom: 12px;">
+          📋 1. คัดลอกรหัสสำรอง (นำไปวางใน LINE)
         </button>
 
-        <div style="border-top: 1px solid var(--border-subtle); margin: 4px 0;"></div>
+        <div style="border-top: 1px solid var(--border-subtle); margin: 12px 0;"></div>
 
-        <!-- Easy Option 2: Paste Code to Restore -->
-        <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label" style="font-size: 0.85rem;">วางรหัสสำรองเพื่อกู้คืนข้อมูล</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="inputBackupCode" class="form-control" placeholder="วางรหัสสำรองที่นี่..." style="font-size: 0.85rem;">
-            <button id="btnRestoreCode" class="btn-secondary" style="white-space: nowrap; padding: 8px 16px;">
-              กู้คืน
-            </button>
+        <label class="form-label" style="font-size: 0.85rem;">2. สำหรับเครื่องใหม่: วางรหัสที่คัดลอกมาจาก LINE</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="inputBackupCode" class="form-control" placeholder="วางรหัสสำรองที่นี่..." style="font-size: 0.85rem;">
+          <button id="btnRestoreCode" class="btn-secondary" style="white-space: nowrap; padding: 8px 16px;">
+            กู้คืนข้อมูล
+          </button>
+        </div>
+      </div>
+
+      <!-- PANEL 2: QR Code Migration -->
+      <div id="panelBackupQr" class="backup-panel" style="display: none;">
+        <div style="text-align: center; margin-bottom: 12px;">
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+            แสดง QR Code นี้ให้เครื่องใหม่สแกน หรือถ่ายรูปเก็บไว้
+          </div>
+          <div class="qr-canvas-container">
+            <canvas id="qrCanvas" style="border-radius: 12px; padding: 8px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.3);"></canvas>
           </div>
         </div>
 
-        <div style="border-top: 1px solid var(--border-subtle); margin: 4px 0;"></div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button id="btnScanQrCamera" class="btn-primary" style="justify-content: center; width: 100%; font-size: 0.9rem;">
+            📸 เปิดกล้องสแกน QR Code เครื่องเก่า
+          </button>
+          <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">หรือเลือกรูป QR Code ที่ถ่ายไว้:</div>
+          <input type="file" id="inputQrImage" accept="image/*" class="form-control" style="font-size: 0.8rem;">
+        </div>
 
-        <!-- Option 3: Traditional File Export / Import -->
-        <details style="font-size: 0.82rem; color: var(--text-muted);">
-          <summary style="cursor: pointer; padding: 4px 0; color: var(--accent-gold);">📁 ตัวเลือกขั้นสูง (บันทึกเป็นไฟล์ .json)</summary>
-          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-            <button id="btnExportJson" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.82rem;">
-              📤 ส่งออกเป็นไฟล์ (Export JSON)
-            </button>
-            <input type="file" id="importFileInput" accept=".json" class="form-control" style="font-size: 0.8rem;">
-            <button id="btnImportJson" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.82rem;">
-              📥 นำเข้าจากไฟล์ (Import JSON)
-            </button>
-          </div>
-        </details>
+        <!-- Camera Scanner Video Feed (Hidden by default) -->
+        <div id="qrScannerContainer" style="display: none; margin-top: 12px; text-align: center;">
+          <video id="qrScannerVideo" playsinline style="width: 100%; max-height: 220px; border-radius: 12px; object-fit: cover; border: 2px solid var(--accent-gold);"></video>
+          <button id="btnCloseScanner" class="btn-secondary" style="margin-top: 8px; width: 100%; justify-content: center;">
+            ✕ ปิดกล้องสแกน
+          </button>
+        </div>
       </div>
+
+      <!-- PANEL 3: File Export / Import -->
+      <div id="panelBackupFile" class="backup-panel" style="display: none;">
+        <button id="btnExportJson" class="btn-primary" style="justify-content: center; width: 100%; margin-bottom: 12px;">
+          📤 ส่งออกไฟล์สำรอง (.json)
+        </button>
+
+        <div style="border-top: 1px solid var(--border-subtle); margin: 12px 0;"></div>
+
+        <label class="form-label" style="font-size: 0.85rem;">นำเข้าจากไฟล์ .json</label>
+        <input type="file" id="importFileInput" accept=".json" class="form-control" style="font-size: 0.85rem; margin-bottom: 8px;">
+        <button id="btnImportJson" class="btn-secondary" style="justify-content: center; width: 100%;">
+          📥 นำเข้าไฟล์เพื่อกู้คืน
+        </button>
+      </div>
+
     </div>
   </div>
 
