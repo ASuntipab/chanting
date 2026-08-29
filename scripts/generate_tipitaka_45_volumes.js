@@ -630,28 +630,28 @@ for (const volMeta of TIPITAKA_VOLUMES_META) {
   const volumeData = {
     volume: volMeta.volume,
     pitaka: volMeta.pitaka,
-    pitakaPali: volMeta.pitakaPali,
     bookTitle: volMeta.bookTitle,
-    bookPali: volMeta.bookPali,
     description: volMeta.description,
     totalSections: volMeta.sections.length,
     sections: volMeta.sections.map((sec, idx) => {
       const secNumStr = String(idx + 1).padStart(2, '0');
+      // แปลงเลขอารบิกเป็นเลขไทย
+      const thaiVol = String(volMeta.volume).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
+      const thaiIdx = String(idx + 1).replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]);
       return {
         id: `tipitaka-v${volNumStr}-s${secNumStr}`,
         sectionNumber: idx + 1,
         title: sec.title,
-        paliTitle: sec.paliTitle,
         category: volMeta.pitaka,
-        author: `พระไตรปิฎก เล่มที่ ${volMeta.volume} (${volMeta.bookTitle})`,
+        author: `พระไตรปิฎก เล่มที่ ${thaiVol} (${volMeta.bookTitle})`,
         description: sec.desc,
         status: 'approved',
         pages: [
           {
             pageNumber: 1,
             verseTitle: `๑. ปฐมวาร: ${sec.title}`,
-            pali: `[พระไตรปิฎก เล่มที่ ${volMeta.volume}: ${volMeta.bookPali} - ข้อที่ ${idx + 1}]\n\n${sec.paliTitle}\n\nเตนะ สะมะเยนะ พุทโธ ภะคะวา สาวัตถิยัง วิหะระติ เชตะวะเน อะนาถะปิณฑิกัสสะ อาราเม...\nเอตัง โข ภิกขะเว สะมะณานัง ปะฏิรูปัง ยะทิทัง สัจจัง อะนุรักขิตัพพัง.\n\nสัพเพ สังขารา อะนิจจา, สัพเพ สังขารา ทุกขา, สัพเพ ธัมมา อะนัตตาติ.`,
-            thai: `[พระไตรปิฎกภาษาไทย ฉบับหลวง เล่มที่ ${volMeta.volume}: ${volMeta.bookTitle} - ข้อที่ ${idx + 1}]\n\n${sec.title}\n\n${sec.desc}\n\nสมัยนั้น พระผู้มีพระภาคพุทธเจ้าประทับอยู่ ณ พระเชตวัน อารามของอนาถบิณฑิกเศรษฐี เขตกรุงสาวัตถี...\nดูกรภิกษุทั้งหลาย ข้อนี้แลเป็นสิ่งที่สมควรแก่สมณะ คือ การตามรักษาความจริง (สัจจานุรักษ์).\n\nสังขารทั้งหลายทั้งปวงไม่เที่ยง สังขารทั้งหลายทั้งปวงเป็นทุกข์ ธรรมทั้งหลายทั้งปวงไม่ใช่ตัวตน.`
+            pali: `[พระไตรปิฎก เล่มที่ ${thaiVol}: ${volMeta.bookTitle} - ข้อที่ ${thaiIdx}]\n\n${sec.title}\n\nเตนะ สะมะเยนะ พุทโธ ภะคะวา สาวัตถิยัง วิหะระติ เชตะวะเน อะนาถะปิณฑิกัสสะ อาราเม...\nเอตัง โข ภิกขะเว สะมะณานัง ปะฏิรูปัง ยะทิทัง สัจจัง อะนุรักขิตัพพัง.\n\nสัพเพ สังขารา อะนิจจา, สัพเพ สังขารา ทุกขา, สัพเพ ธัมมา อะนัตตาติ.`,
+            thai: `[พระไตรปิฎกภาษาไทย ฉบับหลวง เล่มที่ ${thaiVol}: ${volMeta.bookTitle} - ข้อที่ ${thaiIdx}]\n\n${sec.title}\n\n${sec.desc}\n\nสมัยนั้น พระผู้มีพระภาคพุทธเจ้าประทับอยู่ ณ พระเชตวัน อารามของอนาถบิณฑิกเศรษฐี เขตกรุงสาวัตถี...\nดูกรภิกษุทั้งหลาย ข้อนี้แลเป็นสิ่งที่สมควรแก่สมณะ คือ การตามรักษาความจริง (สัจจานุรักษ์).\n\nสังขารทั้งหลายทั้งปวงไม่เที่ยง สังขารทั้งหลายทั้งปวงเป็นทุกข์ ธรรมทั้งหลายทั้งปวงไม่ใช่ตัวตน.`
           },
           {
             pageNumber: 2,
