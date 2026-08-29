@@ -847,6 +847,44 @@ body.theme-parchment .reader-chant-counter {
   color: #3b1d0c !important;
 }
 
+/* Interactive Tap-to-Speak (Like YouTube / Spotify Karaoke) */
+.verse-clickable {
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  border-radius: var(--radius-sm, 6px);
+  padding: 4px 6px;
+  margin: 2px -6px;
+}
+
+.verse-clickable:hover {
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+}
+
+.verse-clickable:active {
+  transform: scale(0.99);
+  background: rgba(212, 175, 55, 0.22);
+}
+
+.theme-parchment .verse-clickable:hover {
+  background: rgba(160, 82, 45, 0.12);
+  box-shadow: 0 0 8px rgba(160, 82, 45, 0.2);
+}
+
+.page-verse-header-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-thai);
+  font-weight: 400;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 0.75;
+}
+
 /* Reader Top Toolbar TTS Controls */
 .reader-audio-dock {
   display: flex;

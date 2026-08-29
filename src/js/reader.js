@@ -357,7 +357,7 @@ export class ComicReaderEngine {
     // Header
     const header = document.createElement('div');
     header.className = 'page-verse-header';
-    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span>`;
+    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span><span class="page-verse-header-hint">💡 แตะที่ข้อความเพื่อเริ่มฟังจากจุดนั้น</span>`;
 
     // Viewport Window
     const viewport = document.createElement('div');
@@ -376,38 +376,80 @@ export class ComicReaderEngine {
 
       if (page.verseTitle && rawPages.length > 1) {
         const titleEl = document.createElement('div');
-        titleEl.className = 'verse-section-title';
+        titleEl.className = 'verse-section-title verse-clickable';
         titleEl.dataset.pageIndex = idx;
         titleEl.dataset.type = 'title';
+        titleEl.dataset.text = page.verseTitle.trim();
         titleEl.textContent = page.verseTitle;
+        titleEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+        titleEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.playFromElement(titleEl);
+        });
         section.appendChild(titleEl);
       }
 
       if (page.pali) {
-        const paliEl = document.createElement('div');
-        paliEl.className = 'verse-pali';
-        paliEl.dataset.pageIndex = idx;
-        paliEl.dataset.type = 'pali';
-        paliEl.innerHTML = this.escapeHtml(page.pali).replace(/\n/g, '<br>');
-        section.appendChild(paliEl);
+        const paliWrap = document.createElement('div');
+        paliWrap.className = 'verse-pali-wrap';
+        const paliLines = page.pali.split('\n').filter(l => l.trim().length > 0);
+        paliLines.forEach(line => {
+          const paliEl = document.createElement('div');
+          paliEl.className = 'verse-pali verse-clickable';
+          paliEl.dataset.pageIndex = idx;
+          paliEl.dataset.type = 'pali';
+          paliEl.dataset.text = line.trim();
+          paliEl.innerHTML = this.escapeHtml(line);
+          paliEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+          paliEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playFromElement(paliEl);
+          });
+          paliWrap.appendChild(paliEl);
+        });
+        section.appendChild(paliWrap);
       }
 
       if (page.thai) {
-        const thaiEl = document.createElement('div');
-        thaiEl.className = 'verse-thai';
-        thaiEl.dataset.pageIndex = idx;
-        thaiEl.dataset.type = 'thai';
-        thaiEl.innerHTML = this.escapeHtml(page.thai).replace(/\n/g, '<br>');
-        section.appendChild(thaiEl);
+        const thaiWrap = document.createElement('div');
+        thaiWrap.className = 'verse-thai-wrap';
+        const thaiLines = page.thai.split('\n').filter(l => l.trim().length > 0);
+        thaiLines.forEach(line => {
+          const thaiEl = document.createElement('div');
+          thaiEl.className = 'verse-thai verse-clickable';
+          thaiEl.dataset.pageIndex = idx;
+          thaiEl.dataset.type = 'thai';
+          thaiEl.dataset.text = line.trim();
+          thaiEl.innerHTML = this.escapeHtml(line);
+          thaiEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+          thaiEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playFromElement(thaiEl);
+          });
+          thaiWrap.appendChild(thaiEl);
+        });
+        section.appendChild(thaiWrap);
       }
 
       if (!page.pali && !page.thai && page.content) {
-        const contentEl = document.createElement('div');
-        contentEl.className = 'verse-thai';
-        contentEl.dataset.pageIndex = idx;
-        contentEl.dataset.type = 'thai';
-        contentEl.innerHTML = this.escapeHtml(page.content).replace(/\n/g, '<br>');
-        section.appendChild(contentEl);
+        const contentWrap = document.createElement('div');
+        contentWrap.className = 'verse-thai-wrap';
+        const contentLines = page.content.split('\n').filter(l => l.trim().length > 0);
+        contentLines.forEach(line => {
+          const contentEl = document.createElement('div');
+          contentEl.className = 'verse-thai verse-clickable';
+          contentEl.dataset.pageIndex = idx;
+          contentEl.dataset.type = 'thai';
+          contentEl.dataset.text = line.trim();
+          contentEl.innerHTML = this.escapeHtml(line);
+          contentEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
+          contentEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playFromElement(contentEl);
+          });
+          contentWrap.appendChild(contentEl);
+        });
+        section.appendChild(contentWrap);
       }
 
       flow.appendChild(section);
@@ -788,7 +830,67 @@ export class ComicReaderEngine {
     if (ttsEngine.queue.length === 0) {
       ttsEngine.prepareQueue(this.currentPrayer);
     }
-    ttsEngine.togglePlayPause();
+    
+    if (ttsEngine.isPlaying) {
+      ttsEngine.pause();
+    } else if (ttsEngine.isPaused) {
+      ttsEngine.play();
+    } else {
+      // Start from the currently visible verse in viewport
+      const startIdx = this.findFirstVisibleChunkIndex();
+      ttsEngine.play(startIdx >= 0 ? startIdx : 0);
+    }
+  }
+
+  playFromElement(el) {
+    if (!el || !this.currentPrayer) return;
+    const pageIndex = parseInt(el.dataset.pageIndex, 10);
+    const type = el.dataset.type;
+    const text = (el.dataset.text || el.textContent || '').trim();
+
+    if (ttsEngine.queue.length === 0) {
+      ttsEngine.prepareQueue(this.currentPrayer);
+    }
+
+    // 1. Find exact matching chunk in queue
+    let targetIdx = ttsEngine.queue.findIndex(c => 
+      c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+    );
+
+    // 2. Fallback to matching page & type
+    if (targetIdx < 0) {
+      targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex && c.type === type);
+    }
+
+    // 3. Fallback to first chunk of this page
+    if (targetIdx < 0) {
+      targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex);
+    }
+
+    if (targetIdx >= 0) {
+      ttsEngine.play(targetIdx);
+      this.scheduleAutoHide(5000);
+      nativeBridge.hapticSuccess();
+    }
+  }
+
+  findFirstVisibleChunkIndex() {
+    if (!this.flowEl || ttsEngine.queue.length === 0 || !this.viewportStepPx) return 0;
+    const currentViewportTop = (this.viewportIndex || 0) * this.viewportStepPx;
+    
+    const clickables = this.flowEl.querySelectorAll('.verse-clickable');
+    for (const el of clickables) {
+      if (el.offsetTop >= currentViewportTop - 40) {
+        const pageIndex = parseInt(el.dataset.pageIndex, 10);
+        const type = el.dataset.type;
+        const text = (el.dataset.text || el.textContent || '').trim();
+        const idx = ttsEngine.queue.findIndex(c => 
+          c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+        );
+        if (idx >= 0) return idx;
+      }
+    }
+    return 0;
   }
 
   toggleTTSSettings() {
@@ -815,14 +917,17 @@ export class ComicReaderEngine {
 
     if (!chunk || chunkIndex < 0) return;
 
-    // Find the matching DOM node
+    // Find the exact matching DOM node
     let target = null;
-    if (chunk.type === 'title') {
-      target = this.flowEl.querySelector(`[data-page-index="${chunk.pageIndex}"][data-type="title"]`);
-    } else if (chunk.type === 'pali') {
-      target = this.flowEl.querySelector(`[data-page-index="${chunk.pageIndex}"][data-type="pali"]`);
-    } else if (chunk.type === 'thai') {
-      target = this.flowEl.querySelector(`[data-page-index="${chunk.pageIndex}"][data-type="thai"]`);
+    const candidates = this.flowEl.querySelectorAll(`[data-page-index="${chunk.pageIndex}"][data-type="${chunk.type}"]`);
+    for (const el of candidates) {
+      if (el.dataset.text && el.dataset.text.trim() === chunk.rawText.trim()) {
+        target = el;
+        break;
+      }
+    }
+    if (!target && candidates.length > 0) {
+      target = candidates[0];
     }
 
     if (target) {

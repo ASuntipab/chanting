@@ -60,3 +60,32 @@ test('TTS Engine: Speed Rate Bounds & Normalization', () => {
   engine.setRate(3.0);
   assert.equal(engine.rate, 1.5, 'Should clamp to max 1.5');
 });
+
+test('TTS Engine: Interactive Tap-to-Speak Queue Index Matching', () => {
+  const engine = new DhammaTTSEngine();
+  const samplePrayer = {
+    pages: [
+      {
+        pageNumber: 1,
+        verseTitle: '๑. บทนำ',
+        pali: 'นะโม ตัสสะ\nภะคะวะโต',
+        thai: 'ขอนอบน้อม'
+      },
+      {
+        pageNumber: 2,
+        verseTitle: '๒. คาถาชินบัญชร',
+        pali: 'ชะยาสะนากะตา พุทธา\nเชตวา มารัง',
+        thai: 'พระพุทธเจ้าผู้ชนะมาร'
+      }
+    ]
+  };
+
+  engine.prepareQueue(samplePrayer);
+  
+  // Find chunk corresponding to page 2 pali 'ชะยาสะนากะตา พุทธา'
+  const targetChunk = engine.queue.find(c => c.pageIndex === 1 && c.type === 'pali' && c.rawText.includes('ชะยาสะนากะตา'));
+  assert.ok(targetChunk, 'Target chunk for page 2 should exist in queue');
+  assert.equal(targetChunk.pageIndex, 1);
+  assert.equal(targetChunk.type, 'pali');
+});
+
