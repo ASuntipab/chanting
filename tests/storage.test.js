@@ -221,6 +221,11 @@ test('Default Prayers Suite: Verified Luang Pu Mun, Luang Ta Maha Bua & Maha Met
   const pahung = DEFAULT_PRAYERS.find(p => p.id === 'pahung-mahaka');
   assert.ok(pahung, 'Pahung Mahaka prayer must exist');
   assert.equal(pahung.pages.length, 6, 'Pahung Mahaka must have 6 complete pages');
+
+  // Verify Chinabanchorn has full 9 atomic pages
+  const chinabanchorn = DEFAULT_PRAYERS.find(p => p.id === 'chinabanchorn');
+  assert.ok(chinabanchorn, 'Chinabanchorn must exist');
+  assert.equal(chinabanchorn.pages.length, 9, 'Chinabanchorn must have 9 complete atomic pages');
 });
 
 test('100% Zero-Loss Content Parity: All prayers retain complete Pali verses and paired Thai translations without loss', () => {
