@@ -112,29 +112,30 @@
 
 .comic-page {
   min-width: 100%;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 16px 12px;
+  padding: 0;
   position: relative;
   user-select: text;
   transform-style: preserve-3d;
 }
 
-/* 3D Realistic Fullscreen Book Leaf Frame - Viewport Snap Paging (Zero Scrollbar) */
+/* 3D Realistic Fullscreen Book Leaf Frame - 100% Fullscreen on iPad, Tablets & Mobile */
 .page-frame {
   width: 100%;
-  max-width: 780px;
+  max-width: 100%;
   height: 100%;
-  max-height: 94vh;
+  max-height: 100vh;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 24px 22px 20px 22px;
+  border: none;
+  border-radius: 0;
+  padding: calc(var(--safe-top) + 64px) 24px calc(var(--safe-bottom) + 84px) 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -142,15 +143,10 @@
   overflow: hidden; /* ZERO SCROLLBAR: Viewport snaps to next section */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  
-  /* 3D Book Page Spine & Shadows */
-  box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.65),
-    inset 0 0 40px rgba(0, 0, 0, 0.3),
-    inset 4px 0 12px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
   transform-origin: left center;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
-  will-change: transform, box-shadow;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
 }
 
 .page-frame::-webkit-scrollbar,
@@ -210,13 +206,9 @@ body.theme-cosmic .reader-view {
 }
 
 body.theme-cosmic .page-frame {
-  background: rgba(14, 21, 48, 0.86);
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  box-shadow:
-    0 15px 40px rgba(2, 6, 23, 0.85),
-    0 0 35px rgba(251, 191, 36, 0.22),
-    0 0 60px rgba(99, 102, 241, 0.25),
-    inset 0 0 30px rgba(129, 140, 248, 0.15);
+  background: rgba(14, 21, 48, 0.92);
+  border: none;
+  box-shadow: none;
 }
 
 body.theme-cosmic .page-frame::after {
@@ -237,7 +229,9 @@ body.theme-cosmic .verse-pali {
   font-family: var(--font-header);
   font-size: 1.15rem;
   color: var(--accent-gold);
-  margin-bottom: 12px;
+  margin: 0 auto 12px auto;
+  max-width: 920px;
+  width: 100%;
   padding-bottom: 8px;
   border-bottom: 1px dashed var(--border-subtle);
   letter-spacing: 0.5px;
@@ -248,24 +242,26 @@ body.theme-cosmic .verse-pali {
 .page-verse-viewport {
   flex: 1;
   width: 100%;
+  max-width: 920px;
+  margin: 4px auto;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin: 4px 0;
   mask-image: linear-gradient(to bottom, black 94%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 94%, transparent 100%);
 }
 
 .page-verse-flow {
   width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
   transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1);
   will-change: transform;
   text-align: center;
-  margin: 0;
   padding: 4px 0 20px 0;
   font-size: var(--reader-font-size, 1.15rem);
   color: var(--text-primary);
@@ -611,11 +607,8 @@ body.theme-parchment .reader-subtitle {
 
 body.theme-parchment .page-frame {
   background: #fbf6ec;
-  border: 1px solid rgba(160, 120, 60, 0.35);
-  box-shadow:
-    0 15px 35px rgba(90, 60, 30, 0.15),
-    inset 0 0 40px rgba(210, 185, 140, 0.25),
-    inset 3px 0 10px rgba(120, 85, 45, 0.15);
+  border: none;
+  box-shadow: none;
 }
 
 body.theme-parchment .page-frame::before {
