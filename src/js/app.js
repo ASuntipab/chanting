@@ -6,6 +6,7 @@ import { scraper } from './scraper.js';
 import { shareEngine } from './share.js';
 import { starfield } from './starfield.js';
 import { nativeBridge } from './native-bridge.js';
+import { renderQRCodeToCanvas } from './qrcode.js';
 
 class TammaApp {
   constructor() {
@@ -177,27 +178,223 @@ class TammaApp {
     const btnCloseBackup = document.getElementById('btnCloseBackup');
     const btnExportJson = document.getElementById('btnExportJson');
     const btnImportJson = document.getElementById('btnImportJson');
+    const btnCopyBackupCode = document.getElementById('btnCopyBackupCode');
+    const inputBackupCode = document.getElementById('inputBackupCode');
+    const btnRestoreCode = document.getElementById('btnRestoreCode');
     const importFileInput = document.getElementById('importFileInput');
+    
+    // Backup Method Tabs
+    const tabBackupLine = document.getElementById('tabBackupLine');
+    const tabBackupQr = document.getElementById('tabBackupQr');
+    const tabBackupFile = document.getElementById('tabBackupFile');
+    const panelBackupLine = document.getElementById('panelBackupLine');
+    const panelBackupQr = document.getElementById('panelBackupQr');
+    const panelBackupFile = document.getElementById('panelBackupFile');
+    const qrCanvas = document.getElementById('qrCanvas');
+    const btnScanQrCamera = document.getElementById('btnScanQrCamera');
+    const inputQrImage = document.getElementById('inputQrImage');
+    const qrScannerContainer = document.getElementById('qrScannerContainer');
+    const qrScannerVideo = document.getElementById('qrScannerVideo');
+    const btnCloseScanner = document.getElementById('btnCloseScanner');
 
-    btnOpenBackup?.addEventListener('click', () => backupModal?.classList.add('open'));
-    btnCloseBackup?.addEventListener('click', () => backupModal?.classList.remove('open'));
+    let qrStream = null;
+    let qrScanInterval = null;
 
-    // Export JSON Action
+    const stopQrScanner = () => {
+      if (qrStream) {
+        qrStream.getTracks().forEach(t => t.stop());
+        qrStream = null;
+      }
+      if (qrScanInterval) {
+        clearInterval(qrScanInterval);
+        qrScanInterval = null;
+      }
+      if (qrScannerContainer) qrScannerContainer.style.display = 'none';
+    };
+
+    const updateQrCanvas = () => {
+      if (qrCanvas) {
+        const backupCode = storage.exportBackupCode();
+        renderQRCodeToCanvas(qrCanvas, backupCode, 200);
+      }
+    };
+
+    btnOpenBackup?.addEventListener('click', () => {
+      backupModal?.classList.add('open');
+      updateQrCanvas();
+    });
+
+    btnCloseBackup?.addEventListener('click', () => {
+      stopQrScanner();
+      backupModal?.classList.remove('open');
+    });
+
+    // Switch Backup Method Tabs
+    const switchBackupTab = (activeTab, activePanel) => {
+      [tabBackupLine, tabBackupQr, tabBackupFile].forEach(t => t?.classList.remove('active'));
+      [panelBackupLine, panelBackupQr, panelBackupFile].forEach(p => {
+        if (p) p.style.display = 'none';
+      });
+      activeTab?.classList.add('active');
+      if (activePanel) activePanel.style.display = 'block';
+    };
+
+    tabBackupLine?.addEventListener('click', () => {
+      stopQrScanner();
+      switchBackupTab(tabBackupLine, panelBackupLine);
+    });
+
+    tabBackupQr?.addEventListener('click', () => {
+      switchBackupTab(tabBackupQr, panelBackupQr);
+      updateQrCanvas();
+    });
+
+    tabBackupFile?.addEventListener('click', () => {
+      stopQrScanner();
+      switchBackupTab(tabBackupFile, panelBackupFile);
+    });
+
+    // 1. Easy Copy Backup Code (For LINE / Notes)
+    btnCopyBackupCode?.addEventListener('click', async () => {
+      const code = storage.exportBackupCode();
+      const message = `🙏 ข้อมูลสำรองบทสวดมนต์ของคุณ:\n${code}\n\n(นำรหัสนี้ไปกด 'วางรหัสเพื่อกู้คืน' ในแอปบทสวดมนต์บนเครื่องใหม่)`;
+      try {
+        await navigator.clipboard.writeText(message);
+        this.showToast('📋 คัดลอกรหัสสำรองแล้ว! ส่งเก็บไว้ใน LINE ได้เลย');
+      } catch (err) {
+        prompt('คัดลอกรหัสสำรองด้านล่างนี้ไปเก็บไว้:', code);
+      }
+    });
+
+    // 2. Easy Restore from Pasted Code
+    btnRestoreCode?.addEventListener('click', () => {
+      const rawText = inputBackupCode?.value?.trim();
+      if (!rawText) {
+        alert('กรุณาวางรหัสสำรองที่คัดลอกมา');
+        return;
+      }
+
+      // Extract code if user pasted full message
+      let codeToImport = rawText;
+      const lines = rawText.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('🙏') && !trimmed.startsWith('(')) {
+          codeToImport = trimmed;
+          break;
+        }
+      }
+
+      const result = storage.importData(codeToImport);
+      if (result.success) {
+        this.refreshCurrentViews();
+        this.applyInitialSettings();
+        backupModal?.classList.remove('open');
+        if (inputBackupCode) inputBackupCode.value = '';
+        this.showToast('✨ กู้คืนสถิติและรายการโปรดสำเร็จเรียบร้อย! 🎉');
+      } else {
+        alert(`รหัสสำรองไม่ถูกต้อง หรือข้อมูลเสียหาย: ${result.error || ''}`);
+      }
+    });
+
+    // 3. QR Camera Scanner
+    btnScanQrCamera?.addEventListener('click', async () => {
+      if (!('BarcodeDetector' in window)) {
+        alert('เบราว์เซอร์นี้ไม่รองรับการสแกนกล้องสดโดยตรง กรุณาใช้การถ่ายรูป QR Code หรือใช้วิธีคัดลอกรหัสส่ง LINE แทนครับ');
+        return;
+      }
+
+      try {
+        qrStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        if (qrScannerVideo && qrScannerContainer) {
+          qrScannerVideo.srcObject = qrStream;
+          qrScannerVideo.play();
+          qrScannerContainer.style.display = 'block';
+
+          const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+          qrScanInterval = setInterval(async () => {
+            try {
+              const barcodes = await barcodeDetector.detect(qrScannerVideo);
+              if (barcodes.length > 0) {
+                const qrValue = barcodes[0].rawValue;
+                stopQrScanner();
+                const result = storage.importData(qrValue);
+                if (result.success) {
+                  this.refreshCurrentViews();
+                  this.applyInitialSettings();
+                  backupModal?.classList.remove('open');
+                  this.showToast('✨ สแกน QR Code กู้คืนข้อมูลสำเร็จเรียบร้อย! 🎉');
+                } else {
+                  alert('ข้อมูลใน QR Code ไม่ถูกต้อง');
+                }
+              }
+            } catch (err) {
+              // Frame scan error, ignore
+            }
+          }, 300);
+        }
+      } catch (err) {
+        alert('ไม่สามารถเปิดกล้องได้: ' + (err.message || 'กรุณาอนุญาตให้เข้าถึงกล้อง'));
+      }
+    });
+
+    btnCloseScanner?.addEventListener('click', stopQrScanner);
+
+    // 4. QR Image File Picker Scanner
+    inputQrImage?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!('BarcodeDetector' in window)) {
+        alert('เบราว์เซอร์นี้ไม่รองรับการอ่าน QR จากภาพ กรุณาใช้วิธีคัดลอกรหัสส่ง LINE แทนครับ');
+        return;
+      }
+
+      const img = new Image();
+      img.onload = async () => {
+        try {
+          const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+          const barcodes = await barcodeDetector.detect(img);
+          if (barcodes.length > 0) {
+            const qrValue = barcodes[0].rawValue;
+            const result = storage.importData(qrValue);
+            if (result.success) {
+              this.refreshCurrentViews();
+              this.applyInitialSettings();
+              backupModal?.classList.remove('open');
+              inputQrImage.value = '';
+              this.showToast('✨ อ่าน QR Code กู้คืนข้อมูลสำเร็จเรียบร้อย! 🎉');
+            } else {
+              alert('ข้อมูลใน QR Code ไม่ถูกต้อง');
+            }
+          } else {
+            alert('ไม่พบ QR Code ในรูปภาพที่เลือก กรุณาลองเลือกรูปใหม่');
+          }
+        } catch (err) {
+          alert('ไม่สามารถอ่าน QR Code ได้: ' + err.message);
+        }
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    // 5. Export JSON File Action
     btnExportJson?.addEventListener('click', () => {
       const jsonStr = storage.exportData();
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `prayers-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `dhamma-stats-backup-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      this.showToast('ส่งออกไฟล์บทสวดมนต์ (JSON) เรียบร้อย 💾');
+      this.showToast('ส่งออกไฟล์สถิติ (JSON) เรียบร้อย 💾');
     });
 
-    // Import JSON Action
+    // 6. Import JSON File Action
     btnImportJson?.addEventListener('click', () => {
       const file = importFileInput?.files?.[0];
       if (!file) {
@@ -209,11 +406,11 @@ class TammaApp {
       reader.onload = (e) => {
         const result = storage.importData(e.target.result);
         if (result.success) {
-          this.renderLibrary();
-          tracker.render();
+          this.refreshCurrentViews();
+          this.applyInitialSettings();
           backupModal?.classList.remove('open');
-          importFileInput.value = '';
-          this.showToast(`นำเข้าสำเร็จ! เพิ่มบทสวดใหม่ ${result.addedCount} บท 🎉`);
+          if (importFileInput) importFileInput.value = '';
+          this.showToast('✨ กู้คืนสถิติและรายการโปรดสำเร็จเรียบร้อย! 🎉');
         } else {
           alert(`นำเข้าไฟล์ไม่สำเร็จ: ${result.error}`);
         }
