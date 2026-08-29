@@ -44,17 +44,27 @@
 
     <!-- TAB 1: PRAYER LIBRARY VIEW -->
     <main id="viewLibrary" class="tab-view">
-      <!-- Compact 1-Line Search & Category Filter Bar -->
+      <!-- Compact 1-Line Search & Category Dropdown -->
       <div class="search-container">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
           <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบทสวดมนต์ เช่น ชินบัญชร, พาหุง...">
         </div>
-        <!-- Category Selector Dropdown Button -->
-        <button id="btnCategorySelect" class="btn-category-dropdown" title="เลือกหมวดหมู่">
-          <span id="selectedCategoryLabel">✨ ทั้งหมด</span>
-          <span class="dropdown-caret">▼</span>
-        </button>
+        <!-- Native Styled Category Dropdown -->
+        <div class="category-dropdown-wrap">
+          <select id="categorySelect" class="category-select" title="เลือกหมวดหมู่">
+            <option value="all">✨ ทุกหมวดหมู่</option>
+            <option value="หลวงพ่อจรัญ">🪷 หลวงพ่อจรัญ</option>
+            <option value="หลวงปู่มั่น">⛰️ หลวงปู่มั่น</option>
+            <option value="หลวงตามหาบัว">🪷 หลวงตามหาบัว</option>
+            <option value="แผ่เมตตา">💖 แผ่เมตตา</option>
+            <option value="คาถาศักดิ์สิทธิ์">🌟 คาถาศักดิ์สิทธิ์</option>
+            <option value="บทสวดประจำวัน">🙏 บทสวดประจำวัน</option>
+            <option value="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา</option>
+            <option value="ทำวัตร">📜 ทำวัตรเช้า-เย็น</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
       </div>
 
       <!-- Prayers Grid -->
@@ -175,55 +185,11 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-       MODAL: CATEGORY SELECTOR BOTTOM SHEET
-       ========================================================================== -->
-  <div id="categoryModal" class="modal-overlay">
-    <div class="modal-card category-sheet" style="max-width: 440px;">
-      <div class="modal-header">
-        <h3 class="modal-title">🏷️ เลือกหมวดหมู่บทสวด</h3>
-        <button id="btnCloseCategoryModal" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
+      <!-- Prayers Grid -->
+      <div id="prayerGrid" class="prayer-grid">
+        <!-- Rendered dynamically by JS -->
       </div>
-      <div class="category-sheet-grid">
-        <button class="category-sheet-item active" data-category="all">
-          <span class="cat-icon">✨</span>
-          <span class="cat-name">ทั้งหมด</span>
-        </button>
-        <button class="category-sheet-item" data-category="หลวงพ่อจรัญ">
-          <span class="cat-icon">🪷</span>
-          <span class="cat-name">หลวงพ่อจรัญ (วัดอัมพวัน)</span>
-        </button>
-        <button class="category-sheet-item" data-category="หลวงปู่มั่น">
-          <span class="cat-icon">⛰️</span>
-          <span class="cat-name">หลวงปู่มั่น ภูริทัตโต</span>
-        </button>
-        <button class="category-sheet-item" data-category="หลวงตามหาบัว">
-          <span class="cat-icon">🪷</span>
-          <span class="cat-name">หลวงตามหาบัว (วัดป่าบ้านตาด)</span>
-        </button>
-        <button class="category-sheet-item" data-category="แผ่เมตตา">
-          <span class="cat-icon">💖</span>
-          <span class="cat-name">แผ่เมตตา</span>
-        </button>
-        <button class="category-sheet-item" data-category="คาถาศักดิ์สิทธิ์">
-          <span class="cat-icon">🌟</span>
-          <span class="cat-name">คาถาศักดิ์สิทธิ์</span>
-        </button>
-        <button class="category-sheet-item" data-category="บทสวดประจำวัน">
-          <span class="cat-icon">🙏</span>
-          <span class="cat-name">บทสวดประจำวัน</span>
-        </button>
-        <button class="category-sheet-item" data-category="ชัยมงคลคาถา">
-          <span class="cat-icon">🛡️</span>
-          <span class="cat-name">ชัยมงคลคาถา</span>
-        </button>
-        <button class="category-sheet-item" data-category="ทำวัตร">
-          <span class="cat-icon">📜</span>
-          <span class="cat-name">ทำวัตรเช้า-เย็น</span>
-        </button>
-      </div>
-    </div>
-  </div>
+    </main>
 
   <!-- ==========================================================================
        MODALS: SUGGEST / REQUEST PRAYER (EMAIL TO ADMIN@KAISOFT.NET)

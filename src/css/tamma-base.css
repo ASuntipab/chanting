@@ -410,78 +410,57 @@ body {
   box-shadow: var(--shadow-gold);
 }
 
-/* Category Dropdown Pill */
-.btn-category-dropdown {
+/* Category Dropdown Select Wrap (1-Line Space Saver) */
+.category-dropdown-wrap {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  flex-shrink: 0;
+}
+
+.category-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-full);
-  padding: 8px 14px;
+  padding: 8px 30px 8px 14px;
   color: var(--accent-gold);
   font-family: var(--font-header);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
+  outline: none;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
+  max-width: 175px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.btn-category-dropdown:hover, .btn-category-dropdown:active {
-  background: var(--bg-card-hover);
+.category-select:focus, .category-select:hover {
   border-color: var(--accent-gold);
-  transform: translateY(-1px);
+  background: var(--bg-card-hover);
   box-shadow: var(--shadow-gold);
 }
 
-.dropdown-caret {
-  font-size: 0.65rem;
-  opacity: 0.7;
+.category-select option {
+  background: #181410;
+  color: #fdfaf6;
+  padding: 8px 12px;
+  font-family: var(--font-body);
 }
 
-/* Category Sheet Grid Modal */
-.category-sheet-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.category-sheet-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  color: var(--text-primary);
-  font-family: var(--font-header);
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.category-sheet-item:hover {
-  border-color: var(--accent-gold);
-  background: var(--bg-card-hover);
-  transform: translateY(-2px);
-}
-
-.category-sheet-item.active {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(36, 29, 23, 0.9));
-  border-color: var(--accent-gold);
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--accent-gold);
-  font-weight: 600;
-  box-shadow: 0 0 16px var(--accent-gold-glow);
-}
-
-.category-sheet-item .cat-icon {
-  font-size: 1.15rem;
+  font-size: 0.65rem;
+  pointer-events: none;
+  opacity: 0.8;
 }
 
 /* Cards Grid */
