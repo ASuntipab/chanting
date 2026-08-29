@@ -20,21 +20,38 @@ class DhammaStorageEngine {
   }
 
   init() {
-    // Seed and merge default prayers so new prayers are always available
+    // Seed, update, and merge default prayers so latest versions are always loaded
     const existing = this.getPrayers();
     if (!existing || existing.length === 0) {
       this.save(STORAGE_KEYS.PRAYERS, DEFAULT_PRAYERS);
     } else {
-      const existingIds = new Set(existing.map(p => p.id));
-      let hasNew = false;
+      const defaultMap = new Map(DEFAULT_PRAYERS.map(p => [p.id, p]));
+      let updated = false;
+
+      // 1. Update existing default prayers with latest complete content
+      const merged = existing.map(p => {
+        if (defaultMap.has(p.id)) {
+          const latest = defaultMap.get(p.id);
+          // If page count changed or content improved, upgrade it
+          if (!p.pages || p.pages.length !== latest.pages.length || p.title !== latest.title) {
+            updated = true;
+            return { ...p, ...latest };
+          }
+        }
+        return p;
+      });
+
+      // 2. Add any newly introduced default prayers
+      const existingIds = new Set(merged.map(p => p.id));
       DEFAULT_PRAYERS.forEach(dp => {
         if (!existingIds.has(dp.id)) {
-          existing.push(dp);
-          hasNew = true;
+          merged.push(dp);
+          updated = true;
         }
       });
-      if (hasNew) {
-        this.save(STORAGE_KEYS.PRAYERS, existing);
+
+      if (updated) {
+        this.save(STORAGE_KEYS.PRAYERS, merged);
       }
     }
   }
