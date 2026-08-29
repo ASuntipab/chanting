@@ -18,10 +18,22 @@ export class DhammaShareEngine {
     const count = trackerData.totalCounts[prayer.id] || 0;
     const streak = trackerData.streakDays || 1;
 
+    // สร้าง Deep Link (Zero-Database P2P Share)
+    // บีบอัดบทสวดเป็น Base64 แทรกลงใน URL Parameter
+    const prayerPayload = {
+      title: prayer.title,
+      category: prayer.category,
+      author: prayer.author,
+      pages: prayer.pages
+    };
+    const base64Prayer = btoa(encodeURIComponent(JSON.stringify(prayerPayload)));
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?import=${base64Prayer}`;
+
     const shareData = {
       title: `${prayer.title} - ธรรมะ E-Book`,
-      text: `วันนี้ฉันได้ร่วมสวดมนต์ "${prayer.title}" สะสมแล้ว ${count} จบ (ปฏิบัติธรรมต่อเนื่อง ${streak} วัน) 🙏✨`,
-      url: window.location.href
+      text: `🙏 ขอเชิญร่วมสวดมนต์บท "${prayer.title}"\n(วันนี้ฉันสวดสะสมแล้ว ${count} จบ, ต่อเนื่อง ${streak} วัน)\n\nกดลิงก์ด้านล่างเพื่อเปิดอ่านและเพิ่มเข้าแอปธรรมะ E-Book ของคุณได้ฟรี (ไม่ต้องโหลดแอป):`,
+      url: shareUrl
     };
 
     if (navigator.share) {

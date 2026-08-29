@@ -28,10 +28,45 @@ class TammaApp {
     this.renderLibrary();
     tracker.render();
 
-    // 5. Bind Global UI Events
+    // 5. Check for Peer-to-Peer Shared Prayer in URL
+    this.checkDeepLinkImport();
+
+    // 6. Bind Global UI Events
     this.bindEvents();
 
     console.log('🙏 Tamma OS E-Book Engine Initialized (100% Offline-First).');
+  }
+
+  checkDeepLinkImport() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const importPayload = urlParams.get('import');
+    
+    if (importPayload) {
+      try {
+        const decoded = decodeURIComponent(atob(importPayload));
+        const prayer = JSON.parse(decoded);
+        
+        if (prayer && prayer.title && prayer.pages) {
+          // Generate new ID to avoid collision
+          prayer.id = 'shared-' + Date.now().toString(36);
+          prayer.status = 'approved';
+          storage.savePrayer(prayer);
+          
+          this.renderLibrary();
+          this.showToast(`✨ รับบทสวด "${prayer.title}" จากเพื่อนสำเร็จ!`);
+          
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Auto open
+          setTimeout(() => this.reader.open(prayer), 500);
+        }
+      } catch (e) {
+        console.error('Failed to parse shared prayer:', e);
+        this.showToast('❌ ลิงก์บทสวดมนต์ไม่ถูกต้อง หรือข้อมูลเสียหาย');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
   }
 
   applyInitialSettings() {
