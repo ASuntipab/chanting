@@ -990,6 +990,8 @@ export class ComicReaderEngine {
     if (!this.ttsSettingsModal) return;
     if (this.ttsSettingsModal.style.display === 'none' || !this.ttsSettingsModal.style.display) {
       this.ttsSettingsModal.style.display = 'block';
+      this.hideMP3Deck();
+      this.scheduleAutoHide(12000);
     } else {
       this.ttsSettingsModal.style.display = 'none';
     }
@@ -1116,6 +1118,7 @@ export class ComicReaderEngine {
     if (this.mp3PlayerDeck) {
       this.mp3PlayerDeck.style.display = 'flex';
       this.hideTTSSettings();
+      this.scheduleAutoHide(15000);
     }
   }
 
