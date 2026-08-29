@@ -170,7 +170,7 @@
   transform-style: preserve-3d;
 }
 
-/* 3D Realistic Fullscreen Book Leaf Frame */
+/* 3D Realistic Fullscreen Book Leaf Frame - Zero Scrollbars Guarantee */
 .page-frame {
   width: 100%;
   max-width: 780px;
@@ -181,13 +181,14 @@
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 34px 24px 28px 24px;
+  padding: 28px 22px 24px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  overflow: hidden; /* ZERO SCROLLBAR: Content auto-paginates cleanly across discrete pages */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   
   /* 3D Book Page Spine & Shadows */
   box-shadow:
@@ -197,6 +198,15 @@
   transform-origin: left center;
   transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
   will-change: transform, box-shadow;
+}
+
+.page-frame::-webkit-scrollbar,
+.page-verse-body::-webkit-scrollbar,
+.comic-stage::-webkit-scrollbar,
+.reader-view::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Book Spine Gutter Light & Shadow Overlay */

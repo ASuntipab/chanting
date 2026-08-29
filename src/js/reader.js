@@ -156,6 +156,19 @@ export class ComicReaderEngine {
       window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
       window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
     }
+
+    // Dynamic Live Auto-Pagination on Screen Resize / Orientation Change
+    window.addEventListener('resize', () => {
+      if (this.isOpen() && this.currentPrayer) {
+        if (this.resizeDebounce) clearTimeout(this.resizeDebounce);
+        this.resizeDebounce = setTimeout(() => {
+          const relativeProgress = this.totalPages > 1 ? this.currentPageIndex / (this.totalPages - 1) : 0;
+          this.renderPages(this.currentPrayer);
+          const newIndex = Math.min(Math.round(relativeProgress * (this.totalPages - 1)), this.totalPages - 1);
+          this.goToPage(newIndex, false);
+        }, 150);
+      }
+    });
   }
 
   // --- HUD Auto-Hide & Toggle Mechanics ---
@@ -245,17 +258,120 @@ export class ComicReaderEngine {
   }
 
   /**
+   * Smart Dynamic Auto-Pagination Flow Engine:
+   * Splits long chants into discrete pages dynamically based on current font size & screen height.
+   * Guarantees 0 scrollbars and perfect readability on any screen size.
+   */
+  calculateDynamicPages(prayer, fontSizeRem = 1.15) {
+    if (!prayer) return [];
+    const rawPages = prayer.pages || [];
+    if (rawPages.length === 0) {
+      return this.autoPaginateText(prayer.content || prayer.description || '');
+    }
+
+    const vh = typeof window !== 'undefined' ? (window.innerHeight || 800) : 800;
+    // Calculate character budget per page based on font size and screen height
+    const baseBudget = vh < 650 ? 190 : 270;
+    const fontFactor = 1.15 / Math.max(fontSizeRem, 0.7);
+    const charCapacity = Math.max(Math.floor(baseBudget * fontFactor * fontFactor), 75);
+
+    const dynamicPages = [];
+
+    rawPages.forEach((page, originalIdx) => {
+      const pali = (page.pali || '').trim();
+      const thai = (page.thai || '').trim();
+      const content = (page.content || '').trim();
+      const totalLen = pali.length + thai.length + content.length;
+
+      // If fits nicely within page capacity, keep as single page
+      if (totalLen <= charCapacity) {
+        dynamicPages.push({
+          ...page,
+          pageNumber: dynamicPages.length + 1,
+          verseTitle: page.verseTitle || `ตอนที่ ${originalIdx + 1}`
+        });
+        return;
+      }
+
+      // If text exceeds page capacity, intelligently split into sub-pages
+      const subChunks = [];
+
+      if (pali && thai) {
+        const paliStanzas = pali.split(/\n\s*\n/).filter(s => s.trim().length > 0);
+        const thaiStanzas = thai.split(/\n\s*\n/).filter(s => s.trim().length > 0);
+
+        if (paliStanzas.length > 1 && paliStanzas.length === thaiStanzas.length) {
+          for (let i = 0; i < paliStanzas.length; i++) {
+            subChunks.push({ pali: paliStanzas[i], thai: thaiStanzas[i] });
+          }
+        } else if (paliStanzas.length > 1) {
+          paliStanzas.forEach((stanza, i) => {
+            subChunks.push({
+              pali: stanza,
+              thai: i === paliStanzas.length - 1 ? thai : ''
+            });
+          });
+        } else {
+          // Long single stanza: Pali on Page 1, Thai translation on Page 2
+          subChunks.push({ pali: pali, thai: '' });
+          subChunks.push({ pali: '', thai: thai });
+        }
+      } else {
+        const textToSplit = pali || thai || content;
+        const paragraphs = textToSplit.split(/\n+/).filter(p => p.trim().length > 0);
+        let curChunk = [];
+        let curLen = 0;
+
+        paragraphs.forEach(p => {
+          if (curLen + p.length > charCapacity && curChunk.length > 0) {
+            subChunks.push({
+              pali: page.pali ? curChunk.join('\n') : '',
+              thai: page.thai ? curChunk.join('\n') : '',
+              content: page.content ? curChunk.join('\n') : ''
+            });
+            curChunk = [];
+            curLen = 0;
+          }
+          curChunk.push(p);
+          curLen += p.length;
+        });
+
+        if (curChunk.length > 0) {
+          subChunks.push({
+            pali: page.pali ? curChunk.join('\n') : '',
+            thai: page.thai ? curChunk.join('\n') : '',
+            content: page.content ? curChunk.join('\n') : ''
+          });
+        }
+      }
+
+      // Append sub-pages with clear numbering
+      const totalSub = subChunks.length;
+      subChunks.forEach((sub, subIdx) => {
+        const baseTitle = page.verseTitle || `ตอนที่ ${originalIdx + 1}`;
+        const titleWithSub = totalSub > 1 ? `${baseTitle} (${subIdx + 1}/${totalSub})` : baseTitle;
+        dynamicPages.push({
+          pageNumber: dynamicPages.length + 1,
+          verseTitle: titleWithSub,
+          pali: sub.pali || '',
+          thai: sub.thai || '',
+          content: sub.content || ''
+        });
+      });
+    });
+
+    return dynamicPages;
+  }
+
+  /**
    * Intelligently renders and paginates prayer content into Comic frames
    */
   renderPages(prayer) {
-    let pages = prayer.pages;
+    const settings = storage.getSettings();
+    const currentFontSize = settings.fontSize || 1.15;
 
-    // If pages not pre-split, auto-paginate text
-    if (!pages || pages.length === 0) {
-      pages = this.autoPaginateText(prayer.content || prayer.description || '');
-      this.currentPrayer.pages = pages;
-    }
-
+    // Use Smart Dynamic Auto-Pagination Flow Engine
+    const pages = this.calculateDynamicPages(prayer, currentFontSize);
     this.totalPages = pages.length;
     this.comicTrack.innerHTML = '';
 
@@ -269,7 +385,7 @@ export class ComicReaderEngine {
 
       const header = document.createElement('div');
       header.className = 'page-verse-header';
-      header.innerHTML = `<span>${page.verseTitle || `บทที่ ${idx + 1}`}</span>`;
+      header.innerHTML = `<span>${this.escapeHtml(page.verseTitle || `บทที่ ${idx + 1}`)}</span>`;
 
       const body = document.createElement('div');
       body.className = 'page-verse-body';
@@ -277,14 +393,14 @@ export class ComicReaderEngine {
       if (page.pali) {
         const paliEl = document.createElement('div');
         paliEl.className = 'verse-pali';
-        paliEl.innerHTML = page.pali.replace(/\n/g, '<br>');
+        paliEl.innerHTML = this.escapeHtml(page.pali).replace(/\n/g, '<br>');
         body.appendChild(paliEl);
       }
 
       if (page.thai) {
         const thaiEl = document.createElement('div');
         thaiEl.className = 'verse-thai';
-        thaiEl.innerHTML = page.thai.replace(/\n/g, '<br>');
+        thaiEl.innerHTML = this.escapeHtml(page.thai).replace(/\n/g, '<br>');
         body.appendChild(thaiEl);
       }
 
@@ -292,7 +408,7 @@ export class ComicReaderEngine {
       if (!page.pali && !page.thai && page.content) {
         const contentEl = document.createElement('div');
         contentEl.className = 'verse-thai';
-        contentEl.innerHTML = page.content.replace(/\n/g, '<br>');
+        contentEl.innerHTML = this.escapeHtml(page.content).replace(/\n/g, '<br>');
         body.appendChild(contentEl);
       }
 
@@ -308,6 +424,16 @@ export class ComicReaderEngine {
     });
 
     this.renderPageDots();
+  }
+
+  escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   autoPaginateText(rawText) {
@@ -536,7 +662,7 @@ export class ComicReaderEngine {
     }
   }
 
-  // --- Font Scaling & Preference Persistence ---
+  // --- Font Scaling & Preference Persistence with Dynamic Auto-Repagination ---
   adjustFontSize(delta) {
     const settings = storage.getSettings();
     let current = settings.fontSize || 1.15;
@@ -544,6 +670,14 @@ export class ComicReaderEngine {
     settings.fontSize = parseFloat(current.toFixed(2));
     storage.saveSettings(settings);
     this.applyFontSize(settings.fontSize);
+
+    // Re-paginate dynamically with new font size without losing reading progress
+    if (this.currentPrayer && this.isOpen()) {
+      const relativeProgress = this.totalPages > 1 ? this.currentPageIndex / (this.totalPages - 1) : 0;
+      this.renderPages(this.currentPrayer);
+      const newIndex = Math.min(Math.round(relativeProgress * (this.totalPages - 1)), this.totalPages - 1);
+      this.goToPage(newIndex, false);
+    }
   }
 
   applyFontSize(sizeRem) {
