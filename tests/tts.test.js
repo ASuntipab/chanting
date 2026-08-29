@@ -91,3 +91,24 @@ test('TTS Engine: Interactive Tap-to-Speak Queue Index Matching', () => {
   assert.equal(targetChunk.type, 'pali');
 });
 
+test('TTS Engine: Comprehensive Pali Normalization across all 28 default prayers', () => {
+  const engine = new DhammaTTSEngine();
+  
+  let totalVersesChecked = 0;
+  DEFAULT_PRAYERS.forEach(prayer => {
+    (prayer.pages || []).forEach(page => {
+      if (page.pali) {
+        const cleaned = engine.cleanPaliForTTS(page.pali);
+        assert.ok(cleaned && cleaned.length > 0, `Cleaned Pali for ${prayer.title} must not be empty`);
+        assert.equal(cleaned.includes('(กราบ)'), false, 'Should strip all (กราบ)');
+        assert.equal(cleaned.includes('\u0E3A'), false, 'Should strip all Pinthu diacritics');
+        assert.equal(cleaned.includes('\u0E4E'), false, 'Should strip all Yamakkan diacritics');
+        totalVersesChecked++;
+      }
+    });
+  });
+
+  assert.ok(totalVersesChecked >= 20, 'Should test at least 20 Pali verses');
+});
+
+
