@@ -38,7 +38,7 @@ class TammaApp {
     // 6. Bind Global UI Events
     this.bindEvents();
 
-    console.log('🙏 Tamma OS E-Book Engine Initialized (100% Offline-First).');
+    console.log('🙏 แอปพลิเคชันบทสวดมนต์ เริ่มทำงาน (100% Offline-First).');
   }
 
   checkDeepLinkImport() {
@@ -87,14 +87,18 @@ class TammaApp {
       });
     });
 
-    // Theme Switcher Buttons
-    document.querySelectorAll('[data-set-theme]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const theme = btn.dataset.setTheme;
-        document.body.className = `theme-${theme}`;
-        storage.saveSettings({ theme });
-        this.showToast(`เปลี่ยนธีมเป็น: ${btn.textContent.trim()}`);
-      });
+    // Theme Toggle Button
+    const btnToggleTheme = document.getElementById('btnToggleTheme');
+    const themes = ['cosmic', 'gold', 'parchment', 'midnight'];
+    const themeNames = ['🌌 จักรวาล', '🌟 ทองอร่าม', '📜 ใบลาน', '🌙 ราตรีสงบ'];
+    btnToggleTheme?.addEventListener('click', () => {
+      const currentTheme = storage.getSettings().theme || 'cosmic';
+      let idx = themes.indexOf(currentTheme);
+      idx = (idx + 1) % themes.length;
+      const newTheme = themes[idx];
+      document.body.className = `theme-${newTheme}`;
+      storage.saveSettings({ theme: newTheme });
+      this.showToast(`เปลี่ยนธีม: ${themeNames[idx]}`);
     });
 
     // Search Input
@@ -185,9 +189,11 @@ class TammaApp {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `tamma-prayers-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `prayers-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
       a.click();
       URL.revokeObjectURL(url);
+      document.body.removeChild(a);
       this.showToast('ส่งออกไฟล์บทสวดมนต์ (JSON) เรียบร้อย 💾');
     });
 
@@ -331,7 +337,6 @@ class TammaApp {
         </div>
         <div class="card-footer">
           <div class="card-stats">
-            <span class="card-stat-item">📖 ${pageCount} หน้า</span>
             <span class="card-stat-item">🔔 ${chantCount} จบ</span>
           </div>
           <div style="display: flex; gap: 6px;">
