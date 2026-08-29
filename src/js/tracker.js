@@ -35,7 +35,7 @@ export class DhammaTrackerEngine {
     if (this.todayCountEl) this.todayCountEl.textContent = todayChantedCount;
     if (this.totalChantsEl) this.totalChantsEl.textContent = totalLifetimeChants;
 
-    // Render Checklist
+    // Render Checklist / Tracker Items
     this.container.innerHTML = '';
     displayList.forEach(prayer => {
       const isCompleted = !!trackerData.todayChanted[prayer.id];
@@ -43,38 +43,31 @@ export class DhammaTrackerEngine {
 
       const item = document.createElement('div');
       item.className = `tracker-item ${isCompleted ? 'completed' : ''}`;
+      item.style.cursor = 'pointer';
       item.innerHTML = `
         <div class="tracker-item-left">
-          <button class="tracker-checkbox" aria-label="ติ๊กสวดแล้ว" data-id="${prayer.id}">
-            ${isCompleted ? '✓' : ''}
-          </button>
-          <div>
+          <div class="tracker-status-icon">
+            ${isCompleted ? '✅' : '⚪'}
+          </div>
+          <div style="min-width: 0; flex: 1;">
             <div class="tracker-title">${prayer.title}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">สวดสะสม ${count} จบ</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+              ${isCompleted ? '<span style="color: var(--accent-green); font-weight: 500;">สวดแล้ววันนี้</span> • ' : ''}สวดสะสม ${count} จบ
+            </div>
           </div>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="tracker-counter-btn btn-plus-one" data-id="${prayer.id}">
-            +1 จบ 🔔
+        <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+          <button class="btn-primary btn-read-tracker" data-id="${prayer.id}" style="padding: 6px 14px; font-size: 0.85rem; border-radius: 20px;">
+            เปิดสวด
           </button>
         </div>
       `;
 
-      // Event Listeners
-      const checkBtn = item.querySelector('.tracker-checkbox');
-      checkBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        audio.playBell();
-        storage.toggleTodayChanted(prayer.id);
-        this.render();
-      });
-
-      const plusBtn = item.querySelector('.btn-plus-one');
-      plusBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        audio.playBell(586);
-        storage.incrementPrayerCount(prayer.id);
-        this.render();
+      // Click to open prayer reader directly
+      item.addEventListener('click', () => {
+        if (window.tammaApp && window.tammaApp.reader) {
+          window.tammaApp.reader.open(prayer);
+        }
       });
 
       this.container.appendChild(item);
