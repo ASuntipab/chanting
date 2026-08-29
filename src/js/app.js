@@ -525,15 +525,30 @@ class TammaApp {
     if (countEl) {
       const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
       const totalAll = allPrayers.length;
-      const totalPages = allPrayers.reduce((acc, p) => acc + (p.pages?.length || 1), 0);
 
       if (this.currentCategory === 'all' && !this.searchQuery) {
-        countEl.innerHTML = `บทสวดมนต์ทั้งหมด <strong>${toThai(totalAll)}</strong> บท (${toThai(totalPages)} หน้า)`;
+        countEl.innerHTML = `บทสวดมนต์ทั้งหมด <strong>${toThai(totalAll)}</strong> บท`;
       } else if (this.searchQuery) {
         countEl.innerHTML = `ค้นพบ <strong>${toThai(prayers.length)}</strong> บท จากคำค้น "${this.searchQuery}" (จากทั้งหมด ${toThai(totalAll)} บท)`;
       } else {
         countEl.innerHTML = `หมวดหมู่ <strong>${this.currentCategory}</strong>: <strong>${toThai(prayers.length)}</strong> บท (จากทั้งหมด ${toThai(totalAll)} บท)`;
       }
+    }
+
+    const badgeWrap = document.querySelector('.library-count-badge');
+    if (badgeWrap && !badgeWrap.dataset.hasListener) {
+      badgeWrap.dataset.hasListener = 'true';
+      badgeWrap.style.cursor = 'pointer';
+      badgeWrap.addEventListener('click', () => {
+        const categorySelect = document.getElementById('categorySelect');
+        const searchInput = document.getElementById('searchInput');
+        if (categorySelect) categorySelect.value = 'all';
+        if (searchInput) searchInput.value = '';
+        this.currentCategory = 'all';
+        this.searchQuery = '';
+        this.renderLibrary();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
 
     this.renderPrayerCards(container, prayers);
