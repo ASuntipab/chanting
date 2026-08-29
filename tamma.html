@@ -79,6 +79,14 @@
         </div>
       </div>
 
+      <!-- Library Count & Status Info Bar -->
+      <div class="library-header-info">
+        <div class="library-count-badge">
+          <span class="library-count-icon">📿</span>
+          <span id="prayerTotalCountText">บทสวดมนต์ทั้งหมด <strong>๑๐๐</strong> บท (๑๘๓ หน้า)</span>
+        </div>
+      </div>
+
       <!-- Prayers Grid -->
       <div id="prayerGrid" class="prayer-grid">
         <!-- Rendered dynamically by JS -->
@@ -195,15 +203,61 @@
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
       </div>
 
-      <!-- TTS Voice Reading Controls -->
+      <!-- Dual Audio Controls: TTS & Real MP3 Monastic Chanting -->
       <div class="reader-audio-dock">
-        <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงอ่านบทสวด">
+        <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงสังเคราะห์สวดนำ (AI)">
           <span id="ttsPlayIcon">🔊</span>
           <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
+        </button>
+        <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
+          <span id="mp3PlayIcon">🎵</span>
+          <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
         </button>
         <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ตั้งค่าเสียงอ่าน">
           ⚙️
         </button>
+      </div>
+    </div>
+
+    <!-- Real Monastic MP3 Chanting Audio Deck -->
+    <div id="mp3PlayerDeck" class="mp3-player-deck" style="display: none;">
+      <div class="mp3-deck-header">
+        <div class="mp3-track-info">
+          <span class="mp3-track-badge">🎵 เสียงพระสวดจริง</span>
+          <h4 id="mp3TrackTitle" class="mp3-track-title">ทำวัตรเช้า (แปลไทย-บาลี)</h4>
+          <span id="mp3TrackTemple" class="mp3-track-temple">วัดป่านานาชาติ / วัดมาบจันทร์</span>
+        </div>
+        <button id="btnCloseMP3Deck" class="btn-icon" style="width: 28px; height: 28px;">✕</button>
+      </div>
+
+      <!-- Track Selector Dropdown -->
+      <div class="mp3-select-wrap">
+        <select id="mp3TrackSelect" class="mp3-track-select">
+          <!-- Populated from CHANTING_AUDIO_TRACKS -->
+        </select>
+      </div>
+
+      <!-- Scrubber & Time -->
+      <div class="mp3-scrubber-row">
+        <span id="mp3CurrentTime" class="mp3-time">00:00</span>
+        <input type="range" id="mp3ProgressBar" class="mp3-slider" min="0" max="100" value="0">
+        <span id="mp3Duration" class="mp3-time">00:00</span>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="mp3-controls-row">
+        <button id="btnMP3Rewind10" class="btn-icon" style="font-size: 0.75rem; padding: 4px 8px;" title="ย้อนกลับ 10 วินาที">⏪ 10s</button>
+        <button id="btnMP3MainPlay" class="btn-mp3-main-play" title="เล่น/หยุด">▶️ เล่นเสียงพระสวด</button>
+        <button id="btnMP3Forward10" class="btn-icon" style="font-size: 0.75rem; padding: 4px 8px;" title="ข้ามไป 10 วินาที">⏩ 10s</button>
+        <button id="btnMP3Loop" class="btn-icon" style="font-size: 0.85rem;" title="เล่นวนซ้ำ">🔁</button>
+        <div class="mp3-speed-wrap">
+          <select id="mp3SpeedSelect" class="mp3-speed-select" title="ความเร็ว">
+            <option value="0.75">0.75x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+        </div>
       </div>
     </div>
 

@@ -503,7 +503,8 @@ class TammaApp {
     const container = document.getElementById('prayerGrid');
     if (!container) return;
 
-    let prayers = storage.getPrayers();
+    const allPrayers = storage.getPrayers();
+    let prayers = [...allPrayers];
 
     // Filter by Category
     if (this.currentCategory !== 'all') {
@@ -519,6 +520,22 @@ class TammaApp {
       );
     }
 
+    // Update Total Count & Filter Status Badge
+    const countEl = document.getElementById('prayerTotalCountText');
+    if (countEl) {
+      const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+      const totalAll = allPrayers.length;
+      const totalPages = allPrayers.reduce((acc, p) => acc + (p.pages?.length || 1), 0);
+
+      if (this.currentCategory === 'all' && !this.searchQuery) {
+        countEl.innerHTML = `บทสวดมนต์ทั้งหมด <strong>${toThai(totalAll)}</strong> บท (${toThai(totalPages)} หน้า)`;
+      } else if (this.searchQuery) {
+        countEl.innerHTML = `ค้นพบ <strong>${toThai(prayers.length)}</strong> บท จากคำค้น "${this.searchQuery}" (จากทั้งหมด ${toThai(totalAll)} บท)`;
+      } else {
+        countEl.innerHTML = `หมวดหมู่ <strong>${this.currentCategory}</strong>: <strong>${toThai(prayers.length)}</strong> บท (จากทั้งหมด ${toThai(totalAll)} บท)`;
+      }
+    }
+
     this.renderPrayerCards(container, prayers);
   }
 
@@ -529,6 +546,12 @@ class TammaApp {
     const favIds = storage.getFavorites();
     const allPrayers = storage.getPrayers();
     const favPrayers = allPrayers.filter(p => favIds.includes(p.id));
+
+    const favCountSubtitle = document.querySelector('#viewFavorites p');
+    if (favCountSubtitle) {
+      const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+      favCountSubtitle.textContent = `บทสวดมนต์ที่คุณบันทึกไว้เปิดสวดเป็นประจำ (${toThai(favPrayers.length)} บท)`;
+    }
 
     if (favPrayers.length === 0) {
       container.innerHTML = `
