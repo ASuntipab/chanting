@@ -517,38 +517,52 @@ class TammaApp {
       );
     }
 
-    // Update Total Count & Filter Status Badge
-    const countEl = document.getElementById('prayerTotalCountText');
-    if (countEl) {
-      const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
-      const totalAll = allPrayers.length;
-
-      if (this.currentCategory === 'all' && !this.searchQuery) {
-        countEl.innerHTML = `บทสวดมนต์ทั้งหมด <strong>${toThai(totalAll)}</strong> บท`;
-      } else if (this.searchQuery) {
-        countEl.innerHTML = `ค้นพบ <strong>${toThai(prayers.length)}</strong> บท จากคำค้น "${this.searchQuery}" (จากทั้งหมด ${toThai(totalAll)} บท)`;
-      } else {
-        countEl.innerHTML = `หมวดหมู่ <strong>${this.currentCategory}</strong>: <strong>${toThai(prayers.length)}</strong> บท (จากทั้งหมด ${toThai(totalAll)} บท)`;
-      }
-    }
-
-    const badgeWrap = document.querySelector('.library-count-badge');
-    if (badgeWrap && !badgeWrap.dataset.hasListener) {
-      badgeWrap.dataset.hasListener = 'true';
-      badgeWrap.style.cursor = 'pointer';
-      badgeWrap.addEventListener('click', () => {
-        const categorySelect = document.getElementById('categorySelect');
-        const searchInput = document.getElementById('searchInput');
-        if (categorySelect) categorySelect.value = 'all';
-        if (searchInput) searchInput.value = '';
-        this.currentCategory = 'all';
-        this.searchQuery = '';
-        this.renderLibrary();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
-
+    this.updateCategoryDropdownCounts(allPrayers);
     this.renderPrayerCards(container, prayers);
+  }
+
+  updateCategoryDropdownCounts(allPrayers = null) {
+    const categorySelect = document.getElementById('categorySelect');
+    if (!categorySelect) return;
+
+    if (!allPrayers) {
+      allPrayers = storage.getPrayers().filter(p => p.status !== 'hidden');
+    }
+
+    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+
+    const categoryCounts = {};
+    allPrayers.forEach(p => {
+      const cat = p.category || 'บทสวดมนต์';
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    });
+
+    const categoryIcons = {
+      'all': '✨',
+      'หลวงพ่อจรัญ': '🪷',
+      'หลวงปู่มั่น': '⛰️',
+      'หลวงตามหาบัว': '🪷',
+      'แผ่เมตตา': '💖',
+      'คาถาศักดิ์สิทธิ์': '🌟',
+      'บทสวดประจำวัน': '🙏',
+      'ชัยมงคลคาถา': '🛡️',
+      'ทำวัตร': '📜',
+      'พระสูตรสำคัญ': '📖',
+      'พระเกจิอาจารย์': '📿',
+      'พิธีกรรม': '🕯️'
+    };
+
+    Array.from(categorySelect.options).forEach(opt => {
+      const val = opt.value;
+      const icon = categoryIcons[val] || '📿';
+      if (val === 'all') {
+        opt.textContent = `${icon} ทุกหมวดหมู่ (${toThai(allPrayers.length)} บท)`;
+      } else {
+        const count = categoryCounts[val] || 0;
+        const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
+        opt.textContent = `${icon} ${baseName} (${toThai(count)} บท)`;
+      }
+    });
   }
 
   async renderFavorites() {
@@ -731,12 +745,9 @@ class TammaApp {
               <span class="card-category" style="color: ${pitakaColor}; background: ${pitakaBadgeClass}; border: 1px solid ${pitakaColor};">
                 ${vol.pitaka} • เล่มที่ ${vol.volume}
               </span>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">⚡ .br (${vol.brSizeKb} KB)</span>
-                <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${volId}" aria-label="รายการโปรด">
-                  ${isFav ? '❤️' : '🤍'}
-                </button>
-              </div>
+              <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${volId}" aria-label="รายการโปรด">
+                ${isFav ? '❤️' : '🤍'}
+              </button>
             </div>
             <div class="card-title">${vol.bookTitle}</div>
             <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 6px; font-style: italic;">${vol.bookPali}</div>
@@ -798,7 +809,7 @@ class TammaApp {
 
   async openTipitakaVolume(volumeNumber) {
     try {
-      this.showToast(`⚡ กำลังคลายการบีบอัด .br เล่มที่ ${volumeNumber}...`);
+      this.showToast(`📖 กำลังเปิดพระไตรปิฎก เล่มที่ ${volumeNumber}...`);
       const volData = await tipitakaLoader.loadVolume(volumeNumber);
       
       if (!volData || !volData.sections || volData.sections.length === 0) {
