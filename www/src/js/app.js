@@ -104,14 +104,11 @@ class TammaApp {
       this.renderLibrary();
     });
 
-    // Category Chips
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        this.currentCategory = chip.dataset.category || 'all';
-        this.renderLibrary();
-      });
+    // Category Dropdown Select
+    const categorySelect = document.getElementById('categorySelect');
+    categorySelect?.addEventListener('change', (e) => {
+      this.currentCategory = e.target.value || 'all';
+      this.renderLibrary();
     });
 
     // Suggest / Request Prayer Modal Triggers (+)

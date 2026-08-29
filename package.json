@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
+    "icons:generate": "python scripts/generate_app_icons.py",
     "test": "node --test tests/*.test.js",
     "cap:build": "npm run build && npx cap sync",
     "cap:sync": "npm run build && npx cap sync",
