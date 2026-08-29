@@ -354,3 +354,17 @@ test('100% Zero-Loss Content Parity: All prayers retain complete Pali verses and
     });
   });
 });
+
+test('Library Header: Accurate Prayer Count & Thai Numeral Formatting', () => {
+  const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+  
+  const activePrayers = DEFAULT_PRAYERS.filter(p => p.status !== 'hidden');
+  const totalCount = activePrayers.length;
+  const totalPages = activePrayers.reduce((acc, p) => acc + (p.pages?.length || 1), 0);
+
+  assert.equal(totalCount, 100, 'Should have exactly 100 active prayers in default library');
+  assert.equal(toThai(totalCount), '๑๐๐', 'Should correctly format 100 to Thai numeral ๑๐๐');
+  assert.equal(totalPages, 183, 'Should have 183 total pages across all prayers');
+  assert.equal(toThai(totalPages), '๑๘๓', 'Should correctly format 183 pages to Thai numeral ๑๘๓');
+});
+
