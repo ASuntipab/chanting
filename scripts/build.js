@@ -34,11 +34,4 @@ copyDir(path.join(rootDir, 'data'), path.join(wwwDir, 'data'));
 // Create .nojekyll for GitHub Pages
 fs.writeFileSync(path.join(wwwDir, '.nojekyll'), '', 'utf8');
 
-const cnameSource = path.join(rootDir, 'CNAME');
-if (fs.existsSync(cnameSource)) {
-  fs.copyFileSync(cnameSource, path.join(wwwDir, 'CNAME'));
-} else {
-  fs.writeFileSync(path.join(wwwDir, 'CNAME'), 'tamma-chanting.surge.sh\n', 'utf8');
-}
-
 console.log('Build complete: Web assets packaged to www/ successfully.');
