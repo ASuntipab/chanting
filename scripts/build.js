@@ -29,6 +29,10 @@ function copyDir(src, dest) {
 
 copyDir(path.join(rootDir, 'src'), path.join(wwwDir, 'src'));
 copyDir(path.join(rootDir, 'assets'), path.join(wwwDir, 'assets'));
+copyDir(path.join(rootDir, 'data'), path.join(wwwDir, 'data'));
+
+// Create .nojekyll for GitHub Pages
+fs.writeFileSync(path.join(wwwDir, '.nojekyll'), '', 'utf8');
 
 const cnameSource = path.join(rootDir, 'CNAME');
 if (fs.existsSync(cnameSource)) {
