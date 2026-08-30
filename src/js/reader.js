@@ -448,11 +448,6 @@ export class ComicReaderEngine {
     const frame = document.createElement('div');
     frame.className = 'page-frame';
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'page-verse-header';
-    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span>`;
-
     // Viewport Window
     const viewport = document.createElement('div');
     viewport.className = 'page-verse-viewport';
@@ -588,7 +583,6 @@ export class ComicReaderEngine {
     footer.appendChild(moreIndicator);
     footer.appendChild(counterBadge);
 
-    frame.appendChild(header);
     frame.appendChild(viewport);
     frame.appendChild(footer);
     pageEl.appendChild(frame);
