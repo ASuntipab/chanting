@@ -16,6 +16,7 @@ const STORAGE_KEYS = {
 
 class DhammaStorageEngine {
   constructor() {
+    this._memoryStore = new Map();
     this.init();
   }
 
@@ -59,8 +60,11 @@ class DhammaStorageEngine {
   // Generic Safe Storage Helpers
   get(key, defaultValue = null) {
     try {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : defaultValue;
+      if (typeof localStorage !== 'undefined' && localStorage !== null) {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : defaultValue;
+      }
+      return this._memoryStore.has(key) ? JSON.parse(this._memoryStore.get(key)) : defaultValue;
     } catch (e) {
       console.warn(`Error reading ${key} from storage:`, e);
       return defaultValue;
@@ -69,7 +73,12 @@ class DhammaStorageEngine {
 
   save(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const json = JSON.stringify(value);
+      if (typeof localStorage !== 'undefined' && localStorage !== null) {
+        localStorage.setItem(key, json);
+      } else {
+        this._memoryStore.set(key, json);
+      }
       return true;
     } catch (e) {
       console.error(`Error saving ${key} to storage:`, e);
@@ -118,8 +127,18 @@ class DhammaStorageEngine {
   }
 
   exportBackupCode() {
-    const jsonStr = this.exportData();
-    return btoa(encodeURIComponent(jsonStr));
+    const compact = {
+      v: 2,
+      favs: this.getFavorites(),
+      tracker: this.getTrackerData(),
+      settings: this.getSettings()
+    };
+    const jsonStr = JSON.stringify(compact);
+    try {
+      return btoa(unescape(encodeURIComponent(jsonStr)));
+    } catch {
+      return btoa(jsonStr);
+    }
   }
 
   importData(rawJson) {
@@ -127,14 +146,23 @@ class DhammaStorageEngine {
       let data = rawJson;
       if (typeof rawJson === 'string') {
         rawJson = rawJson.trim();
-        // Check if Base64 string
+        // Check if raw JSON string
         if (rawJson.startsWith('{') || rawJson.startsWith('[')) {
           data = JSON.parse(rawJson);
         } else {
+          // Base64 decode with multiple fallback strategies
           try {
-            data = JSON.parse(decodeURIComponent(atob(rawJson)));
+            data = JSON.parse(decodeURIComponent(escape(atob(rawJson))));
           } catch {
-            data = JSON.parse(rawJson);
+            try {
+              data = JSON.parse(decodeURIComponent(atob(rawJson)));
+            } catch {
+              try {
+                data = JSON.parse(atob(rawJson));
+              } catch {
+                data = JSON.parse(rawJson);
+              }
+            }
           }
         }
       }
@@ -143,29 +171,37 @@ class DhammaStorageEngine {
         throw new Error('โครงสร้างข้อมูลไม่ถูกต้อง');
       }
 
-      // 1. Restore Favorites
-      if (Array.isArray(data.favorites)) {
+      // 1. Restore Favorites (Support both .favorites and .favs)
+      const favList = data.favorites || data.favs || data.f;
+      if (Array.isArray(favList)) {
         const currentFavs = new Set(this.getFavorites());
-        data.favorites.forEach(f => currentFavs.add(f));
+        favList.forEach(f => currentFavs.add(f));
         this.save(STORAGE_KEYS.FAVORITES, Array.from(currentFavs));
       }
 
       // 2. Restore Tracker & Stats
-      if (data.tracker && typeof data.tracker === 'object') {
+      const trackerObj = data.tracker || data.t;
+      if (trackerObj && typeof trackerObj === 'object') {
         const currentTracker = this.getTrackerData();
-        if (data.tracker.totalCounts) {
-          currentTracker.totalCounts = { ...currentTracker.totalCounts, ...data.tracker.totalCounts };
+        const totalCounts = trackerObj.totalCounts || trackerObj.tc;
+        if (totalCounts && typeof totalCounts === 'object') {
+          currentTracker.totalCounts = { ...currentTracker.totalCounts, ...totalCounts };
         }
-        if (data.tracker.todayChanted) {
-          currentTracker.todayChanted = { ...currentTracker.todayChanted, ...data.tracker.todayChanted };
+        const todayChanted = trackerObj.todayChanted || trackerObj.tod;
+        if (todayChanted && typeof todayChanted === 'object') {
+          currentTracker.todayChanted = { ...currentTracker.todayChanted, ...todayChanted };
         }
-        currentTracker.streakDays = Math.max(currentTracker.streakDays || 1, data.tracker.streakDays || 1);
+        const streak = trackerObj.streakDays || trackerObj.st;
+        if (streak) {
+          currentTracker.streakDays = Math.max(currentTracker.streakDays || 1, streak || 1);
+        }
         this.save(STORAGE_KEYS.TRACKER, currentTracker);
       }
 
       // 3. Restore Settings
-      if (data.settings && typeof data.settings === 'object') {
-        this.saveSettings(data.settings);
+      const settingsObj = data.settings || data.s;
+      if (settingsObj && typeof settingsObj === 'object') {
+        this.saveSettings(settingsObj);
       }
 
       return { success: true };
@@ -292,6 +328,7 @@ class DhammaStorageEngine {
     return this.get(STORAGE_KEYS.SETTINGS, {
       theme: 'cosmic',
       fontSize: 1.15,
+      fontFamily: 'sarabun',
       soundEnabled: true
     });
   }

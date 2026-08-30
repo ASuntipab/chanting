@@ -8,12 +8,52 @@ import { storage } from './storage.js';
 import { nativeBridge } from './native-bridge.js';
 import { ttsEngine } from './tts-engine.js';
 import { mp3Player, CHANTING_AUDIO_TRACKS } from './mp3-player.js';
+import { paliScript } from './paliscript.js';
+
+export const FONT_FAMILIES = {
+  'sarabun': {
+    name: 'สารบรรณ',
+    label: '🇹🇭 สารบรรณ',
+    family: "'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  },
+  'prompt': {
+    name: 'พร้อมท์',
+    label: '✨ พร้อมท์',
+    family: "'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  },
+  'noto-serif': {
+    name: 'โนโตะ เซรีฟ',
+    label: '📜 โนโตะ (ใบลาน)',
+    family: "'Noto Serif Thai', Georgia, 'Times New Roman', serif"
+  },
+  'mitr': {
+    name: 'มิตร',
+    label: '🍃 มิตร',
+    family: "'Mitr', -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  'charm': {
+    name: 'ชาร์ม',
+    label: '✍️ ชาร์ม (ตัวเขียน)',
+    family: "'Charm', 'TH Sarabun New', cursive, sans-serif"
+  },
+  'bai-jamjuree': {
+    name: 'จามจุรี',
+    label: '💎 จามจุรี',
+    family: "'Bai Jamjuree', -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  'chakra': {
+    name: 'จักรเพชร',
+    label: '⚡ จักรเพชร',
+    family: "'Chakra Petch', -apple-system, BlinkMacSystemFont, sans-serif"
+  }
+};
 
 export class ComicReaderEngine {
   constructor() {
     this.currentPrayer = null;
     this.currentPageIndex = 0;
     this.totalPages = 0;
+    this.currentScript = 'thai-phonetic';
     
     // HUD & Fullscreen State
     this.hudVisible = true;
@@ -47,10 +87,13 @@ export class ComicReaderEngine {
     this.btnNext = document.getElementById('btnNextPage');
     this.btnClose = document.getElementById('btnCloseReader');
     
-    // Font Sizing in Bottom HUD Dock
+    // Font Sizing & Typography in Bottom HUD Dock
     this.btnFontPlus = document.getElementById('btnFontPlus');
     this.btnFontMinus = document.getElementById('btnFontMinus');
     this.fontSizeDisplay = document.getElementById('fontSizeDisplay');
+    this.readerFontSelect = document.getElementById('readerFontSelect');
+    this.btnReaderThemeToggle = document.getElementById('btnReaderThemeToggle');
+    this.paliScriptSelect = document.getElementById('paliScriptSelect');
     this.btnChantInReader = document.getElementById('btnChantInReader');
 
     // Fast Page Scrubber & Quick Navigation
@@ -149,6 +192,32 @@ export class ComicReaderEngine {
     this.btnFontMinus?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.adjustFontSize(-0.15);
+      this.scheduleAutoHide(5000);
+    });
+
+    // Font Family Switcher (7 Thai Fonts)
+    this.readerFontSelect?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      this.applyFontFamily(e.target.value, true);
+      this.scheduleAutoHide(5000);
+    });
+
+    // Theme Toggle Button in Reader Toolbar
+    this.btnReaderThemeToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleReaderTheme();
+      this.scheduleAutoHide(5000);
+    });
+
+    // Pali Script Switcher (Transliteration Engine)
+    this.paliScriptSelect?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      this.currentScript = e.target.value;
+      storage.saveSettings({ paliScript: this.currentScript });
+      if (this.currentPrayer) {
+        this.renderPages(this.currentPrayer);
+        this.goToViewport(this.viewportIndex, false);
+      }
       this.scheduleAutoHide(5000);
     });
 
@@ -369,11 +438,18 @@ export class ComicReaderEngine {
     this.currentPrayer = prayer;
     this.currentPageIndex = startPage;
 
-    // Apply User Font & Theme Preference automatically
+    // Apply User Font, Script & Theme Preference automatically
     const settings = storage.getSettings();
+    this.currentScript = settings.paliScript || 'thai-phonetic';
+    if (this.paliScriptSelect) {
+      this.paliScriptSelect.value = this.currentScript;
+    }
     this.applyFontSize(settings.fontSize || 1.15);
+    this.applyFontFamily(settings.fontFamily || 'sarabun', false);
     if (settings.theme) {
-      document.body.className = `theme-${settings.theme}`;
+      const currentClasses = document.body.className.split(' ').filter(c => !c.startsWith('theme-'));
+      currentClasses.push(`theme-${settings.theme}`);
+      document.body.className = currentClasses.join(' ');
     }
 
     // Update Headers
@@ -489,7 +565,10 @@ export class ComicReaderEngine {
           paliEl.dataset.pageIndex = idx;
           paliEl.dataset.type = 'pali';
           paliEl.dataset.text = line.trim();
-          paliEl.innerHTML = this.escapeHtml(line);
+          const displayPali = (this.currentScript && this.currentScript !== 'thai-phonetic')
+            ? paliScript.transliterate(line, this.currentScript)
+            : line;
+          paliEl.innerHTML = this.escapeHtml(displayPali);
           paliEl.addEventListener('click', (e) => {
             if (ttsEngine.isPlaying || ttsEngine.isPaused) {
               e.stopPropagation();
@@ -892,6 +971,66 @@ export class ComicReaderEngine {
     const percentStr = `${Math.round((sizeRem / 1.15) * 100)}%`;
     if (this.fontSizeDisplay) {
       this.fontSizeDisplay.textContent = percentStr;
+    }
+  }
+
+  // --- Font Family Management (7 Thai Typography Styles) ---
+  applyFontFamily(fontKey, save = false) {
+    const validKey = FONT_FAMILIES[fontKey] ? fontKey : 'sarabun';
+    const fontInfo = FONT_FAMILIES[validKey];
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--reader-font-family', fontInfo.family);
+      
+      // Update body font classes while preserving theme class
+      const currentClasses = document.body.className.split(' ').filter(c => !c.startsWith('font-'));
+      currentClasses.push(`font-${validKey}`);
+      document.body.className = currentClasses.join(' ');
+
+      if (this.readerFontSelect && this.readerFontSelect.value !== validKey) {
+        this.readerFontSelect.value = validKey;
+      }
+    }
+
+    if (save) {
+      storage.saveSettings({ fontFamily: validKey });
+    }
+
+    // Recalculate viewports with new font metrics
+    if (this.currentPrayer && this.isOpen()) {
+      const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+      requestAnimationFrame(() => {
+        this.calculateViewportMetrics();
+        const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
+        this.goToViewport(newIndex, false);
+      });
+    }
+  }
+
+  // --- Reader Theme Toggle (Synced with All 4 Themes) ---
+  toggleReaderTheme() {
+    const themes = ['cosmic', 'gold', 'parchment', 'midnight'];
+    const themeNames = {
+      'cosmic': '🌌 จักรวาล',
+      'gold': '🌟 ทองอร่าม',
+      'parchment': '📜 ใบลาน',
+      'midnight': '🌙 ราตรีสงบ'
+    };
+    const settings = storage.getSettings();
+    const currentTheme = settings.theme || 'cosmic';
+    let idx = themes.indexOf(currentTheme);
+    idx = (idx + 1) % themes.length;
+    const newTheme = themes[idx];
+
+    // Preserve font class when toggling theme
+    const currentClasses = document.body.className.split(' ').filter(c => !c.startsWith('theme-'));
+    currentClasses.push(`theme-${newTheme}`);
+    document.body.className = currentClasses.join(' ');
+
+    storage.saveSettings({ theme: newTheme });
+
+    if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
+      window.tammaApp.showToast(`เปลี่ยนธีม: ${themeNames[newTheme]}`);
     }
   }
 

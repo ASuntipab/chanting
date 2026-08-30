@@ -226,7 +226,7 @@ body.theme-cosmic .verse-pali {
 /* Page Content Typography & Viewport Flow */
 .page-verse-header {
   text-align: center;
-  font-family: var(--font-header);
+  font-family: var(--reader-font-family, var(--font-header));
   font-size: 1rem;
   font-weight: 600;
   color: var(--accent-gold);
@@ -268,6 +268,7 @@ body.theme-cosmic .verse-pali {
   will-change: transform;
   text-align: center;
   padding: 2px 0 16px 0;
+  font-family: var(--reader-font-family, var(--font-body));
   font-size: var(--reader-font-size, 1.15rem);
   color: var(--text-primary);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -281,7 +282,7 @@ body.theme-cosmic .verse-pali {
 }
 
 .verse-section-title {
-  font-family: var(--font-header);
+  font-family: var(--reader-font-family, var(--font-header));
   font-size: calc(var(--reader-font-size, 1.15rem) * 0.78);
   color: var(--accent-gold);
   opacity: 0.9;
@@ -300,6 +301,7 @@ body.theme-cosmic .verse-pali {
 }
 
 .verse-pali {
+  font-family: var(--reader-font-family, var(--font-body));
   font-size: calc(var(--reader-font-size, 1.15rem) * 1.12);
   font-weight: 600;
   color: var(--accent-amber);
@@ -309,6 +311,7 @@ body.theme-cosmic .verse-pali {
 }
 
 .verse-thai {
+  font-family: var(--reader-font-family, var(--font-body));
   color: var(--text-secondary);
   font-size: calc(var(--reader-font-size, 1.15rem) * 0.92);
   line-height: 1.7;
@@ -553,6 +556,82 @@ body.theme-cosmic .verse-pali {
   user-select: none;
 }
 
+/* Reader Toolbar Theme Toggle Button */
+.btn-reader-theme {
+  font-size: 0.95rem;
+  padding: 6px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-gold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reader-theme:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-gold);
+  transform: scale(1.08);
+}
+
+/* Font Family Selector Dock in Reader Bottom Bar (Theme-Adaptive) */
+.reader-font-select-dock {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.reader-font-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: rgba(16, 24, 52, 0.75);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 5px 24px 5px 10px;
+  color: var(--accent-gold);
+  font-family: var(--font-header);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
+.reader-font-select-dock::after {
+  content: '▼';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-gold);
+  font-size: 0.55rem;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.reader-font-select:hover,
+.reader-font-select:focus {
+  border-color: var(--accent-gold);
+  background: var(--bg-card-hover);
+  box-shadow: 0 0 10px var(--accent-gold-glow);
+}
+
+.reader-font-select option {
+  background: #10162a;
+  color: #f8fafc;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+}
+
 /* Theme Switcher Dock in Bottom Bar */
 .reader-theme-dock {
   display: flex;
@@ -747,46 +826,252 @@ body.theme-parchment .reader-chant-counter {
   color: #684105;
 }
 
+body.theme-parchment .reader-font-select,
 body.theme-parchment .reader-script-select {
   background: rgba(250, 245, 237, 0.95);
   border-color: rgba(140, 95, 35, 0.35);
   color: #684105;
 }
 
+body.theme-parchment .reader-font-select-dock::after,
 body.theme-parchment .reader-script-dock::after {
   color: #684105;
 }
 
+body.theme-parchment .reader-font-select option,
 body.theme-parchment .reader-script-select option {
   background: #fbf6ec;
   color: #332211;
 }
 
+/* ==========================================================================
+   Golden Temple Theme Reader Styles (ทองอร่าม อบอุ่น สง่างาม)
+   ========================================================================== */
+body.theme-gold .reader-view {
+  background: radial-gradient(ellipse at 50% 0%, #2e1c0d 0%, #1a1007 50%, #0d0804 100%);
+}
+
+body.theme-gold .reader-toolbar {
+  background: rgba(26, 17, 8, 0.95);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+body.theme-gold .reader-title {
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+
+body.theme-gold .reader-subtitle {
+  color: #c49d64;
+}
+
+body.theme-gold .page-frame {
+  background: rgba(35, 22, 10, 0.92);
+  border: none;
+  box-shadow: none;
+}
+
+body.theme-gold .page-frame::before {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.4) 0%, rgba(251, 191, 36, 0.08) 50%, transparent 100%);
+}
+
+body.theme-gold .page-frame::after {
+  content: '🪷';
+  color: #fbbf24;
+  opacity: 0.85;
+}
+
+body.theme-gold .page-verse-header {
+  color: #fbbf24;
+  border-bottom: 1px dashed rgba(251, 191, 36, 0.3);
+}
+
+body.theme-gold .page-verse-flow {
+  color: #fffdfa;
+}
+
+body.theme-gold .verse-pali {
+  color: #fde047;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(253, 224, 71, 0.35);
+}
+
+body.theme-gold .verse-thai {
+  color: #f3e5d0;
+}
+
+body.theme-gold .reader-bottom-bar {
+  background: rgba(26, 17, 8, 0.95);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+body.theme-gold .btn-scrubber-nav {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+body.theme-gold .reader-scrubber-badge {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+body.theme-gold .reader-font-dock {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+body.theme-gold .btn-dock-font {
+  color: #fbbf24;
+}
+
+body.theme-gold .reader-chant-counter {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+}
+
+body.theme-gold .reader-font-select,
+body.theme-gold .reader-script-select {
+  background: rgba(35, 22, 10, 0.92);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
+}
+
+body.theme-gold .reader-font-select-dock::after,
+body.theme-gold .reader-script-dock::after {
+  color: #fbbf24;
+}
+
+body.theme-gold .reader-font-select option,
+body.theme-gold .reader-script-select option {
+  background: #23160a;
+  color: #fffdfa;
+}
+
+/* ==========================================================================
+   Midnight Theme Reader Styles (ราตรีสงบ ดำสนิท OLED ถนอมสายตา)
+   ========================================================================== */
+body.theme-midnight .reader-view {
+  background: #05080c;
+}
+
+body.theme-midnight .reader-toolbar {
+  background: rgba(12, 16, 24, 0.95);
+  border-bottom: 1px solid rgba(88, 166, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+body.theme-midnight .reader-title {
+  color: #58a6ff;
+  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+}
+
+body.theme-midnight .reader-subtitle {
+  color: #8b949e;
+}
+
+body.theme-midnight .page-frame {
+  background: #090d14;
+  border: none;
+  box-shadow: none;
+}
+
+body.theme-midnight .page-frame::before {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(88, 166, 255, 0.05) 50%, transparent 100%);
+}
+
+body.theme-midnight .page-frame::after {
+  content: '🌙';
+  color: #58a6ff;
+  opacity: 0.85;
+}
+
+body.theme-midnight .page-verse-header {
+  color: #58a6ff;
+  border-bottom: 1px dashed rgba(88, 166, 255, 0.25);
+}
+
+body.theme-midnight .page-verse-flow {
+  color: #e6edf3;
+}
+
+body.theme-midnight .verse-pali {
+  color: #79c0ff;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(121, 192, 255, 0.35);
+}
+
+body.theme-midnight .verse-thai {
+  color: #c9d1d9;
+}
+
+body.theme-midnight .reader-bottom-bar {
+  background: rgba(12, 16, 24, 0.95);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+}
+
+body.theme-midnight .btn-scrubber-nav {
+  background: rgba(88, 166, 255, 0.12);
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.3);
+}
+
+body.theme-midnight .reader-scrubber-badge {
+  color: #58a6ff;
+  background: rgba(88, 166, 255, 0.12);
+}
+
+body.theme-midnight .reader-font-dock {
+  background: rgba(88, 166, 255, 0.12);
+  border-color: rgba(88, 166, 255, 0.25);
+}
+
+body.theme-midnight .btn-dock-font {
+  color: #58a6ff;
+}
+
+body.theme-midnight .reader-chant-counter {
+  background: rgba(88, 166, 255, 0.15);
+  border-color: rgba(88, 166, 255, 0.4);
+  color: #58a6ff;
+}
+
+body.theme-midnight .reader-font-select,
 body.theme-midnight .reader-script-select {
   background: rgba(14, 20, 38, 0.85);
   border-color: rgba(88, 166, 255, 0.35);
   color: #58a6ff;
 }
 
+body.theme-midnight .reader-font-select-dock::after,
 body.theme-midnight .reader-script-dock::after {
   color: #58a6ff;
 }
 
+body.theme-midnight .reader-font-select option,
 body.theme-midnight .reader-script-select option {
   background: #090d18;
   color: #f0f6fc;
 }
 
+/* Cosmic Theme Styles */
+body.theme-cosmic .reader-font-select,
 body.theme-cosmic .reader-script-select {
   background: rgba(22, 16, 45, 0.85);
   border-color: rgba(251, 191, 36, 0.4);
   color: #fbbf24;
 }
 
+body.theme-cosmic .reader-font-select-dock::after,
 body.theme-cosmic .reader-script-dock::after {
   color: #fbbf24;
 }
 
+body.theme-cosmic .reader-font-select option,
 body.theme-cosmic .reader-script-select option {
   background: #150f2b;
   color: #ffffff;
