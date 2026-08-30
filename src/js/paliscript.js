@@ -79,6 +79,7 @@ const INDEPENDENT_VOWELS = {
 export class PaliScriptEngine {
   constructor() {
     this.currentScript = this._getSavedScript();
+    this._initDictionary();
   }
 
   _getSavedScript() {
@@ -121,7 +122,6 @@ export class PaliScriptEngine {
 
   /**
    * 1. Thai Phonetic Chanting Format:
-   * Replaces explicit pinthu (.) with chant-friendly vowels and spaces.
    */
   toThaiPhonetic(text) {
     return text
@@ -139,7 +139,6 @@ export class PaliScriptEngine {
 
   /**
    * 2. Thai Pinthu (Canonical Siamrath Pali Standard):
-   * Converts double consonants into pinthu dot subscripts.
    */
   toThaiPinthu(text) {
     let s = text
@@ -159,94 +158,259 @@ export class PaliScriptEngine {
       .replace(/ธัมโม/g, 'ธมฺโม')
       .replace(/สังโฆ/g, 'สงฺโฆ');
 
-    // Convert common double consonants into pinthu: e.g. สสะ -> สฺสะ, มมะ -> มฺมะ
     s = s.replace(/([ก-ฮ])ะ/g, '$1');
     s = s.replace(/ั([ก-ฮ])/g, 'ฺ$1');
     s = s.replace(/ำ/g, 'ํ');
     return s;
   }
 
-  /**
-   * 3. Romanized IAST (International Alphabet of Sanskrit/Pali Transliteration):
-   */
-  toRomanIAST(text) {
-    // Normalization dictionary for common liturgical chant verses
-    const dict = [
+  _initDictionary() {
+    this.phraseDict = [
+      // 1. Ratanattaya Vandana & Namakara
+      ['อะระหัง สัมมาสัมพุทโธ ภะคะวา, พุทธัง ภะคะวันตัง อะภิวาเทมิ.', 'Arahaṃ sammāsambuddho bhagavā, buddhaṃ bhagavantaṃ abhivādemi.'],
+      ['อะระหัง สัมมาสัมพุทโธ ภะคะวา พุทธัง ภะคะวันตัง อะภิวาเทมิ', 'Arahaṃ sammāsambuddho bhagavā buddhaṃ bhagavantaṃ abhivādemi'],
+      ['อรหํ สมฺมาสมฺพุทฺโธ ภควา, พุทฺธํ ภควนฺตํ อภิวาเทมิ.', 'Arahaṃ sammāsambuddho bhagavā, buddhaṃ bhagavantaṃ abhivādemi.'],
+      ['สะวากขาโต ภะคะวะตา ธัมโม, ธัมมัง นะมัสสามิ.', 'Svākkhāto bhagavatā dhammo, dhammaṃ namassāmi.'],
+      ['สวากขาโต ภะคะวะตา ธัมโม, ธัมมัง นะมัสสามิ.', 'Svākkhāto bhagavatā dhammo, dhammaṃ namassāmi.'],
+      ['สฺวากฺขาโต ภควตา ธมฺโม, ธมฺมํ นมสฺสามิ.', 'Svākkhāto bhagavatā dhammo, dhammaṃ namassāmi.'],
+      ['สุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ, สังฆัง นะมามิ.', 'Supaṭipanno bhagavato sāvakasaṅgho, saṅghaṃ namāmi.'],
+      ['สุปฏิปนฺโน ภควโต สาวกสงฺโฆ, สงฺฆํ นมามิ.', 'Supaṭipanno bhagavato sāvakasaṅgho, saṅghaṃ namāmi.'],
       ['นะโม ตัสสะ ภะคะวะโต อะระหะโต สัมมาสัมพุทธัสสะ', 'Namo tassa bhagavato arahato sammāsambuddhassa'],
       ['นโม ตสฺส ภควโต อรหโต สมฺมาสมฺพุทฺธสฺส', 'Namo tassa bhagavato arahato sammāsambuddhassa'],
+
+      // 2. Traisarana
       ['พุทธัง สะระณัง คัจฉามิ', 'Buddhaṃ saraṇaṃ gacchāmi'],
       ['ธัมมัง สะระณัง คัจฉามิ', 'Dhammaṃ saraṇaṃ gacchāmi'],
       ['สังฆัง สะระณัง คัจฉามิ', 'Saṅghaṃ saraṇaṃ gacchāmi'],
-      ['ทุติยัมปิ', 'Dutiyampi'],
-      ['ตะติยัมปิ', 'Tatiyampi'],
-      ['อิติปิ โส ภะคะวา', 'Itipi so bhagavā'],
-      ['อะระหัง สัมมาสัมพุทโธ', 'Arahaṃ sammāsambuddho'],
-      ['วิชชาจะระณะสัมปันโน', 'Vijjācaraṇasampanno'],
-      ['สุคะโต', 'Sugato'],
-      ['โลกะวิทู', 'Lokavidū'],
-      ['อะนุตตะโร ปุริสะทัมมะสาระถิ', 'Anuttaro purisadammasārathi'],
-      ['สัตถา เทวะมะนุสสานัง', 'Satthā devamanussānaṃ'],
-      ['พุทโธ ภะคะวาติ', 'Buddho bhagavāti'],
-      ['สวากขาโต ภะคะวะตา ธัมโม', 'Svākkhāto bhagavatā dhammo'],
-      ['สันทิฏฐิโก', 'Sandiṭṭhiko'],
-      ['อะกาลิโก', 'Akāliko'],
-      ['เอหิปัสสิโก', 'Ehipassiko'],
-      ['โอปะนะยิโก', 'Opanayiko'],
-      ['ปัจจัตตัง เวทิตัพโพ วิญญูหีติ', 'Paccattaṃ veditabbo viññūhīti'],
+      ['ทุติยัมปิ พุทธัง สะระณัง คัจฉามิ', 'Dutiyampi buddhaṃ saraṇaṃ gacchāmi'],
+      ['ทุติยัมปิ ธัมมัง สะระณัง คัจฉามิ', 'Dutiyampi dhammaṃ saraṇaṃ gacchāmi'],
+      ['ทุติยัมปิ สังฆัง สะระณัง คัจฉามิ', 'Dutiyampi saṅghaṃ saraṇaṃ gacchāmi'],
+      ['ตะติยัมปิ พุทธัง สะระณัง คัจฉามิ', 'Tatiyampi buddhaṃ saraṇaṃ gacchāmi'],
+      ['ตะติยัมปิ ธัมมัง สะระณัง คัจฉามิ', 'Tatiyampi dhammaṃ saraṇaṃ gacchāmi'],
+      ['ตะติยัมปิ สังฆัง สะระณัง คัจฉามิ', 'Tatiyampi saṅghaṃ saraṇaṃ gacchāmi'],
+
+      // 3. Buddhagun, Dhammagun, Sanghagun
+      ['อิติปิ โส ภะคะวา อะระหัง สัมมาสัมพุทโธ', 'Itipi so bhagavā arahaṃ sammāsambuddho'],
+      ['วิชชาจะระณะสัมปันโน สุคะโต โลกะวิทู', 'Vijjācaraṇasampanno sugato lokavidū'],
+      ['อะนุตตะโร ปุริสะทัมมะสาระถิ สัตถา เทวะมะนุสสานัง พุทโธ ภะคะวาติ', 'Anuttaro purisadammasārathi satthā devamanussānaṃ buddho bhagavāti'],
+      ['สวากขาโต ภะคะวะตา ธัมโม สันทิฏฐิโก อะกาลิโก', 'Svākkhāto bhagavatā dhammo sandiṭṭhiko akāliko'],
+      ['เอหิปัสสิโก โอปะนะยิโก ปัจจัตตัง เวทิตัพโพ วิญญูหีติ', 'Ehipassiko opanayiko paccattaṃ veditabbo viññūhīti'],
       ['สุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ', 'Supaṭipanno bhagavato sāvakasaṅgho'],
       ['อุชุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ', 'Ujupaṭipanno bhagavato sāvakasaṅgho'],
       ['ญายะปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ', 'Ñāyapaṭipanno bhagavato sāvakasaṅgho'],
       ['สามีจิปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ', 'Sāmīcipaṭipanno bhagavato sāvakasaṅgho'],
-      ['พาหุง สะหัสสะมะภินิมมิตะสาวุธันตัง', 'Bāhuṃ sahassamabhinimmitasāvudhantaṃ'],
-      ['กรณียะเมัตตะสุตตัง', 'Karaṇīyamettasuttaṃ'],
-      ['ชะยาสะนากะตา พุทธา', 'Jayāsanāgatā buddhā'],
-      ['เชตวา มารัง สะวาหะนัง', 'Jetvā māraṃ savāhanaṃ'],
-      ['จะตุสัจจาสะภัง ระสัง', 'Catusaccāsabhaṃ rasaṃ'],
-      ['เย ปิวิงสุ นะราสะภา', 'Ye piviṃsu narāsabhā'],
-      ['สัพเพ สัตตา', 'Sabbe sattā'],
-      ['อะเวรา โหนตุ', 'Averā hontu'],
-      ['อัพยาปัชฌา โหนตุ', 'Abhyāpajjhā hontu'],
-      ['อะนีฆา โหนตุ', 'Anīghā hontu'],
-      ['สุขี อัตตานัง ปะริหะรันตุ', 'Sukhī attānaṃ pariharantu']
+      ['ยะทิทัง จัตตาริ ปุริสะยุคานิ อัฏฐะ ปุริสะปุคคะลา', 'Yadidaṃ cattāri purisayugāni aṭṭha purisapuggalā'],
+      ['เอสะ ภะคะวะโต สาวะกะสังโฆ', 'Esa bhagavato sāvakasaṅgho'],
+      ['อาหุเนยโย ปาหุเนยโย ทักขิเณยโย อัญชะลีกะระณีโย', 'Āhuneyyo pāhuneyyo dakkhiṇeyyo añjalīkaraṇīyo'],
+      ['อะนุตตะรัง ปุญญักเขตตัง โลกัสสาติ', 'Anuttaraṃ puññakkhettaṃ lokassāti'],
+
+      // Actions / Parenthetical notations
+      ['(กราบ)', '(Vandāmi)'],
+      ['(กราบ ๓ หน)', '(Vandāmi 3 times)'],
+      ['(กราบ 3 หน)', '(Vandāmi 3 times)'],
+      ['(กราบ ๓ ครั้ง)', '(Vandāmi 3 times)'],
+      ['(กราบ 3 ครั้ง)', '(Vandāmi 3 times)']
     ];
 
+    this.wordDict = [
+      ['อะระหัง', 'arahaṃ'],
+      ['สัมมาสัมพุทโธ', 'sammāsambuddho'],
+      ['สัมมาสัมพุทธัสสะ', 'sammāsambuddhassa'],
+      ['สัมมา', 'sammā'],
+      ['สัมพุทธัสสะ', 'sambuddhassa'],
+      ['สัมพุทโธ', 'sambuddho'],
+      ['สัมพุทธ', 'sambuddha'],
+      ['พุทธัง', 'buddhaṃ'],
+      ['พุทโธ', 'buddho'],
+      ['พุทธัสสะ', 'buddhassa'],
+      ['พุทธา', 'buddhā'],
+      ['พุทธานัง', 'buddhānaṃ'],
+      ['พุทธ', 'buddha'],
+      ['ภะคะวันตัง', 'bhagavantaṃ'],
+      ['ภะคะวา', 'bhagavā'],
+      ['ภะคะวะโต', 'bhagavato'],
+      ['ภะคะวะตา', 'bhagavatā'],
+      ['ภะคะวาติ', 'bhagavāti'],
+      ['อะภิวาเทมิ', 'abhivādemi'],
+      ['ธัมมัง', 'dhammaṃ'],
+      ['ธัมโม', 'dhammo'],
+      ['ธัมมัสสะ', 'dhammassa'],
+      ['ธัมมา', 'dhammā'],
+      ['นะมัสสามิ', 'namassāmi'],
+      ['นะมามิ', 'namāmi'],
+      ['สะวากขาโต', 'svākkhāto'],
+      ['สวากขาโต', 'svākkhāto'],
+      ['สังฆัง', 'saṅghaṃ'],
+      ['สังโฆ', 'saṅgho'],
+      ['สาวะกะสังโฆ', 'sāvakasaṅgho'],
+      ['สาวะกานัง', 'sāvakānaṃ'],
+      ['สุปะฏิปันโน', 'supaṭipanno'],
+      ['อุชุปะฏิปันโน', 'ujupaṭipanno'],
+      ['ญายะปะฏิปันโน', 'ñāyapaṭipanno'],
+      ['สามีจิปะฏิปันโน', 'sāmīcipaṭipanno'],
+      ['สะระณัง', 'saraṇaṃ'],
+      ['คัจฉามิ', 'gacchāmi'],
+      ['สันทิฏฐิโก', 'sandiṭṭhiko'],
+      ['อะกาลิโก', 'akāliko'],
+      ['เอหิปัสสิโก', 'ehipassiko'],
+      ['โอปะนะยิโก', 'opanayiko'],
+      ['ปัจจัตตัง', 'paccattaṃ'],
+      ['เวทิตัพโพ', 'veditabbo'],
+      ['วิญญูหีติ', 'viññūhīti'],
+      ['วิชชาจะระณะสัมปันโน', 'vijjācaraṇasampanno'],
+      ['สุคะโต', 'sugato'],
+      ['โลกะวิทู', 'lokavidū'],
+      ['อะนุตตะโร', 'anuttaro'],
+      ['ปุริสะทัมมะสาระถิ', 'purisadammasārathi'],
+      ['สัตถา', 'satthā'],
+      ['เทวะมะนุสสานัง', 'devamanussānaṃ'],
+      ['เทวะตา', 'devatā'],
+      ['มะนุสสานัง', 'manussānaṃ'],
+      ['ชินะบัญชะระ', 'jinapañjara'],
+      ['ชินบัญชร', 'jinapañjara'],
+      ['พาหุง', 'bāhuṃ'],
+      ['สะหัสสะมะภินิมมิตะสาวุธันตัง', 'sahassamabhinimmitasāvudhantaṃ'],
+      ['คิรีเมขะลัง', 'girimekhalaṃ'],
+      ['อุทิตะโฆระสะเสนะมารัง', 'uditakhorasasenamāraṃ'],
+      ['ทานาทิธัมมะวิธินา', 'dānādidhammavidhinā'],
+      ['ชิตะวา', 'jitvā'],
+      ['มุนินโท', 'munindo'],
+      ['ตันเตชะสา', 'tantejasā'],
+      ['ภะวะตุ', 'bhavatu'],
+      ['ชะยะมังคะลานิ', 'jayamangalāni'],
+      ['ชะยะมังคะลัง', 'jayamangalaṃ'],
+      ['สัพเพ', 'sabbe'],
+      ['สัตตา', 'sattā'],
+      ['อะเวรา', 'averā'],
+      ['โหนตุ', 'hontu'],
+      ['อัพยาปัชฌา', 'abyāpajjhā'],
+      ['อะนีฆา', 'anīghā'],
+      ['สุขี', 'sukhī'],
+      ['อัตตานัง', 'attānaṃ'],
+      ['ปะริหะรันตุ', 'pariharantu'],
+      ['กัมมัสสะกา', 'kammassakā'],
+      ['กัมมะทายาทา', 'kammadāyādā'],
+      ['กัมมะโยนิ', 'kammayoni'],
+      ['กัมมะพันธุ', 'kammabandhu'],
+      ['กัมมะปะฏิสะระณา', 'kammapaṭisaraṇā'],
+      ['ยัง', 'yaṃ'],
+      ['กัมมัง', 'kammaṃ'],
+      ['กะริสสันติ', 'karissanti'],
+      ['กัลยาณัง', 'kalyāṇaṃ'],
+      ['วา', 'vā'],
+      ['ปาปะกัง', 'pāpakaṃ'],
+      ['ตัสสะ', 'tassa'],
+      ['ทายาทา', 'dāyādā'],
+      ['ภะวิสสันติ', 'bhavissanti'],
+      ['เต', 'te'],
+      ['เม', 'me'],
+      ['โส', 'so'],
+      ['นะโม', 'namo'],
+      ['อิติปิ', 'itipi']
+    ];
+  }
+
+  /**
+   * 3. Romanized IAST (International Alphabet of Sanskrit/Pali Transliteration):
+   */
+  toRomanIAST(text) {
+    if (!text || typeof text !== 'string') return text;
     let res = text;
-    for (const [k, v] of dict) {
+
+    // Phase 1: High-priority phrase replacements
+    for (const [k, v] of this.phraseDict) {
       res = res.replaceAll(k, v);
     }
 
-    // Algorithmic fallback transliterator for lines not matched in phrase table
-    return this._algorithmicTransliterateToRoman(res);
+    // Phase 2: Word vocabulary replacements
+    for (const [k, v] of this.wordDict) {
+      res = res.replaceAll(k, v);
+    }
+
+    // Phase 3: Syllable-by-syllable fallback for any remaining Thai text
+    if (/[ก-ฮ]/.test(res)) {
+      res = this._syllablePaliToRoman(res);
+    }
+
+    // Phase 4: Sentence capitalization & formatting
+    return this._formatSentenceCasing(res);
   }
 
-  _algorithmicTransliterateToRoman(text) {
+  _syllablePaliToRoman(text) {
+    // Map individual syllables & clusters
     return text
-      .replace(/สัมมาสัมพุทธัสสะ/g, 'sammāsambuddhassa')
-      .replace(/สัมมา/g, 'sammā')
-      .replace(/สัมพุทโธ/g, 'sambuddho')
-      .replace(/สัมพุทธ/g, 'sambuddha')
-      .replace(/พุทธ/g, 'buddha')
-      .replace(/ภะคะวา/g, 'bhagavā')
-      .replace(/ภะคะวะโต/g, 'bhagavato')
-      .replace(/อะระหะโต/g, 'arahato')
-      .replace(/อะระหัง/g, 'arahaṃ')
-      .replace(/นะโม/g, 'namo')
-      .replace(/ตัสสะ/g, 'tassa')
-      .replace(/ธัมมัง/g, 'dhammaṃ')
-      .replace(/ธัมโม/g, 'dhammo')
-      .replace(/สังฆัง/g, 'saṅghaṃ')
-      .replace(/สังโฆ/g, 'saṅgho')
-      .replace(/สะระณัง/g, 'saraṇaṃ')
-      .replace(/คัจฉามิ/g, 'gacchāmi')
-      .replace(/สัพเพ/g, 'sabbe')
-      .replace(/สัตตา/g, 'sattā')
-      .replace(/โหนตุ/g, 'hontu')
-      .replace(/สุขี/g, 'sukhī')
-      .replace(/อัตตานัง/g, 'attānaṃ')
-      .replace(/เมตตา/g, 'mettā')
-      .replace(/ปะริตร/g, 'paritta')
-      .replace(/สูตร/g, 'sutta')
-      .replace(/คาถา/g, 'gāthā');
+      // Vowels & diphthongs
+      .replace(/เ([ก-ฮ])([า-ไ])/g, '$1$2')
+      .replace(/โ([ก-ฮ])ะ/g, '$1o')
+      .replace(/โ([ก-ฮ])/g, '$1o')
+      .replace(/เ([ก-ฮ])ะ/g, '$1e')
+      .replace(/เ([ก-ฮ])/g, '$1e')
+      .replace(/แ([ก-ฮ])/g, '$1e')
+      .replace(/([ก-ฮ])ั([ก-ฮ])/g, '$1a$2')
+      .replace(/([ก-ฮ])ัง/g, '$1aṃ')
+      .replace(/([ก-ฮ])ํ/g, '$1ṃ')
+      .replace(/([ก-ฮ])า/g, '$1ā')
+      .replace(/([ก-ฮ])ิ/g, '$1i')
+      .replace(/([ก-ฮ])ี/g, '$1ī')
+      .replace(/([ก-ฮ])ึ/g, '$1u')
+      .replace(/([ก-ฮ])ื/g, '$1ū')
+      .replace(/([ก-ฮ])ุ/g, '$1u')
+      .replace(/([ก-ฮ])ู/g, '$1ū')
+      .replace(/([ก-ฮ])ะ/g, '$1a')
+      // Consonants with implicit 'a'
+      .replace(/ก/g, 'ka')
+      .replace(/ข/g, 'kha')
+      .replace(/ค/g, 'ga')
+      .replace(/ฆ/g, 'gha')
+      .replace(/ง/g, 'ṅa')
+      .replace(/จ/g, 'ca')
+      .replace(/ฉ/g, 'cha')
+      .replace(/ช/g, 'ja')
+      .replace(/ฌ/g, 'jha')
+      .replace(/ญ/g, 'ña')
+      .replace(/ฏ/g, 'ṭa')
+      .replace(/ฐ/g, 'ṭha')
+      .replace(/ฑ/g, 'ḍa')
+      .replace(/ฒ/g, 'ḍha')
+      .replace(/ณ/g, 'ṇa')
+      .replace(/ต/g, 'ta')
+      .replace(/ถ/g, 'tha')
+      .replace(/ท/g, 'da')
+      .replace(/ธ/g, 'dha')
+      .replace(/น/g, 'na')
+      .replace(/บ/g, 'ba')
+      .replace(/ป/g, 'pa')
+      .replace(/ผ/g, 'pha')
+      .replace(/ฝ/g, 'fa')
+      .replace(/พ/g, 'ba')
+      .replace(/ฟ/g, 'fa')
+      .replace(/ภ/g, 'bha')
+      .replace(/ม/g, 'ma')
+      .replace(/ย/g, 'ya')
+      .replace(/ร/g, 'ra')
+      .replace(/ล/g, 'la')
+      .replace(/ว/g, 'va')
+      .replace(/ศ/g, 'sa')
+      .replace(/ษ/g, 'sa')
+      .replace(/ส/g, 'sa')
+      .replace(/ห/g, 'ha')
+      .replace(/ฬ/g, 'ḷa')
+      .replace(/อ/g, 'a')
+      .replace(/ฮ/g, 'ha')
+      // Cleanup double 'aa' from implicit vowel merges
+      .replace(/a([āīūeoiu])/g, '$1')
+      .replace(/([āīūeoiu])a/g, '$1')
+      .replace(/aa/g, 'ā');
+  }
+
+  _formatSentenceCasing(text) {
+    const lines = text.split('\n');
+    return lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return line;
+      // Capitalize first letter of line
+      return line.replace(/^([a-zāīūñṭḍṇḷ])/i, (m) => m.toUpperCase());
+    }).join('\n');
   }
 
   /**
@@ -272,7 +436,6 @@ export class PaliScriptEngine {
     return words.map(w => {
       if (!w || /^\s+$/.test(w) || /^[.,;!?\-—–()\[\]]$/.test(w)) return w;
 
-      // Direct Devanagari mappings for common core mantras
       if (isDev) {
         if (/^namo$/i.test(w)) return 'नमो';
         if (/^tassa$/i.test(w)) return 'तस्स';
@@ -294,7 +457,6 @@ export class PaliScriptEngine {
         if (/^bhagavā$/i.test(w)) return 'भगवा';
         if (/^arahaṃ$/i.test(w)) return 'अरहं';
       } else {
-        // Burmese mappings
         if (/^namo$/i.test(w)) return 'နမော';
         if (/^tassa$/i.test(w)) return 'တဿ';
         if (/^bhagavato$/i.test(w)) return 'ဘဂဝတော';
@@ -317,3 +479,4 @@ export class PaliScriptEngine {
 }
 
 export const paliScript = new PaliScriptEngine();
+
