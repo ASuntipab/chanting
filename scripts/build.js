@@ -9,7 +9,7 @@ if (fs.existsSync(wwwDir)) {
 }
 fs.mkdirSync(wwwDir, { recursive: true });
 
-fs.copyFileSync(path.join(rootDir, 'index.html'), path.join(wwwDir, 'index.html'));
+fs.copyFileSync(path.join(rootDir, 'tamma.html'), path.join(wwwDir, 'index.html'));
 fs.copyFileSync(path.join(rootDir, 'tamma.html'), path.join(wwwDir, 'tamma.html'));
 
 function copyDir(src, dest) {
