@@ -28,4 +28,5 @@ function copyDir(src, dest) {
 }
 
 copyDir(path.join(rootDir, 'src'), path.join(wwwDir, 'src'));
+copyDir(path.join(rootDir, 'assets'), path.join(wwwDir, 'assets'));
 console.log('Build complete: Web assets packaged to www/ successfully.');
