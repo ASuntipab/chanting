@@ -29,4 +29,12 @@ function copyDir(src, dest) {
 
 copyDir(path.join(rootDir, 'src'), path.join(wwwDir, 'src'));
 copyDir(path.join(rootDir, 'assets'), path.join(wwwDir, 'assets'));
+
+const cnameSource = path.join(rootDir, 'CNAME');
+if (fs.existsSync(cnameSource)) {
+  fs.copyFileSync(cnameSource, path.join(wwwDir, 'CNAME'));
+} else {
+  fs.writeFileSync(path.join(wwwDir, 'CNAME'), 'tamma-chanting.surge.sh\n', 'utf8');
+}
+
 console.log('Build complete: Web assets packaged to www/ successfully.');
