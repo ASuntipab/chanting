@@ -334,50 +334,56 @@
 
       <div class="reader-dock-divider"></div>
 
-      <!-- Controls Row: Font Size + Font Family + Pali Script + MP3 Monk Chanting + Counter -->
-      <div class="reader-controls-row">
-        <!-- Font Size Resizer (Up to 300% for Elders) -->
-        <div class="reader-font-dock">
-          <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
-          <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
-          <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+      <!-- Controls Container: Clean 2-Tier Responsive Grouping (Mobile First) -->
+      <div class="reader-controls-grid">
+        <!-- Group 1: Typography & Language (Font Size + Font Family + Pali Script) -->
+        <div class="reader-controls-group typography-group">
+          <!-- Font Size Resizer (Up to 300% for Elders) -->
+          <div class="reader-font-dock">
+            <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
+            <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
+            <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+          </div>
+
+          <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
+          <div class="reader-font-select-dock">
+            <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
+              <option value="sarabun" selected>🇹🇭 สารบรรณ</option>
+              <option value="prompt">✨ พร้อมท์</option>
+              <option value="noto-serif">📜 โนโตะ</option>
+              <option value="mitr">🍃 มิตร</option>
+              <option value="charm">✍️ ชาร์ม</option>
+              <option value="bai-jamjuree">💎 จามจุรี</option>
+              <option value="chakra">⚡ จักรเพชร</option>
+            </select>
+          </div>
+
+          <!-- Pali Script Switcher (PaliScript Engine) -->
+          <div class="reader-script-dock">
+            <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
+              <option value="thai-phonetic" selected>🇹🇭 คำอ่าน</option>
+              <option value="thai-pinthu">🇹🇭 พินทุ</option>
+              <option value="roman-iast">🌍 IAST</option>
+              <option value="devanagari">🇮🇳 เทวนาครี</option>
+              <option value="burmese">🇲🇲 พม่า</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
-        <div class="reader-font-select-dock">
-          <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
-            <option value="sarabun" selected>🇹🇭 สารบรรณ</option>
-            <option value="prompt">✨ พร้อมท์</option>
-            <option value="noto-serif">📜 โนโตะ (ใบลาน)</option>
-            <option value="mitr">🍃 มิตร</option>
-            <option value="charm">✍️ ชาร์ม (ตัวเขียน)</option>
-            <option value="bai-jamjuree">💎 จามจุรี</option>
-            <option value="chakra">⚡ จักรเพชร</option>
-          </select>
+        <!-- Group 2: Audio & Chant Counter Actions -->
+        <div class="reader-controls-group actions-group">
+          <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
+          <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
+            <span id="mp3PlayIcon">🎵</span>
+            <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
+          </button>
+
+          <!-- Quick Chant Counter with Bell -->
+          <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
+            <span>🔔</span>
+            <span id="readerChantCount">0 จบ</span>
+          </button>
         </div>
-
-        <!-- Pali Script Switcher (PaliScript Engine) -->
-        <div class="reader-script-dock">
-          <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
-            <option value="thai-phonetic" selected>🇹🇭 ไทย (คำอ่าน)</option>
-            <option value="thai-pinthu">🇹🇭 ไทย (พินทุแท้)</option>
-            <option value="roman-iast">🌍 โรมัน (IAST)</option>
-            <option value="devanagari">🇮🇳 เทวนาครี</option>
-            <option value="burmese">🇲🇲 พม่า</option>
-          </select>
-        </div>
-
-        <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
-        <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
-          <span id="mp3PlayIcon">🎵</span>
-          <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
-        </button>
-
-        <!-- Quick Chant Counter with Bell -->
-        <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
-          <span>🔔</span>
-          <span id="readerChantCount">0 จบ</span>
-        </button>
       </div>
     </div>
   </div>
