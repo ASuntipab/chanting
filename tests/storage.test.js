@@ -124,6 +124,58 @@ test('Zero-Database Backup & Restore: Lightweight User Stats & Favorites Backup 
   assert.equal(tester2.tracker.totalCounts['p1'], 5);
 });
 
+test('QR Code Backup Image: Generates valid QR and decodes via jsQR with 100% data recovery', async () => {
+  const { qrcode } = await import('../src/js/qrcode.js');
+  const jsQR = (await import('jsqr')).default;
+
+  const tester1 = new StorageTester();
+  tester1.toggleFavorite('p1');
+  tester1.toggleFavorite('chinabanchorn');
+  tester1.incrementCount('p1', 108);
+
+  const backupCode = tester1.exportBackupCode();
+  const qr = qrcode(0, 'M');
+  qr.addData(backupCode);
+  qr.make();
+
+  const count = qr.getModuleCount();
+  const margin = 4;
+  const total = count + margin * 2;
+  const scale = 4;
+  const size = total * scale;
+  const pixelBuffer = new Uint8ClampedArray(size * size * 4);
+  pixelBuffer.fill(255);
+
+  for (let r = 0; r < count; r++) {
+    for (let c = 0; c < count; c++) {
+      if (qr.isDark(r, c)) {
+        for (let y = 0; y < scale; y++) {
+          for (let x = 0; x < scale; x++) {
+            const px = (c + margin) * scale + x;
+            const py = (r + margin) * scale + y;
+            const idx = (py * size + px) * 4;
+            pixelBuffer[idx] = 0;
+            pixelBuffer[idx+1] = 0;
+            pixelBuffer[idx+2] = 0;
+            pixelBuffer[idx+3] = 255;
+          }
+        }
+      }
+    }
+  }
+
+  const decoded = jsQR(pixelBuffer, size, size);
+  assert.ok(decoded && decoded.data, 'jsQR must successfully decode generated QR image');
+  assert.equal(decoded.data, backupCode, 'Decoded QR text must match exported backup code exactly');
+
+  // Restore on target phone
+  const tester2 = new StorageTester();
+  const importResult = tester2.importData(decoded.data);
+  assert.equal(importResult.success, true);
+  assert.deepEqual(tester2.favorites, ['p1', 'chinabanchorn']);
+  assert.equal(tester2.tracker.totalCounts['p1'], 108);
+});
+
 test('Favorites & Chanting Counter State', () => {
   const tester = new StorageTester();
 
