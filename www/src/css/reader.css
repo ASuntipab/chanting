@@ -564,6 +564,61 @@ body.theme-cosmic .verse-pali {
   border-radius: var(--radius-full);
 }
 
+/* Pali Script Selector Dock in Reader Bottom Bar (Theme-Adaptive) */
+.reader-script-dock {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.reader-script-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: rgba(16, 24, 52, 0.75);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 5px 24px 5px 10px;
+  color: var(--accent-gold);
+  font-family: var(--font-header);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
+.reader-script-dock::after {
+  content: '▼';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-gold);
+  font-size: 0.55rem;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.reader-script-select:hover,
+.reader-script-select:focus {
+  border-color: var(--accent-gold);
+  background: var(--bg-card-hover);
+  box-shadow: 0 0 10px var(--accent-gold-glow);
+}
+
+.reader-script-select option {
+  background: #10162a;
+  color: #f8fafc;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+}
+
 /* Finished Chanting Overlay Button */
 .finish-chant-overlay {
   position: absolute;
@@ -690,6 +745,51 @@ body.theme-parchment .reader-chant-counter {
   background: rgba(154, 101, 20, 0.12);
   border-color: rgba(154, 101, 20, 0.35);
   color: #684105;
+}
+
+body.theme-parchment .reader-script-select {
+  background: rgba(250, 245, 237, 0.95);
+  border-color: rgba(140, 95, 35, 0.35);
+  color: #684105;
+}
+
+body.theme-parchment .reader-script-dock::after {
+  color: #684105;
+}
+
+body.theme-parchment .reader-script-select option {
+  background: #fbf6ec;
+  color: #332211;
+}
+
+body.theme-midnight .reader-script-select {
+  background: rgba(14, 20, 38, 0.85);
+  border-color: rgba(88, 166, 255, 0.35);
+  color: #58a6ff;
+}
+
+body.theme-midnight .reader-script-dock::after {
+  color: #58a6ff;
+}
+
+body.theme-midnight .reader-script-select option {
+  background: #090d18;
+  color: #f0f6fc;
+}
+
+body.theme-cosmic .reader-script-select {
+  background: rgba(22, 16, 45, 0.85);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+}
+
+body.theme-cosmic .reader-script-dock::after {
+  color: #fbbf24;
+}
+
+body.theme-cosmic .reader-script-select option {
+  background: #150f2b;
+  color: #ffffff;
 }
 
 /* ==========================================================================
@@ -920,7 +1020,26 @@ body.theme-parchment .reader-chant-counter {
 .btn-tts-gear {
   width: 36px;
   height: 36px;
-  font-size: 1rem;
+  border-radius: 50%;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-tts-gear:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-gold);
+  transform: scale(1.08);
+  box-shadow: var(--shadow-gold);
 }
 
 /* TTS Settings Modal / Popover */
