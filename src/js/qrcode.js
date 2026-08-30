@@ -145,16 +145,46 @@ class QRPolynomial {
 
 const QRRSBlock = {
   RS_BLOCK_TABLE: [
+    // 1
     [1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9],
+    // 2
     [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16],
+    // 3
     [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13],
+    // 4
     [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9],
+    // 5
     [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12],
+    // 6
     [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15],
+    // 7
     [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14],
+    // 8
     [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15],
+    // 9
     [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13],
-    [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16]
+    // 10
+    [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16],
+    // 11
+    [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13],
+    // 12
+    [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15],
+    // 13
+    [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12],
+    // 14
+    [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13],
+    // 15
+    [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12, 7, 37, 13],
+    // 16
+    [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16],
+    // 17
+    [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15],
+    // 18
+    [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15],
+    // 19
+    [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14],
+    // 20
+    [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16]
   ],
   getRSBlocks(typeNumber, errorCorrectLevel) {
     const rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
@@ -457,33 +487,60 @@ class QRCodeModel {
  */
 export function renderQRCodeToCanvas(canvas, text, size = 240) {
   if (!canvas) return;
-  const qr = new QRCodeModel(0, QRErrorCorrectLevel.M);
-  qr.addData(text);
-  qr.make();
+  try {
+    let qr;
+    try {
+      qr = new QRCodeModel(0, QRErrorCorrectLevel.L);
+      qr.addData(text);
+      qr.make();
+    } catch {
+      qr = new QRCodeModel(0, QRErrorCorrectLevel.M);
+      qr.addData(text);
+      qr.make();
+    }
 
-  const ctx = canvas.getContext('2d');
-  const count = qr.getModuleCount();
-  const moduleSize = size / count;
+    const ctx = canvas.getContext('2d');
+    const count = qr.getModuleCount();
+    const moduleSize = size / count;
 
-  canvas.width = size;
-  canvas.height = size;
+    canvas.width = size;
+    canvas.height = size;
 
-  // Background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
 
-  // Modules
-  ctx.fillStyle = '#120e0b';
-  for (let r = 0; r < count; r++) {
-    for (let c = 0; c < count; c++) {
-      if (qr.isDark(r, c)) {
-        ctx.fillRect(
-          Math.round(c * moduleSize),
-          Math.round(r * moduleSize),
-          Math.ceil(moduleSize),
-          Math.ceil(moduleSize)
-        );
+    // Modules
+    ctx.fillStyle = '#120e0b';
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (qr.isDark(r, c)) {
+          ctx.fillRect(
+            Math.round(c * moduleSize),
+            Math.round(r * moduleSize),
+            Math.ceil(moduleSize),
+            Math.ceil(moduleSize)
+          );
+        }
       }
+    }
+  } catch (err) {
+    console.error('renderQRCodeToCanvas error:', err);
+    try {
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ข้อมูลยาวเกินไปสำหรับ QR', size / 2, size / 2 - 10);
+      ctx.fillStyle = '#64748b';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('โปรดใช้แท็บ "รหัสส่ง LINE"', size / 2, size / 2 + 14);
+    } catch (e) {
+      // ignore
     }
   }
 }

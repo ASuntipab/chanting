@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>บทสวดมนต์ - คลังบทสวดมนต์ & บันทึกการสวด</title>
   
-  <!-- Thai Modern Web Fonts -->
+  <!-- Thai Modern & Classic Buddhist Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&family=Chakra+Petch:wght@400;500;600;700&family=Charm:wght@400;700&family=Mitr:wght@400;500;600&family=Noto+Serif+Thai:wght@400;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
   <!-- App Icons & Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="src/assets/favicon-32.png">
@@ -208,8 +208,11 @@
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
       </div>
 
-      <!-- Top Audio Controls: AI TTS Play & Voice Control Options -->
+      <!-- Top Audio Controls: AI TTS Play & Voice Control Options & Theme Switcher -->
       <div class="reader-audio-dock">
+        <button id="btnReaderThemeToggle" class="btn-icon btn-reader-theme" title="สลับธีมตอนอ่าน (🎨)">
+          🎨
+        </button>
         <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงสังเคราะห์สวดนำ (AI)">
           <span id="ttsPlayIcon">🔊</span>
           <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
@@ -331,13 +334,26 @@
 
       <div class="reader-dock-divider"></div>
 
-      <!-- Controls Row: Font Size + Pali Script + MP3 Monk Chanting + Counter -->
+      <!-- Controls Row: Font Size + Font Family + Pali Script + MP3 Monk Chanting + Counter -->
       <div class="reader-controls-row">
         <!-- Font Size Resizer (Up to 300% for Elders) -->
         <div class="reader-font-dock">
           <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
           <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
           <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+        </div>
+
+        <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
+        <div class="reader-font-select-dock">
+          <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
+            <option value="sarabun" selected>🇹🇭 สารบรรณ</option>
+            <option value="prompt">✨ พร้อมท์</option>
+            <option value="noto-serif">📜 โนโตะ (ใบลาน)</option>
+            <option value="mitr">🍃 มิตร</option>
+            <option value="charm">✍️ ชาร์ม (ตัวเขียน)</option>
+            <option value="bai-jamjuree">💎 จามจุรี</option>
+            <option value="chakra">⚡ จักรเพชร</option>
+          </select>
         </div>
 
         <!-- Pali Script Switcher (PaliScript Engine) -->

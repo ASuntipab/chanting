@@ -1,6 +1,6 @@
 import { storage } from './storage.js';
 import { audio } from './audio.js';
-import { ComicReaderEngine } from './reader.js';
+import { ComicReaderEngine, FONT_FAMILIES } from './reader.js';
 import { tracker } from './tracker.js';
 import { scraper } from './scraper.js';
 import { shareEngine } from './share.js';
@@ -84,7 +84,14 @@ class TammaApp {
 
   applyInitialSettings() {
     const settings = storage.getSettings();
-    document.body.className = `theme-${settings.theme || 'cosmic'}`;
+    const currentTheme = settings.theme || 'cosmic';
+    const currentFont = settings.fontFamily || 'sarabun';
+    document.body.className = `theme-${currentTheme} font-${currentFont}`;
+    
+    const fontInfo = FONT_FAMILIES[currentFont];
+    if (fontInfo && typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--reader-font-family', fontInfo.family);
+    }
   }
 
   bindEvents() {
@@ -101,11 +108,14 @@ class TammaApp {
     const themes = ['cosmic', 'gold', 'parchment', 'midnight'];
     const themeNames = ['🌌 จักรวาล', '🌟 ทองอร่าม', '📜 ใบลาน', '🌙 ราตรีสงบ'];
     btnToggleTheme?.addEventListener('click', () => {
-      const currentTheme = storage.getSettings().theme || 'cosmic';
+      const settings = storage.getSettings();
+      const currentTheme = settings.theme || 'cosmic';
       let idx = themes.indexOf(currentTheme);
       idx = (idx + 1) % themes.length;
       const newTheme = themes[idx];
-      document.body.className = `theme-${newTheme}`;
+      
+      const currentFont = settings.fontFamily || 'sarabun';
+      document.body.className = `theme-${newTheme} font-${currentFont}`;
       storage.saveSettings({ theme: newTheme });
       this.showToast(`เปลี่ยนธีม: ${themeNames[idx]}`);
     });

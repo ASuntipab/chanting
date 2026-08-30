@@ -31,12 +31,84 @@
 
   --font-body: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-header: 'Prompt', 'Sarabun', sans-serif;
+
+  /* Thai Typography Palette */
+  --font-family-sarabun: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-prompt: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-noto-serif: 'Noto Serif Thai', Georgia, 'Times New Roman', serif;
+  --font-family-mitr: 'Mitr', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-charm: 'Charm', 'TH Sarabun New', cursive, sans-serif;
+  --font-family-bai-jamjuree: 'Bai Jamjuree', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-chakra: 'Chakra Petch', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --reader-font-family: var(--font-family-sarabun);
+
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Reader Font Family Modifier Classes */
+body.font-sarabun { --reader-font-family: var(--font-family-sarabun); }
+body.font-prompt { --reader-font-family: var(--font-family-prompt); }
+body.font-noto-serif { --reader-font-family: var(--font-family-noto-serif); }
+body.font-mitr { --reader-font-family: var(--font-family-mitr); }
+body.font-charm { --reader-font-family: var(--font-family-charm); }
+body.font-bai-jamjuree { --reader-font-family: var(--font-family-bai-jamjuree); }
+body.font-chakra { --reader-font-family: var(--font-family-chakra); }
+
+/* Theme: Golden Temple (ทองอร่าม - อบอุ่น สงบ แสงเทียนแห่งธรรม) */
+body.theme-gold {
+  --bg-primary: #140d07;
+  --bg-secondary: #23160a;
+  --bg-card: rgba(35, 22, 10, 0.55);
+  --bg-card-hover: rgba(58, 38, 18, 0.7);
+  --bg-modal: #20140b;
+  --text-primary: #fffdfa;
+  --text-secondary: #f3e5d0;
+  --text-muted: #c49d64;
+  
+  --accent-gold: #fbbf24;
+  --accent-gold-glow: rgba(251, 191, 36, 0.45);
+  --accent-gold-dark: #b45309;
+  --accent-amber: #f59e0b;
+  --accent-lotus: #fb7185;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+
+  --border-subtle: rgba(251, 191, 36, 0.25);
+  --border-strong: rgba(251, 191, 36, 0.55);
+  --shadow-sm: 0 4px 14px rgba(20, 13, 7, 0.3);
+  --shadow-md: 0 8px 28px rgba(20, 13, 7, 0.5);
+  --shadow-gold: 0 0 25px rgba(251, 191, 36, 0.35);
+}
+
+body.theme-gold {
+  background: radial-gradient(ellipse at 50% 0%, #2e1c0d 0%, #1a1007 50%, #0d0804 100%);
+  background-attachment: fixed;
+}
+
+body.theme-gold .top-header,
+body.theme-gold .bottom-nav {
+  background: rgba(26, 17, 8, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: var(--border-subtle);
+}
+
+body.theme-gold .prayer-card {
+  background: rgba(38, 25, 12, 0.6);
+  border-color: rgba(251, 191, 36, 0.28);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-gold .prayer-card:hover {
+  background: rgba(58, 38, 18, 0.8);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.35);
 }
 
 /* Theme: Ancient Parchment (คัมภีร์ใบลาน - คมชัด สบายตา อ่านง่าย) */
