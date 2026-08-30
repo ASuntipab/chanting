@@ -393,18 +393,26 @@ export class ComicReaderEngine {
     });
   }
 
-  // --- HUD Auto-Hide & Toggle Mechanics ---
+  // --- HUD Controls: Manual Tap Toggle (Stable & No Sudden Auto-Disappearing) ---
   showHUD() {
     this.hudVisible = true;
     this.readerView?.classList.remove('hud-hidden');
-    this.scheduleAutoHide(4000);
+    if (this.autoHideTimer) {
+      clearTimeout(this.autoHideTimer);
+      this.autoHideTimer = null;
+    }
   }
 
   hideHUD() {
     this.hudVisible = false;
     this.readerView?.classList.add('hud-hidden');
     this.settingsDrawer?.classList.remove('open');
-    if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
+    this.hideTTSSettings();
+    this.hideMP3Deck();
+    if (this.autoHideTimer) {
+      clearTimeout(this.autoHideTimer);
+      this.autoHideTimer = null;
+    }
   }
 
   toggleHUD() {
@@ -415,14 +423,12 @@ export class ComicReaderEngine {
     }
   }
 
-  scheduleAutoHide(delay = 3500) {
-    if (!this.hudVisible) return;
-    if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
-    this.autoHideTimer = setTimeout(() => {
-      if (this.isOpen() && this.hudVisible && !this.settingsDrawer?.classList.contains('open')) {
-        this.hideHUD();
-      }
-    }, delay);
+  scheduleAutoHide() {
+    // Disabled aggressive auto-hide so the control panel stays open until the user taps to hide it
+    if (this.autoHideTimer) {
+      clearTimeout(this.autoHideTimer);
+      this.autoHideTimer = null;
+    }
   }
 
   toggleFullscreen() {
