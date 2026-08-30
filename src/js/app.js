@@ -223,6 +223,7 @@ class TammaApp {
     const panelBackupQr = document.getElementById('panelBackupQr');
     const panelBackupFile = document.getElementById('panelBackupFile');
     const qrCanvas = document.getElementById('qrCanvas');
+    const btnSaveQrImage = document.getElementById('btnSaveQrImage');
     const btnScanQrCamera = document.getElementById('btnScanQrCamera');
     const inputQrImage = document.getElementById('inputQrImage');
     const qrScannerContainer = document.getElementById('qrScannerContainer');
@@ -231,6 +232,21 @@ class TammaApp {
 
     let qrStream = null;
     let qrScanInterval = null;
+
+    // Helper: Universal QR Code decoder from ImageData using bundled jsQR
+    const decodeQRCodeFromImageData = (imageData) => {
+      if (typeof jsQR !== 'undefined') {
+        try {
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'attemptBoth'
+          });
+          if (code && code.data) return code.data;
+        } catch (e) {
+          console.warn('jsQR decode error:', e);
+        }
+      }
+      return null;
+    };
 
     const stopQrScanner = () => {
       if (qrStream) {
@@ -329,13 +345,26 @@ class TammaApp {
       }
     });
 
-    // 3. QR Camera Scanner
-    btnScanQrCamera?.addEventListener('click', async () => {
-      if (!('BarcodeDetector' in window)) {
-        alert('เบราว์เซอร์นี้ไม่รองรับการสแกนกล้องสดโดยตรง กรุณาใช้การถ่ายรูป QR Code หรือใช้วิธีคัดลอกรหัสส่ง LINE แทนครับ');
-        return;
+    // 3. Save QR Code Image to Device (Download PNG)
+    btnSaveQrImage?.addEventListener('click', () => {
+      if (!qrCanvas) return;
+      try {
+        const dataUrl = qrCanvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        const today = new Date().toISOString().slice(0, 10);
+        a.href = dataUrl;
+        a.download = `tamma-backup-qr-${today}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        this.showToast('💾 บันทึกภาพ QR Code ลงเครื่องเรียบร้อยแล้ว!');
+      } catch (err) {
+        alert('ไม่สามารถบันทึกภาพได้: ' + err.message);
       }
+    });
 
+    // 4. QR Camera Scanner (Live Video Stream with Fallback)
+    btnScanQrCamera?.addEventListener('click', async () => {
       try {
         qrStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' }
@@ -345,12 +374,37 @@ class TammaApp {
           qrScannerVideo.play();
           qrScannerContainer.style.display = 'block';
 
-          const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+          let barcodeDetector = null;
+          if ('BarcodeDetector' in window) {
+            try {
+              barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+            } catch (e) {
+              barcodeDetector = null;
+            }
+          }
+
           qrScanInterval = setInterval(async () => {
             try {
-              const barcodes = await barcodeDetector.detect(qrScannerVideo);
-              if (barcodes.length > 0) {
-                const qrValue = barcodes[0].rawValue;
+              let qrValue = null;
+
+              // 1. Try BarcodeDetector
+              if (barcodeDetector) {
+                const barcodes = await barcodeDetector.detect(qrScannerVideo);
+                if (barcodes.length > 0) qrValue = barcodes[0].rawValue;
+              }
+
+              // 2. Try jsQR on video frame
+              if (!qrValue && typeof jsQR !== 'undefined' && qrScannerVideo.videoWidth > 0) {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = qrScannerVideo.videoWidth;
+                tempCanvas.height = qrScannerVideo.videoHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(qrScannerVideo, 0, 0);
+                const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                qrValue = decodeQRCodeFromImageData(imgData);
+              }
+
+              if (qrValue) {
                 stopQrScanner();
                 const result = storage.importData(qrValue);
                 if (result.success) {
@@ -374,41 +428,59 @@ class TammaApp {
 
     btnCloseScanner?.addEventListener('click', stopQrScanner);
 
-    // 4. QR Image File Picker Scanner
-    inputQrImage?.addEventListener('change', async (e) => {
+    // 5. QR Image File Picker Scanner (Universal Canvas + jsQR)
+    inputQrImage?.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      if (!('BarcodeDetector' in window)) {
-        alert('เบราว์เซอร์นี้ไม่รองรับการอ่าน QR จากภาพ กรุณาใช้วิธีคัดลอกรหัสส่ง LINE แทนครับ');
-        return;
-      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = async () => {
+          let qrValue = null;
 
-      const img = new Image();
-      img.onload = async () => {
-        try {
-          const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
-          const barcodes = await barcodeDetector.detect(img);
-          if (barcodes.length > 0) {
-            const qrValue = barcodes[0].rawValue;
+          // 1. Primary: Canvas + jsQR
+          try {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            tempCtx.drawImage(img, 0, 0);
+            const imgData = tempCtx.getImageData(0, 0, img.width, img.height);
+            qrValue = decodeQRCodeFromImageData(imgData);
+          } catch (err) {
+            console.warn('Canvas jsQR error:', err);
+          }
+
+          // 2. Secondary fallback: BarcodeDetector
+          if (!qrValue && ('BarcodeDetector' in window)) {
+            try {
+              const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+              const barcodes = await barcodeDetector.detect(img);
+              if (barcodes.length > 0) qrValue = barcodes[0].rawValue;
+            } catch (err) {
+              console.warn('BarcodeDetector fallback error:', err);
+            }
+          }
+
+          if (qrValue) {
             const result = storage.importData(qrValue);
             if (result.success) {
               this.refreshCurrentViews();
               this.applyInitialSettings();
               backupModal?.classList.remove('open');
               inputQrImage.value = '';
-              this.showToast('✨ อ่าน QR Code กู้คืนข้อมูลสำเร็จเรียบร้อย! 🎉');
+              this.showToast('✨ กู้คืนข้อมูลจากรูปภาพ QR Code สำเร็จเรียบร้อย! 🎉');
             } else {
-              alert('ข้อมูลใน QR Code ไม่ถูกต้อง');
+              alert('ข้อมูลในรูปภาพ QR Code ไม่ถูกต้อง หรือไม่ใช่ข้อมูลของแอปบทสวดมนต์');
             }
           } else {
-            alert('ไม่พบ QR Code ในรูปภาพที่เลือก กรุณาลองเลือกรูปใหม่');
+            alert('ไม่พบ QR Code ในรูปภาพที่เลือก กรุณาเลือกภาพที่เห็น QR Code ชัดเจน');
           }
-        } catch (err) {
-          alert('ไม่สามารถอ่าน QR Code ได้: ' + err.message);
-        }
+        };
+        img.src = reader.result;
       };
-      img.src = URL.createObjectURL(file);
+      reader.readAsDataURL(file);
     });
 
     // 5. Export JSON File Action
