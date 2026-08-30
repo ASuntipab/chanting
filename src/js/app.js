@@ -532,6 +532,13 @@ class TammaApp {
       );
     }
 
+    // Sort: Favorites first (รายการโปรดขึ้นก่อน)
+    prayers.sort((a, b) => {
+      const favA = storage.isFavorite(a.id) ? 1 : 0;
+      const favB = storage.isFavorite(b.id) ? 1 : 0;
+      return favB - favA;
+    });
+
     this.updateCategoryDropdownCounts(allPrayers);
     this.renderPrayerCards(container, prayers);
   }
@@ -733,6 +740,18 @@ class TammaApp {
         `;
         return;
       }
+
+      // Sort: Favorites first (รายการโปรดขึ้นก่อน)
+      volumes.sort((a, b) => {
+        const volIdA = `tipitaka-vol-${String(a.volume).padStart(2, '0')}`;
+        const volIdB = `tipitaka-vol-${String(b.volume).padStart(2, '0')}`;
+        const favA = storage.isFavorite(volIdA) ? 1 : 0;
+        const favB = storage.isFavorite(volIdB) ? 1 : 0;
+        if (favA !== favB) {
+          return favB - favA;
+        }
+        return a.volume - b.volume;
+      });
 
       container.innerHTML = '';
       const trackerData = storage.getTrackerData();
