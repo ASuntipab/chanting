@@ -414,6 +414,7 @@ export class ComicReaderEngine {
 
   close() {
     this.readerView.classList.remove('active');
+    this.readerView.classList.remove('tts-active');
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
@@ -450,7 +451,7 @@ export class ComicReaderEngine {
     // Header
     const header = document.createElement('div');
     header.className = 'page-verse-header';
-    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span><span class="page-verse-header-hint">💡 แตะที่ข้อความเพื่อเริ่มฟังจากจุดนั้น</span>`;
+    header.innerHTML = `<span>${this.escapeHtml(prayer.title || 'บทสวดมนต์')}</span>`;
 
     // Viewport Window
     const viewport = document.createElement('div');
@@ -474,10 +475,11 @@ export class ComicReaderEngine {
         titleEl.dataset.type = 'title';
         titleEl.dataset.text = page.verseTitle.trim();
         titleEl.textContent = page.verseTitle;
-        titleEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
         titleEl.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.playFromElement(titleEl);
+          if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+            e.stopPropagation();
+            this.playFromElement(titleEl);
+          }
         });
         section.appendChild(titleEl);
       }
@@ -493,10 +495,11 @@ export class ComicReaderEngine {
           paliEl.dataset.type = 'pali';
           paliEl.dataset.text = line.trim();
           paliEl.innerHTML = this.escapeHtml(line);
-          paliEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
           paliEl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.playFromElement(paliEl);
+            if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+              e.stopPropagation();
+              this.playFromElement(paliEl);
+            }
           });
           paliWrap.appendChild(paliEl);
         });
@@ -514,10 +517,11 @@ export class ComicReaderEngine {
           thaiEl.dataset.type = 'thai';
           thaiEl.dataset.text = line.trim();
           thaiEl.innerHTML = this.escapeHtml(line);
-          thaiEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
           thaiEl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.playFromElement(thaiEl);
+            if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+              e.stopPropagation();
+              this.playFromElement(thaiEl);
+            }
           });
           thaiWrap.appendChild(thaiEl);
         });
@@ -535,10 +539,11 @@ export class ComicReaderEngine {
           contentEl.dataset.type = 'thai';
           contentEl.dataset.text = line.trim();
           contentEl.innerHTML = this.escapeHtml(line);
-          contentEl.title = 'แตะเพื่อเริ่มสวดจากท่อนนี้';
           contentEl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.playFromElement(contentEl);
+            if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+              e.stopPropagation();
+              this.playFromElement(contentEl);
+            }
           });
           contentWrap.appendChild(contentEl);
         });
@@ -1044,15 +1049,18 @@ export class ComicReaderEngine {
 
     if (state === 'playing') {
       this.btnTTSPlay.classList.add('playing');
+      this.readerView?.classList.add('tts-active');
       if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '⏸️';
       if (this.ttsPlayText) this.ttsPlayText.textContent = 'พักเสียง';
       nativeBridge.setKeepAwake(true);
     } else if (state === 'paused') {
       this.btnTTSPlay.classList.remove('playing');
+      this.readerView?.classList.add('tts-active');
       if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '▶️';
       if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดต่อ';
     } else {
       this.btnTTSPlay.classList.remove('playing');
+      this.readerView?.classList.remove('tts-active');
       if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '🔊';
       if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดนำ';
     }
