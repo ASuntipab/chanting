@@ -702,6 +702,70 @@ body {
   opacity: 0.8;
 }
 
+/* Theme Overrides for Category Select */
+body.theme-midnight .category-select {
+  border-color: rgba(88, 166, 255, 0.4);
+  color: #58a6ff;
+  background: rgba(14, 20, 38, 0.85);
+}
+
+body.theme-midnight .category-select:focus,
+body.theme-midnight .category-select:hover {
+  border-color: #58a6ff;
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+}
+
+body.theme-midnight .category-select option {
+  background: #090d18;
+  color: #f0f6fc;
+}
+
+body.theme-midnight .select-arrow {
+  color: #58a6ff;
+}
+
+body.theme-parchment .category-select {
+  background: rgba(250, 245, 237, 0.95);
+  border-color: rgba(140, 95, 35, 0.35);
+  color: #684105;
+}
+
+body.theme-parchment .category-select:focus,
+body.theme-parchment .category-select:hover {
+  border-color: #9a6514;
+  box-shadow: 0 0 10px rgba(154, 101, 20, 0.2);
+}
+
+body.theme-parchment .category-select option {
+  background: #fbf6ec;
+  color: #332211;
+}
+
+body.theme-parchment .select-arrow {
+  color: #684105;
+}
+
+body.theme-cosmic .category-select {
+  background: rgba(22, 16, 45, 0.85);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+}
+
+body.theme-cosmic .category-select:focus,
+body.theme-cosmic .category-select:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+
+body.theme-cosmic .category-select option {
+  background: #150f2b;
+  color: #ffffff;
+}
+
+body.theme-cosmic .select-arrow {
+  color: #fbbf24;
+}
+
 /* Library Counter & Filter Status Info Bar */
 .library-header-info {
   display: flex;
