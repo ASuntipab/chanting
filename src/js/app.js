@@ -277,6 +277,23 @@ class TammaApp {
       backupModal?.classList.remove('open');
     });
 
+    // About & Privacy Policy Modal
+    const btnOpenAbout = document.getElementById('btnOpenAbout');
+    const btnCloseAbout = document.getElementById('btnCloseAbout');
+    const aboutModal = document.getElementById('aboutModal');
+
+    btnOpenAbout?.addEventListener('click', () => {
+      aboutModal?.classList.add('open');
+    });
+
+    btnCloseAbout?.addEventListener('click', () => {
+      aboutModal?.classList.remove('open');
+    });
+
+    aboutModal?.addEventListener('click', (e) => {
+      if (e.target === aboutModal) aboutModal.classList.remove('open');
+    });
+
     // Switch Backup Method Tabs
     const switchBackupTab = (activeTab, activePanel) => {
       [tabBackupLine, tabBackupQr, tabBackupFile].forEach(t => t?.classList.remove('active'));

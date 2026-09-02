@@ -44,6 +44,10 @@
         <button id="btnOpenBackup" class="btn-icon" title="สำรอง / นำเข้าไฟล์บทสวดมนต์ (Export & Import)">
           💾
         </button>
+        <!-- About & Privacy Policy Button -->
+        <button id="btnOpenAbout" class="btn-icon" title="เกี่ยวกับแอป & นโยบายความเป็นส่วนตัว (About & Privacy)">
+          ℹ️
+        </button>
         <!-- Add / Suggest Prayer Button (+) -->
         <button id="btnOpenUpload" class="btn-circle-add" title="แนะนำ / ขอเพิ่มบทสวดมนต์">
           +
@@ -581,6 +585,44 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: ABOUT APP & PRIVACY POLICY / TERMS OF SERVICE
+       ========================================================================== -->
+  <div id="aboutModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🪷 เกี่ยวกับแอปพลิเคชัน & นโยบาย</h3>
+        <button id="btnCloseAbout" class="btn-icon" style="width: 32px; height: 32px;">✕</button>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">🪷</div>
+        <h4 style="color: var(--accent-gold); font-size: 1.15rem; margin-bottom: 4px;">แอปบทสวดมนต์ (Chant)</h4>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">เวอร์ชัน 1.0.0 (Build 2026) | Kai Soft Company Limited</div>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; margin-bottom: 16px; font-size: 0.85rem; line-height: 1.6;">
+        <div style="font-weight: 600; color: #34d399; margin-bottom: 6px;">🛡️ นโยบายความปลอดภัย & ความเป็นส่วนตัว (Privacy-First)</div>
+        <p style="color: var(--text-secondary); margin: 0;">
+          แอปพลิเคชันนี้ทำงานแบบ <strong>ออฟไลน์ 100%</strong> ข้อมูลการสวด รายการโปรด และการตั้งค่าทั้งหมดจะถูกบันทึกไว้ในอุปกรณ์ของคุณเท่านั้น โดยไม่มีการเก็บรวบรวม ไม่มีการติดตาม และไม่มีการส่งต่อข้อมูลส่วนบุคคลใดๆ ออกภายนอกทั้งสิ้น
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+        <a href="https://kaisoftthailand.com/terms/" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="justify-content: center; text-decoration: none; padding: 10px; font-size: 0.88rem;">
+          📜 เงื่อนไขและข้อกำหนดการใช้งาน (Terms of Service) ↗
+        </a>
+        <a href="https://kaisoftthailand.com/privacy/" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="justify-content: center; text-decoration: none; padding: 10px; font-size: 0.88rem;">
+          🔒 นโยบายความเป็นส่วนตัว (Privacy Policy) ↗
+        </a>
+      </div>
+
+      <div style="text-align: center; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+        พัฒนาด้วยจิตกุศลเพื่อเป็นธรรมทาน<br>© 2026 Kai Soft Company Limited. สงวนลิขสิทธิ์
+      </div>
     </div>
   </div>
 
