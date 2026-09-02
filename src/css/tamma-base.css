@@ -368,16 +368,9 @@ body {
 }
 
 .brand-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: pulse-lotus 3s infinite ease-in-out;
-}
-
-.brand-lotus-svg {
-  color: var(--accent-gold);
+  font-size: 24px;
   filter: drop-shadow(0 0 8px var(--accent-gold));
-  display: block;
+  animation: pulse-lotus 3s infinite ease-in-out;
 }
 
 @keyframes pulse-lotus {
@@ -546,11 +539,6 @@ body {
   transition: transform 0.2s ease;
 }
 
-.nav-item .nav-svg {
-  transition: transform 0.2s ease, stroke 0.2s ease, color 0.2s ease;
-  stroke: currentColor;
-}
-
 .nav-item.active {
   color: var(--accent-gold);
   font-weight: 600;
@@ -559,13 +547,6 @@ body {
 .nav-item.active .nav-icon {
   transform: translateY(-2px) scale(1.15);
   filter: drop-shadow(0 0 6px var(--accent-gold));
-}
-
-.nav-item.active .nav-svg {
-  transform: translateY(-2px) scale(1.15);
-  filter: drop-shadow(0 0 6px var(--accent-gold));
-  stroke: var(--accent-gold);
-  color: var(--accent-gold);
 }
 
 /* Compact Search & Category Filter Bar (1-Line Space Saver) */
