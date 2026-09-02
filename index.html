@@ -334,50 +334,56 @@
 
       <div class="reader-dock-divider"></div>
 
-      <!-- Controls Row: Font Size + Font Family + Pali Script + MP3 Monk Chanting + Counter -->
-      <div class="reader-controls-row">
-        <!-- Font Size Resizer (Up to 300% for Elders) -->
-        <div class="reader-font-dock">
-          <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
-          <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
-          <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+      <!-- Controls Container: Clean 2-Tier Responsive Grouping (Mobile First) -->
+      <div class="reader-controls-grid">
+        <!-- Group 1: Typography & Language (Font Size + Font Family + Pali Script) -->
+        <div class="reader-controls-group typography-group">
+          <!-- Font Size Resizer (Up to 300% for Elders) -->
+          <div class="reader-font-dock">
+            <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
+            <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
+            <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+          </div>
+
+          <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
+          <div class="reader-font-select-dock">
+            <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
+              <option value="sarabun" selected>🇹🇭 สารบรรณ</option>
+              <option value="prompt">✨ พร้อมท์</option>
+              <option value="noto-serif">📜 โนโตะ</option>
+              <option value="mitr">🍃 มิตร</option>
+              <option value="charm">✍️ ชาร์ม</option>
+              <option value="bai-jamjuree">💎 จามจุรี</option>
+              <option value="chakra">⚡ จักรเพชร</option>
+            </select>
+          </div>
+
+          <!-- Pali Script Switcher (PaliScript Engine) -->
+          <div class="reader-script-dock">
+            <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
+              <option value="thai-phonetic" selected>🇹🇭 คำอ่าน</option>
+              <option value="thai-pinthu">🇹🇭 พินทุ</option>
+              <option value="roman-iast">🌍 IAST</option>
+              <option value="devanagari">🇮🇳 เทวนาครี</option>
+              <option value="burmese">🇲🇲 พม่า</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
-        <div class="reader-font-select-dock">
-          <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
-            <option value="sarabun" selected>🇹🇭 สารบรรณ</option>
-            <option value="prompt">✨ พร้อมท์</option>
-            <option value="noto-serif">📜 โนโตะ (ใบลาน)</option>
-            <option value="mitr">🍃 มิตร</option>
-            <option value="charm">✍️ ชาร์ม (ตัวเขียน)</option>
-            <option value="bai-jamjuree">💎 จามจุรี</option>
-            <option value="chakra">⚡ จักรเพชร</option>
-          </select>
+        <!-- Group 2: Audio & Chant Counter Actions -->
+        <div class="reader-controls-group actions-group">
+          <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
+          <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
+            <span id="mp3PlayIcon">🎵</span>
+            <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
+          </button>
+
+          <!-- Quick Chant Counter with Bell -->
+          <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
+            <span>🔔</span>
+            <span id="readerChantCount">0 จบ</span>
+          </button>
         </div>
-
-        <!-- Pali Script Switcher (PaliScript Engine) -->
-        <div class="reader-script-dock">
-          <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
-            <option value="thai-phonetic" selected>🇹🇭 ไทย (คำอ่าน)</option>
-            <option value="thai-pinthu">🇹🇭 ไทย (พินทุแท้)</option>
-            <option value="roman-iast">🌍 โรมัน (IAST)</option>
-            <option value="devanagari">🇮🇳 เทวนาครี</option>
-            <option value="burmese">🇲🇲 พม่า</option>
-          </select>
-        </div>
-
-        <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
-        <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
-          <span id="mp3PlayIcon">🎵</span>
-          <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
-        </button>
-
-        <!-- Quick Chant Counter with Bell -->
-        <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
-          <span>🔔</span>
-          <span id="readerChantCount">0 จบ</span>
-        </button>
       </div>
     </div>
   </div>
@@ -512,23 +518,43 @@
         </div>
       </div>
 
-      <!-- PANEL 2: QR Code Migration -->
+      <!-- PANEL 2: QR Code Migration (Save to Device & Import from Device) -->
       <div id="panelBackupQr" class="backup-panel" style="display: none;">
-        <div style="text-align: center; margin-bottom: 12px;">
-          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
-            แสดง QR Code นี้ให้เครื่องใหม่สแกน หรือถ่ายรูปเก็บไว้
+        <!-- Section A: QR Code Export & Download -->
+        <div style="text-align: center; margin-bottom: 14px; background: rgba(0,0,0,0.25); padding: 14px; border-radius: 16px; border: 1px solid var(--border-subtle);">
+          <div style="font-weight: 600; font-size: 0.92rem; color: var(--accent-gold); margin-bottom: 4px;">
+            📱 1. เครื่องเก่า: รูปภาพ QR Code สำรอง
           </div>
-          <div class="qr-canvas-container">
-            <canvas id="qrCanvas" style="border-radius: 12px; padding: 8px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.3);"></canvas>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+            กดปุ่มด้านล่างเพื่อบันทึกรูป QR Code เก็บไว้ในเครื่อง หรือส่งให้เครื่องอื่น
           </div>
+          <div class="qr-canvas-container" style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <canvas id="qrCanvas" style="border-radius: 12px; padding: 10px; background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,0.4); max-width: 200px; max-height: 200px;"></canvas>
+          </div>
+          <button id="btnSaveQrImage" class="btn-primary" style="justify-content: center; width: 100%; font-size: 0.92rem;">
+            💾 บันทึกรูปภาพ QR Code ลงเครื่อง
+          </button>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button id="btnScanQrCamera" class="btn-primary" style="justify-content: center; width: 100%; font-size: 0.9rem;">
-            📸 เปิดกล้องสแกน QR Code เครื่องเก่า
-          </button>
-          <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">หรือเลือกรูป QR Code ที่ถ่ายไว้:</div>
-          <input type="file" id="inputQrImage" accept="image/*" class="form-control" style="font-size: 0.8rem;">
+        <!-- Section B: QR Code Import & Restore -->
+        <div style="background: rgba(212, 175, 55, 0.08); padding: 14px; border-radius: 16px; border: 1px dashed var(--accent-gold);">
+          <div style="font-weight: 600; font-size: 0.92rem; color: var(--accent-gold); margin-bottom: 4px; text-align: center;">
+            📲 2. สำหรับเครื่องใหม่: นำเข้าจาก QR Code
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px; text-align: center;">
+            เลือกรูปภาพ QR Code ที่บันทึกไว้ หรือเปิดกล้องเพื่อกู้คืนสถิติ
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label for="inputQrImage" class="btn-secondary" style="display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; width: 100%; font-size: 0.9rem; padding: 10px 16px; border-radius: 12px; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 600; box-sizing: border-box;">
+              <span>🖼️ เลือกรูปภาพ QR Code จากในเครื่อง</span>
+            </label>
+            <input type="file" id="inputQrImage" accept="image/*" style="display: none;">
+
+            <button id="btnScanQrCamera" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.88rem;">
+              📸 หรือเปิดกล้องสแกนสด
+            </button>
+          </div>
         </div>
 
         <!-- Camera Scanner Video Feed (Hidden by default) -->
@@ -560,6 +586,9 @@
 
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Client-side QR Code Decoder (Universal Offline jsQR) -->
+  <script src="src/js/jsqr.js"></script>
 
   <!-- App Entry Point Module -->
   <script type="module" src="src/js/app.js"></script>
