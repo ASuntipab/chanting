@@ -29,17 +29,17 @@
   --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.25);
   --glass-blur: blur(4px);
 
-  --font-body: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-header: 'Prompt', 'Sarabun', sans-serif;
+  --font-body: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI', Roboto, sans-serif;
+  --font-header: 'Prompt', 'Sarabun', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 
   /* Thai Typography Palette */
-  --font-family-sarabun: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-prompt: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-noto-serif: 'Noto Serif Thai', Georgia, 'Times New Roman', serif;
-  --font-family-mitr: 'Mitr', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-family-charm: 'Charm', 'TH Sarabun New', cursive, sans-serif;
-  --font-family-bai-jamjuree: 'Bai Jamjuree', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-family-chakra: 'Chakra Petch', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-sarabun: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI', Roboto, sans-serif;
+  --font-family-prompt: 'Prompt', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI', Roboto, sans-serif;
+  --font-family-noto-serif: 'Noto Serif Thai', Georgia, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Times New Roman', serif;
+  --font-family-mitr: 'Mitr', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  --font-family-charm: 'Charm', 'TH Sarabun New', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', cursive, sans-serif;
+  --font-family-bai-jamjuree: 'Bai Jamjuree', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  --font-family-chakra: 'Chakra Petch', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 
   --reader-font-family: var(--font-family-sarabun);
 
@@ -389,10 +389,11 @@ body {
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 12px 20px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -407,6 +408,7 @@ body {
 
 .brand-icon {
   font-size: 24px;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
   filter: drop-shadow(0 0 8px var(--accent-gold));
   animation: pulse-lotus 3s infinite ease-in-out;
 }
@@ -430,7 +432,8 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 /* Golden Circle Plus Button */
@@ -561,16 +564,18 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 
 .btn-icon:hover {
@@ -666,6 +671,7 @@ body {
 
 .nav-item .nav-icon {
   font-size: 1.35rem;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
   transition: transform 0.2s ease;
 }
 
