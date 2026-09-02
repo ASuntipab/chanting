@@ -31,22 +31,40 @@
     <!-- Top Header -->
     <header class="top-header">
       <div class="brand" onclick="window.tammaApp.switchTab('library')">
-        <span class="brand-icon">🪷</span>
+        <span class="brand-icon">
+          <svg class="brand-lotus-svg" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+            <path d="M12 2C11 5 8 8 6 11c-2 3-1 6 1 8 2 1.5 5 1 5 1s3 .5 5-1c2-2 3-5 1-8-2-3-5-6-6-9zm0 6c1.5 2 3 4 3 6 0 1.5-1 2.5-3 2.5S9 15.5 9 14c0-2 1.5-4 3-6zm-7 5c-1 2 0 4 1.5 5 1.5.5 3 .5 3 .5s-.5-1.5-1.2-3C7.5 14 6 12 5 13zm14 0c-1-1-2.5 1-3.3 2.5-.7 1.5-1.2 3-1.2 3s1.5 0 3-.5c1.5-1 2.5-3 1.5-5z"/>
+          </svg>
+        </span>
         <div class="brand-name">บทสวดมนต์</div>
       </div>
 
       <div class="header-actions">
         <!-- Theme Toggle Button -->
         <button id="btnToggleTheme" class="btn-icon" title="สลับธีม">
-          🎨
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r="1" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r="1" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r="1" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r="1" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.7 1.7-1.7h2c3 0 5.5-2.5 5.5-5.5C22 6 17.5 2 12 2z"></path>
+          </svg>
         </button>
         <!-- Backup / Restore Button -->
         <button id="btnOpenBackup" class="btn-icon" title="สำรอง / นำเข้าไฟล์บทสวดมนต์ (Export & Import)">
-          💾
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
         </button>
         <!-- About & Privacy Policy Button -->
         <button id="btnOpenAbout" class="btn-icon" title="เกี่ยวกับแอป & นโยบายความเป็นส่วนตัว (About & Privacy)">
-          ℹ️
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
         </button>
         <!-- Add / Suggest Prayer Button (+) -->
         <button id="btnOpenUpload" class="btn-circle-add" title="แนะนำ / ขอเพิ่มบทสวดมนต์">
@@ -61,8 +79,12 @@
         <span class="ad-badge">โฆษณา</span>
         <div class="ad-content-slot">
           <div class="ad-dharma-promo">
-            <span class="ad-promo-icon">🪷</span>
-            <span class="ad-promo-text">สนับสนุนแอปพลิเคชันบทสวดมนต์ & ธรรมทาน</span>
+            <span class="ad-promo-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M12 2C11 5 8 8 6 11c-2 3-1 6 1 8 2 1.5 5 1 5 1s3 .5 5-1c2-2 3-5 1-8-2-3-5-6-6-9zm0 6c1.5 2 3 4 3 6 0 1.5-1 2.5-3 2.5S9 15.5 9 14c0-2 1.5-4 3-6zm-7 5c-1 2 0 4 1.5 5 1.5.5 3 .5 3 .5s-.5-1.5-1.2-3C7.5 14 6 12 5 13zm14 0c-1-1-2.5 1-3.3 2.5-.7 1.5-1.2 3-1.2 3s1.5 0 3-.5c1.5-1 2.5-3 1.5-5z"/>
+              </svg>
+            </span>
+            <span class="ad-promo-text">สนับสนุนแอปพลิเคชันบทสวดมนต์ &amp; ธรรมทาน</span>
           </div>
         </div>
       </div>
@@ -73,24 +95,29 @@
       <!-- Compact 1-Line Search & Category Dropdown -->
       <div class="search-container">
         <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
           <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบทสวดมนต์ เช่น ชินบัญชร, พาหุง...">
         </div>
         <!-- Native Styled Category Dropdown -->
         <div class="category-dropdown-wrap">
           <select id="categorySelect" class="category-select" title="เลือกหมวดหมู่">
-            <option value="all">✨ ทุกหมวดหมู่ (๑๐๐ บท)</option>
-            <option value="หลวงพ่อจรัญ">🪷 หลวงพ่อจรัญ (๗ บท)</option>
-            <option value="หลวงปู่มั่น">⛰️ หลวงปู่มั่น (๔ บท)</option>
-            <option value="หลวงตามหาบัว">🪷 หลวงตามหาบัว (๒ บท)</option>
-            <option value="แผ่เมตตา">💖 แผ่เมตตา (๕ บท)</option>
-            <option value="คาถาศักดิ์สิทธิ์">🌟 คาถาศักดิ์สิทธิ์ (๑๖ บท)</option>
-            <option value="บทสวดประจำวัน">🙏 บทสวดประจำวัน (๑๐ บท)</option>
-            <option value="ชัยมงคลคาถา">🛡️ ชัยมงคลคาถา (๔ บท)</option>
-            <option value="ทำวัตร">📜 ทำวัตรเช้า-เย็น (๔ บท)</option>
-            <option value="พระสูตรสำคัญ">📖 พระสูตรสำคัญ (๑๒ บท)</option>
-            <option value="พระเกจิอาจารย์">📿 พระเกจิอาจารย์ (๒๔ บท)</option>
-            <option value="พิธีกรรม">🕯️ พิธีกรรม (๑๒ บท)</option>
+            <option value="all">ทุกหมวดหมู่ (๑๐๐ บท)</option>
+            <option value="หลวงพ่อจรัญ">หลวงพ่อจรัญ (๗ บท)</option>
+            <option value="หลวงปู่มั่น">หลวงปู่มั่น (๔ บท)</option>
+            <option value="หลวงตามหาบัว">หลวงตามหาบัว (๒ บท)</option>
+            <option value="แผ่เมตตา">แผ่เมตตา (๕ บท)</option>
+            <option value="คาถาศักดิ์สิทธิ์">คาถาศักดิ์สิทธิ์ (๑๖ บท)</option>
+            <option value="บทสวดประจำวัน">บทสวดประจำวัน (๑๐ บท)</option>
+            <option value="ชัยมงคลคาถา">ชัยมงคลคาถา (๔ บท)</option>
+            <option value="ทำวัตร">ทำวัตรเช้า-เย็น (๔ บท)</option>
+            <option value="พระสูตรสำคัญ">พระสูตรสำคัญ (๑๒ บท)</option>
+            <option value="พระเกจิอาจารย์">พระเกจิอาจารย์ (๒๔ บท)</option>
+            <option value="พิธีกรรม">พิธีกรรม (๑๒ บท)</option>
           </select>
           <span class="select-arrow">▼</span>
         </div>
@@ -181,19 +208,30 @@
   <!-- Bottom Navigation Bar (4 Clean Tabs) -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-tab="library" style="width: 25%;">
-      <span class="nav-icon">📚</span>
+      <svg class="nav-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
       <span>คลังบทสวด</span>
     </button>
     <button class="nav-item" data-tab="tipitaka" style="width: 25%;">
-      <span class="nav-icon">📖</span>
+      <svg class="nav-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+      </svg>
       <span>พระไตรปิฎก</span>
     </button>
     <button class="nav-item" data-tab="tracker" style="width: 25%;">
-      <span class="nav-icon">📊</span>
+      <svg class="nav-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
       <span>บันทึกสวด</span>
     </button>
     <button class="nav-item" data-tab="favorites" style="width: 25%;">
-      <span class="nav-icon">💖</span>
+      <svg class="nav-svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
       <span>รายการโปรด</span>
     </button>
   </nav>
@@ -214,15 +252,36 @@
 
       <!-- Top Audio Controls: AI TTS Play & Voice Control Options & Theme Switcher -->
       <div class="reader-audio-dock">
-        <button id="btnReaderThemeToggle" class="btn-icon btn-reader-theme" title="สลับธีมตอนอ่าน (🎨)">
-          🎨
+        <button id="btnReaderThemeToggle" class="btn-icon btn-reader-theme" title="สลับธีมตอนอ่าน">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r="1" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r="1" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r="1" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r="1" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.7 1.7-1.7h2c3 0 5.5-2.5 5.5-5.5C22 6 17.5 2 12 2z"></path>
+          </svg>
         </button>
         <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงสังเคราะห์สวดนำ (AI)">
-          <span id="ttsPlayIcon">🔊</span>
+          <span id="ttsPlayIcon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          </span>
           <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
         </button>
         <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ควบคุมและปรับแต่งเสียงสวดนำ (AI)">
-          🎛️
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
         </button>
       </div>
     </div>

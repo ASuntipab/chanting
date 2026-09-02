@@ -66,13 +66,17 @@ export class DhammaTrackerEngine {
       const isCompleted = !!trackerData.todayChanted[prayer.id];
       const count = trackerData.totalCounts[prayer.id] || 0;
 
+      const statusIconSvg = isCompleted
+        ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="#10b981" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
+        : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.35"><circle cx="12" cy="12" r="10"></circle></svg>`;
+
       const item = document.createElement('div');
       item.className = `tracker-item ${isCompleted ? 'completed' : ''}`;
       item.style.cursor = 'pointer';
       item.innerHTML = `
         <div class="tracker-item-left">
           <div class="tracker-status-icon">
-            ${isCompleted ? '✅' : '⚪'}
+            ${statusIconSvg}
           </div>
           <div style="min-width: 0; flex: 1;">
             <div class="tracker-title">${prayer.title}</div>

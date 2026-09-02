@@ -648,30 +648,14 @@ class TammaApp {
       categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
     });
 
-    const categoryIcons = {
-      'all': '✨',
-      'หลวงพ่อจรัญ': '🪷',
-      'หลวงปู่มั่น': '⛰️',
-      'หลวงตามหาบัว': '🪷',
-      'แผ่เมตตา': '💖',
-      'คาถาศักดิ์สิทธิ์': '🌟',
-      'บทสวดประจำวัน': '🙏',
-      'ชัยมงคลคาถา': '🛡️',
-      'ทำวัตร': '📜',
-      'พระสูตรสำคัญ': '📖',
-      'พระเกจิอาจารย์': '📿',
-      'พิธีกรรม': '🕯️'
-    };
-
     Array.from(categorySelect.options).forEach(opt => {
       const val = opt.value;
-      const icon = categoryIcons[val] || '📿';
       if (val === 'all') {
-        opt.textContent = `${icon} ทุกหมวดหมู่ (${toThai(allPrayers.length)} บท)`;
+        opt.textContent = `ทุกหมวดหมู่ (${toThai(allPrayers.length)} บท)`;
       } else {
         const count = categoryCounts[val] || 0;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
-        opt.textContent = `${icon} ${baseName} (${toThai(count)} บท)`;
+        opt.textContent = `${baseName} (${toThai(count)} บท)`;
       }
     });
   }
@@ -734,6 +718,11 @@ class TammaApp {
     container.innerHTML = '';
     const trackerData = storage.getTrackerData();
 
+    const favHeartFilled = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" style="display:block;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+    const favHeartOutline = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block; opacity:0.6;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+    const chantBellSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px; display:inline-block;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
+    const cardShareSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
+
     prayers.forEach(prayer => {
       const isFav = storage.isFavorite(prayer.id);
       const chantCount = trackerData.totalCounts[prayer.id] || 0;
@@ -745,7 +734,7 @@ class TammaApp {
           <div class="card-header">
             <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
             <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${prayer.id}" aria-label="รายการโปรด">
-              ${isFav ? '❤️' : '🤍'}
+              ${isFav ? favHeartFilled : favHeartOutline}
             </button>
           </div>
           <div class="card-title">${prayer.title}</div>
@@ -753,11 +742,11 @@ class TammaApp {
         </div>
         <div class="card-footer">
           <div class="card-stats">
-            <span class="card-stat-item">🔔 ${chantCount} จบ</span>
+            <span class="card-stat-item">${chantBellSvg}${chantCount} จบ</span>
           </div>
           <div style="display: flex; gap: 6px;">
-            <button class="btn-icon btn-card-share" data-id="${prayer.id}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์บทสวด">
-              📤
+            <button class="btn-icon btn-card-share" data-id="${prayer.id}" style="width: 32px; height: 32px;" title="แชร์บทสวด">
+              ${cardShareSvg}
             </button>
             <button class="btn-primary btn-read-card" style="padding: 4px 12px; font-size: 0.85rem;">
               เปิดอ่าน
@@ -782,7 +771,7 @@ class TammaApp {
         audio.playTick();
         const active = storage.toggleFavorite(prayer.id);
         e.currentTarget.classList.toggle('active', active);
-        e.currentTarget.textContent = active ? '❤️' : '🤍';
+        e.currentTarget.innerHTML = active ? favHeartFilled : favHeartOutline;
         this.showToast(active ? `เพิ่ม "${prayer.title}" ในรายการโปรดแล้ว` : 'นำออกจากรายการโปรด');
         if (this.activeTab === 'favorites') this.renderFavorites();
         tracker.render();
