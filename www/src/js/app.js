@@ -983,8 +983,16 @@ class TammaApp {
   }
 }
 
-// Auto bootstrap when DOM loaded
-document.addEventListener('DOMContentLoaded', () => {
-  window.tammaApp = new TammaApp();
-  window.tammaApp.init();
-});
+// Auto bootstrap when DOM loaded (Supports instant WKWebView initialization)
+function bootstrap() {
+  if (!window.tammaApp) {
+    window.tammaApp = new TammaApp();
+    window.tammaApp.init();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrap);
+} else {
+  bootstrap();
+}

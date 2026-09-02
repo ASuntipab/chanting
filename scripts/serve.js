@@ -1,4 +1,4 @@
-﻿import http from 'node:http';
+import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -55,6 +55,25 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`🌸 Tamma OS Web Server is running at http://localhost:${PORT}/tamma.html`);
+let currentPort = Number(process.env.PORT) || 8080;
+
+function startServer(port) {
+  server.listen(port, () => {
+    console.log(`\n======================================================`);
+    console.log(`🌸 Tamma OS Web Server is running!`);
+    console.log(`👉 URL: http://localhost:${port}/tamma.html`);
+    console.log(`======================================================\n`);
+  });
+}
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.warn(`⚠️ Port ${currentPort} กำลังถูกใช้งาน สลับไปใช้พอร์ต ${currentPort + 1}...`);
+    currentPort++;
+    startServer(currentPort);
+  } else {
+    console.error('Server error:', err);
+  }
 });
+
+startServer(currentPort);
