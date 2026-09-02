@@ -11,6 +11,9 @@ fs.mkdirSync(wwwDir, { recursive: true });
 
 fs.copyFileSync(path.join(rootDir, 'tamma.html'), path.join(wwwDir, 'index.html'));
 fs.copyFileSync(path.join(rootDir, 'tamma.html'), path.join(wwwDir, 'tamma.html'));
+if (fs.existsSync(path.join(rootDir, 'privacy-policy.html'))) {
+  fs.copyFileSync(path.join(rootDir, 'privacy-policy.html'), path.join(wwwDir, 'privacy-policy.html'));
+}
 
 function copyDir(src, dest) {
   if (!fs.existsSync(src)) return;
