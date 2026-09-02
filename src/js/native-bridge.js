@@ -25,12 +25,20 @@ class NativeMobileBridge {
       this.statusBarPlugin = Plugins.StatusBar;
       this.localNotificationsPlugin = Plugins.LocalNotifications;
       this.preferencesPlugin = Plugins.Preferences;
+      this.splashScreenPlugin = Plugins.SplashScreen;
 
       // Apply Native Status Bar Style
       if (this.statusBarPlugin) {
         try {
           await this.statusBarPlugin.setStyle({ style: 'DARK' });
           await this.statusBarPlugin.setBackgroundColor({ color: '#181411' });
+        } catch (e) {}
+      }
+
+      // Hide Splash Screen immediately once app web runtime is ready
+      if (this.splashScreenPlugin) {
+        try {
+          await this.splashScreenPlugin.hide();
         } catch (e) {}
       }
     }
