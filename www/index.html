@@ -25,11 +25,9 @@
   <!-- Realtime 60fps Cosmic Dhamma Starfield Background -->
   <canvas id="cosmicCanvas" style="position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1;"></canvas>
 
-  <!-- Main App Shell -->
-  <div class="app-container">
-    
-    <!-- Top Header -->
-    <header class="top-header">
+  <!-- Top Header (Sticky & Safe-Area Aware) -->
+  <header class="top-header">
+    <div class="header-inner">
       <div class="brand" onclick="window.tammaApp.switchTab('library')">
         <span class="brand-icon">🪷</span>
         <div class="brand-name">บทสวดมนต์</div>
@@ -53,7 +51,11 @@
           +
         </button>
       </div>
-    </header>
+    </div>
+  </header>
+
+  <!-- Main App Shell -->
+  <div class="app-container">
 
     <!-- TAB 1: PRAYER LIBRARY VIEW -->
     <main id="viewLibrary" class="tab-view">
