@@ -105,43 +105,42 @@ export class DhammaShareEngine {
     ctx.lineWidth = 1;
     ctx.strokeRect(40, 40, width - 80, height - 80);
 
-    // 3. Glowing Lotus Centerpiece Watermark
-    ctx.save();
-    ctx.font = '140px serif';
-    ctx.fillStyle = 'rgba(212, 175, 55, 0.08)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🪷', width / 2, height / 2 - 40);
-    ctx.restore();
+    // 3. Sacred Golden Lotus Mandala Watermark (Vector Path, No Emoji Fallback Bugs)
+    this.drawLotusWatermark(ctx, width / 2, height / 2 - 40, 95);
 
-    // 4. Header & App Branding
+    // 4. Header & App Branding (Strictly Centered)
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 22px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
     ctx.fillText('❖ บทสวดมนต์ ❖', width / 2, 85);
 
-    // 5. Prayer Title (Auto-scaling & Word Wrapping)
+    // 5. Prayer Title (Strict Auto-fitting to Max 640px Width)
     const titleText = prayer.title || 'บทสวดมนต์อันเป็นมงคล';
-    let titleFontSize = 32;
-    if (titleText.length > 32) titleFontSize = 23;
-    else if (titleText.length > 20) titleFontSize = 27;
-
+    let titleFontSize = 28;
     ctx.font = `bold ${titleFontSize}px "Prompt", sans-serif`;
+    while (ctx.measureText(titleText).width > 640 && titleFontSize > 17) {
+      titleFontSize -= 1;
+      ctx.font = `bold ${titleFontSize}px "Prompt", sans-serif`;
+    }
+
     ctx.fillStyle = '#ffffff';
-    const titleEndY = this.wrapText(ctx, titleText, width / 2, 140, width - 140, titleFontSize * 1.35, 2);
+    ctx.textAlign = 'center';
+    const titleEndY = this.wrapText(ctx, titleText, width / 2, 140, 640, titleFontSize * 1.35, 2);
 
     // Category / Origin Subtitle
     const subtitleY = titleEndY + 28;
     ctx.font = '18px "Sarabun", sans-serif';
     ctx.fillStyle = '#d1c5b8';
+    ctx.textAlign = 'center';
     ctx.fillText(prayer.author || prayer.category || 'บทสวดมนต์อันเป็นมงคล', width / 2, subtitleY);
 
-    // 6. Dividing Ornament Line
+    // 6. Dividing Ornament Line (Centered)
     const dividerY = subtitleY + 20;
-    ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
     ctx.beginPath();
-    ctx.moveTo(width / 2 - 120, dividerY);
-    ctx.lineTo(width / 2 + 120, dividerY);
+    ctx.moveTo(width / 2 - 130, dividerY);
+    ctx.lineTo(width / 2 + 130, dividerY);
     ctx.stroke();
 
     // 7. Key Excerpt / First Verse Body
@@ -152,44 +151,106 @@ export class DhammaShareEngine {
     const paliStartY = dividerY + 36;
     ctx.font = '21px "Sarabun", sans-serif';
     ctx.fillStyle = '#f59e0b';
-    const paliEndY = this.wrapText(ctx, textPali, width / 2, paliStartY, width - 140, 32, 5);
+    ctx.textAlign = 'center';
+    const paliEndY = this.wrapText(ctx, textPali, width / 2, paliStartY, 660, 32, 5);
 
     if (textThai) {
-      const thaiStartY = Math.max(paliEndY + 22, 500);
+      const thaiStartY = Math.max(paliEndY + 24, 490);
       ctx.font = '17px "Sarabun", sans-serif';
       ctx.fillStyle = '#a89d8f';
-      this.wrapText(ctx, `"${textThai}"`, width / 2, thaiStartY, width - 160, 28, 4);
+      ctx.textAlign = 'center';
+      this.wrapText(ctx, `"${textThai}"`, width / 2, thaiStartY, 660, 28, 4);
     }
 
-    // 8. User Stats & Merit Badge Box (Local Device Timezone)
+    // 8. User Stats & Merit Badge Box (Centered at x = 140, width = 520)
     const trackerData = storage.getTrackerData();
     const count = trackerData.totalCounts[prayer.id] || 1;
     const streak = trackerData.streakDays || 1;
 
+    const badgeWidth = 520;
+    const badgeHeight = 90;
+    const badgeX = (width - badgeWidth) / 2;
     const badgeY = height - 230;
+
     ctx.fillStyle = 'rgba(212, 175, 55, 0.12)';
     ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
-    this.roundRect(ctx, width / 2 - 250, badgeY, 500, 90, 16, true, true);
+    this.roundRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, 16, true, true);
 
-    ctx.font = 'bold 22px "Prompt", sans-serif';
+    ctx.font = 'bold 21px "Prompt", sans-serif';
     ctx.fillStyle = '#d4af37';
-    ctx.fillText(`✨ ร่วมเจริญพระพุทธมนต์ สะสมบุญบารมี ✨`, width / 2, badgeY + 42);
+    ctx.textAlign = 'center';
+    ctx.fillText(`✨ ร่วมเจริญพระพุทธมนต์ สะสมบุญบารมี ✨`, width / 2, badgeY + 40);
 
     ctx.font = '16px "Sarabun", sans-serif';
     ctx.fillStyle = '#e5e7eb';
+    ctx.textAlign = 'center';
     const dateStr = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-    ctx.fillText(`บันทึกบุญบารมี ณ วันที่ ${dateStr}`, width / 2, badgeY + 70);
+    ctx.fillText(`บันทึกบุญบารมี ณ วันที่ ${dateStr}`, width / 2, badgeY + 68);
 
-    // 9. Footer Blessing
+    // 9. Footer Blessing (Strictly Centered)
     ctx.font = 'italic 16px "Sarabun", sans-serif';
     ctx.fillStyle = '#9b8a78';
+    ctx.textAlign = 'center';
     ctx.fillText('ขออานิสงส์แห่งการเจริญพระพุทธมนต์ จงดลบันดาลให้ท่านมีความสุข สงบ และเจริญด้วยธรรม', width / 2, height - 70);
 
     return this.canvas.toDataURL('image/png');
   }
 
+  /**
+   * Draws a Sacred Golden Lotus Mandala as high-res vector watermark
+   */
+  drawLotusWatermark(ctx, cx, cy, radius = 95) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.18)';
+    ctx.fillStyle = 'rgba(212, 175, 55, 0.05)';
+    ctx.lineWidth = 1.5;
+
+    // 8 Outer Petals
+    const petals = 8;
+    for (let i = 0; i < petals; i++) {
+      const angle = (i * Math.PI * 2) / petals;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(radius * 0.35, -radius * 0.6, 0, -radius);
+      ctx.quadraticCurveTo(-radius * 0.35, -radius * 0.6, 0, 0);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 8 Inner Petals
+    for (let i = 0; i < petals; i++) {
+      const angle = (i * Math.PI * 2) / petals + (Math.PI / petals);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(radius * 0.22, -radius * 0.38, 0, -radius * 0.65);
+      ctx.quadraticCurveTo(-radius * 0.22, -radius * 0.38, 0, 0);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Center Sacred Core
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.18, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(212, 175, 55, 0.22)';
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
   wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 5) {
     if (!text) return y;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+
     const lines = text.split('\n');
     let curY = y;
     let totalRendered = 0;
@@ -217,6 +278,7 @@ export class DhammaShareEngine {
         const testLine = currentLine + token;
         const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && currentLine.length > 0) {
+          ctx.textAlign = 'center';
           ctx.fillText(currentLine.trim(), x, curY);
           currentLine = token;
           curY += lineHeight;
@@ -227,6 +289,7 @@ export class DhammaShareEngine {
         }
       }
       if (currentLine.length > 0 && totalRendered < maxLines) {
+        ctx.textAlign = 'center';
         ctx.fillText(currentLine.trim(), x, curY);
         curY += lineHeight;
         totalRendered++;

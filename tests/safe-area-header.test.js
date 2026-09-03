@@ -47,12 +47,35 @@ test('Mobile Safe-Area Header & Navigation Layout Live Verification', async (t) 
     assert.match(headerRules, /padding-right:\s*max\(14px,\s*env\(safe-area-inset-right\)\);?/, '.top-header must respect safe-area-inset-right');
   });
 
-  await t.test('CSS Verification: reader-toolbar integrates var(--safe-top)', () => {
+  await t.test('CSS Verification: reader-toolbar integrates var(--safe-top) and bottom alignment', () => {
     const readerMatch = readerCssContent.match(/\.reader-toolbar\s*\{([^}]+)\}/);
     assert.ok(readerMatch, '.reader-toolbar selector must exist in reader.css');
     const readerRules = readerMatch[1];
-    assert.match(readerRules, /padding-top:\s*var\(--safe-top\);?/, '.reader-toolbar must have padding-top: var(--safe-top)');
-    assert.match(readerRules, /height:\s*calc\(58px\s*\+\s*var\(--safe-top\)\);?/, '.reader-toolbar must calculate total height including safe-top');
+    assert.match(readerRules, /padding-top:\s*max\(8px,\s*var\(--safe-top\)\);?/, '.reader-toolbar must have padding-top with safe-top');
+    assert.match(readerRules, /height:\s*calc\(64px\s*\+\s*var\(--safe-top\)\);?/, '.reader-toolbar must calculate total height including safe-top');
+    assert.match(readerRules, /align-items:\s*flex-end;?/, '.reader-toolbar must align items flex-end to push buttons away from top edge');
+  });
+
+  await t.test('CSS Verification: reader-view has 0 padding and page-frame maximizes area in hud-hidden', () => {
+    const readerViewMatch = readerCssContent.match(/\.reader-view\s*\{([^}]+)\}/);
+    assert.ok(readerViewMatch, '.reader-view selector must exist in reader.css');
+    assert.match(readerViewMatch[1], /padding:\s*0;?/, '.reader-view must have padding: 0 to eliminate double safe-padding');
+
+    const hudHiddenMatch = readerCssContent.match(/\.reader-view\.hud-hidden\s+\.page-frame\s*\{([^}]+)\}/);
+    assert.ok(hudHiddenMatch, '.reader-view.hud-hidden .page-frame selector must exist');
+    assert.match(hudHiddenMatch[1], /padding:\s*max\(14px,\s*calc\(var\(--safe-top\)\s*\+\s*6px\)\)/, 'hud-hidden page-frame must maximize vertical reading space');
+  });
+
+  await t.test('JS Verification: shareEngine uses vector lotus and strict centering', () => {
+    const shareJsContent = fs.readFileSync(path.join(rootDir, 'src/js/share.js'), 'utf8');
+    assert.ok(shareJsContent.includes('drawLotusWatermark'), 'shareEngine must use drawLotusWatermark instead of raw emoji');
+    assert.ok(shareJsContent.includes("ctx.textAlign = 'center'"), 'shareEngine must explicitly enforce textAlign center');
+  });
+
+  await t.test('JS Verification: nativeBridge supports hideStatusBar and showStatusBar', () => {
+    const bridgeJsContent = fs.readFileSync(path.join(rootDir, 'src/js/native-bridge.js'), 'utf8');
+    assert.ok(bridgeJsContent.includes('hideStatusBar'), 'nativeBridge must have hideStatusBar method');
+    assert.ok(bridgeJsContent.includes('showStatusBar'), 'nativeBridge must have showStatusBar method');
   });
 
   await t.test('CSS Verification: toast-container respects var(--safe-top)', () => {

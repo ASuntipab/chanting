@@ -14,8 +14,7 @@
   pointer-events: none;
   transition: opacity 0.3s ease;
   overflow: hidden;
-  padding-top: var(--safe-top);
-  padding-bottom: var(--safe-bottom);
+  padding: 0;
 }
 
 .reader-view.active {
@@ -29,22 +28,42 @@
   top: 0;
   left: 0;
   right: 0;
-  height: calc(58px + var(--safe-top));
-  padding-top: var(--safe-top);
-  padding-bottom: 0;
+  height: calc(64px + var(--safe-top));
+  padding-top: max(8px, var(--safe-top));
+  padding-bottom: 8px;
   padding-left: max(16px, env(safe-area-inset-left));
   padding-right: max(16px, env(safe-area-inset-right));
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--border-subtle);
-  z-index: 100;
+  z-index: 600;
   transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.35s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+#btnCloseReader {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  touch-action: manipulation;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
 }
 
 .reader-title-box {
@@ -139,7 +158,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   border: none;
   border-radius: 0;
-  padding: calc(var(--safe-top) + 54px) 18px calc(var(--safe-bottom) + 48px) 18px;
+  padding: calc(var(--safe-top) + 68px) 18px calc(var(--safe-bottom) + 54px) 18px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -149,8 +168,13 @@
   -ms-overflow-style: none;
   box-shadow: none;
   transform-origin: left center;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: padding 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
+}
+
+/* Immersive Fullscreen Zen Mode (HUD Hidden) - Maximize Reading Area Without Dead Space */
+.reader-view.hud-hidden .page-frame {
+  padding: max(14px, calc(var(--safe-top) + 6px)) max(16px, env(safe-area-inset-right)) max(14px, calc(var(--safe-bottom) + 6px)) max(16px, env(safe-area-inset-left));
 }
 
 .page-frame::-webkit-scrollbar,
@@ -1082,8 +1106,8 @@ body.theme-cosmic .reader-script-select option {
 @media (min-width: 768px) {
   .reader-toolbar {
     height: calc(72px + var(--safe-top));
-    padding-top: var(--safe-top);
-    padding-bottom: 0;
+    padding-top: max(12px, var(--safe-top));
+    padding-bottom: 10px;
     padding-left: max(28px, env(safe-area-inset-left));
     padding-right: max(28px, env(safe-area-inset-right));
   }
@@ -1103,7 +1127,11 @@ body.theme-cosmic .reader-script-select option {
   }
 
   .page-frame {
-    padding: calc(var(--safe-top) + 68px) 32px calc(var(--safe-bottom) + 58px) 32px;
+    padding: calc(var(--safe-top) + 78px) 32px calc(var(--safe-bottom) + 64px) 32px;
+  }
+
+  .reader-view.hud-hidden .page-frame {
+    padding: max(20px, calc(var(--safe-top) + 10px)) 32px max(20px, calc(var(--safe-bottom) + 10px)) 32px;
   }
 
   .page-verse-header {
