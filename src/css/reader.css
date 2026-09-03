@@ -23,14 +23,18 @@
   pointer-events: auto;
 }
 
-/* Reader Top Toolbar (Auto-hiding HUD) */
+/* Reader Top Toolbar (Auto-hiding HUD & Safe-Area Aware) */
 .reader-toolbar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 58px;
-  padding: 0 16px;
+  height: calc(58px + var(--safe-top));
+  padding-top: var(--safe-top);
+  padding-bottom: 0;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1077,8 +1081,11 @@ body.theme-cosmic .reader-script-select option {
    ========================================================================== */
 @media (min-width: 768px) {
   .reader-toolbar {
-    height: 72px;
-    padding: 0 28px;
+    height: calc(72px + var(--safe-top));
+    padding-top: var(--safe-top);
+    padding-bottom: 0;
+    padding-left: max(28px, env(safe-area-inset-left));
+    padding-right: max(28px, env(safe-area-inset-right));
   }
 
   .reader-title {
