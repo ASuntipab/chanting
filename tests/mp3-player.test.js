@@ -5,14 +5,14 @@ import { TIPITAKA_SUTTA_PRAYERS } from '../src/js/prayers-tipitaka-suttas.js';
 
 test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t) => {
   await t.test('CHANTING_AUDIO_TRACKS provides authentic public domain chanting sources', () => {
-    assert.ok(CHANTING_AUDIO_TRACKS.length >= 59, `Expected 59+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
+    assert.ok(CHANTING_AUDIO_TRACKS.length >= 72, `Expected 72+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
     
     CHANTING_AUDIO_TRACKS.forEach(track => {
       assert.ok(track.id, 'Track must have an ID');
       assert.ok(track.title, 'Track must have a title');
       assert.ok(track.temple, 'Track must have a temple attribution');
       assert.ok(track.srcWebm, 'Track must have compressed WebM/Ogg source');
-      assert.ok(track.srcMp3.endsWith('.mp3'), 'Track must have fallback MP3 source');
+      assert.ok(track.srcMp3.endsWith('.mp3') || track.srcMp3.endsWith('.MP3'), 'Track must have fallback MP3 source');
     });
   });
 
@@ -67,6 +67,37 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
     const bhojananga = { id: 'bhojananga', title: 'โภชนังคปริตร' };
     assert.strictEqual(mp3Player.getTrackForPrayer(bhojananga).id, 'track-bhojananga-dhammamon');
 
+    // Newly added popular prayers (Maha Chakraphat, Yod Phrakand, Ngoen Lan, Metta Yai, etc.)
+    const mahaChakraphat = { id: 'maha-chakraphat', title: 'พระคาถามหาจักรพรรดิ' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(mahaChakraphat).id, 'track-maha-chakraphat');
+
+    const yodPhrakand = { id: 'yod-phrakand', title: 'ยอดพระกัณฑ์ไตรปิฎก (ฉบับโบราณ)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(yodPhrakand).id, 'track-yod-phrakand');
+
+    const baramee30 = { id: 'baramee-30-tas', title: 'บทสวดบารมี ๓๐ ทัศ' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(baramee30).id, 'track-baramee-30-tas');
+
+    const photibat = { id: 'katha-photibat', title: 'พระคาถาโพธิบาท กันภัย ๑๐ ทิศ' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(photibat).id, 'track-katha-photibat');
+
+    const mahaMettaYai = { id: 'maha-metta-yai', title: 'บทสวดมหาเมตตาใหญ่ (ฉบับเต็มสมบูรณ์)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(mahaMettaYai).id, 'track-maha-metta-yai');
+
+    const ngoenLan = { id: 'katha-ngoen-lan', title: 'พระคาถาเงินล้าน (หลวงพ่อฤๅษีลิงดำ)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(ngoenLan).id, 'track-katha-ngoen-lan');
+
+    const moraParitta = { id: 'lp-mun-mora-paritta', title: 'พระคาถาพญานกยูงทอง (โมรปริตร หลวงปู่มั่น)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(moraParitta).id, 'track-mora-paritta');
+
+    const vattaka = { id: 'vattaka-paritta', title: 'วัฏฏกปริตร' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(vattaka).id, 'track-vattaka-paritta');
+
+    const dhajagga = { id: 'dhajagga-sutta', title: 'ธชัคคสูตร' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(dhajagga).id, 'track-dhajagga-paritta');
+
+    const mongkolChakrawan = { id: 'mongkol-chakrawan-yai', title: 'มงคลจักรวาฬใหญ่' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(mongkolChakrawan).id, 'track-mongkol-chakrawan-yai');
+
     // All track IDs must be unique
     const ids = CHANTING_AUDIO_TRACKS.map(t => t.id);
     assert.strictEqual(ids.length, new Set(ids).size, 'All track IDs must be unique');
@@ -80,6 +111,12 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
 
     const altChinabanchorn = mp3Player.getAlternativeTracks({ title: 'ชินบัญชร' });
     assert.ok(altChinabanchorn.length >= 2, `ชินบัญชร should have 2+ versions, got ${altChinabanchorn.length}`);
+
+    const altChakraphat = mp3Player.getAlternativeTracks({ title: 'พระคาถามหาจักรพรรดิ' });
+    assert.ok(altChakraphat.length >= 2, `มหาจักรพรรดิ should have 2+ versions, got ${altChakraphat.length}`);
+
+    const altMettaYai = mp3Player.getAlternativeTracks({ title: 'มหาเมตตาใหญ่' });
+    assert.ok(altMettaYai.length >= 2, `มหาเมตตาใหญ่ should have 2+ versions, got ${altMettaYai.length}`);
   });
 
   await t.test('MP3 player utility functions: time formatting, speed, loop', () => {
