@@ -5,7 +5,7 @@ import { TIPITAKA_SUTTA_PRAYERS } from '../src/js/prayers-tipitaka-suttas.js';
 
 test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t) => {
   await t.test('CHANTING_AUDIO_TRACKS provides authentic public domain chanting sources', () => {
-    assert.ok(CHANTING_AUDIO_TRACKS.length >= 72, `Expected 72+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
+    assert.ok(CHANTING_AUDIO_TRACKS.length >= 78, `Expected 78+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
     
     CHANTING_AUDIO_TRACKS.forEach(track => {
       assert.ok(track.id, 'Track must have an ID');
@@ -98,6 +98,16 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
     const mongkolChakrawan = { id: 'mongkol-chakrawan-yai', title: 'มงคลจักรวาฬใหญ่' };
     assert.strictEqual(mp3Player.getTrackForPrayer(mongkolChakrawan).id, 'track-mongkol-chakrawan-yai');
 
+    // Luang Por Charan (Wat Amphawan) prayer audio matches
+    const lpCharanDaily = { id: 'lp-charan-complete-set', title: 'ชุดสวดมนต์ประจำวัน หลวงพ่อจรัญ (วัดอัมพวัน)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(lpCharanDaily).id, 'track-charan-anisong-chanting');
+
+    const lpCharanKammathana = { id: 'lp-charan-kammathana', title: 'บทสมาทานศีล ๕ และสมาทานพระกรรมฐาน (วัดอัมพวัน)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(lpCharanKammathana).id, 'track-charan-kammathana');
+
+    const lpCharanAhosi = { id: 'lp-charan-ahosikarma', title: 'บทขอขมาและอธิษฐานขออโหสิกรรม หลวงพ่อจรัญ' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(lpCharanAhosi).id, 'track-charan-metta-ahosi');
+
     // All track IDs must be unique
     const ids = CHANTING_AUDIO_TRACKS.map(t => t.id);
     assert.strictEqual(ids.length, new Set(ids).size, 'All track IDs must be unique');
@@ -117,6 +127,9 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
 
     const altMettaYai = mp3Player.getAlternativeTracks({ title: 'มหาเมตตาใหญ่' });
     assert.ok(altMettaYai.length >= 2, `มหาเมตตาใหญ่ should have 2+ versions, got ${altMettaYai.length}`);
+
+    const altCharan = mp3Player.getAlternativeTracks({ title: 'หลวงพ่อจรัญ วัดอัมพวัน' });
+    assert.ok(altCharan.length >= 4, `หลวงพ่อจรัญ should have 4+ versions, got ${altCharan.length}`);
   });
 
   await t.test('MP3 player utility functions: time formatting, speed, loop', () => {

@@ -723,6 +723,62 @@ export const CHANTING_AUDIO_TRACKS = [
     srcMp3: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./08.%E0%B8%89%E0%B8%B1%E0%B8%97%E0%B8%97%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.mp3',
     durationEst: '00:35',
     category: 'ชัยมงคลคาถา'
+  },
+
+  // --- เสียงเทศน์และธรรมปฏิบัติ หลวงพ่อจรัญ ฐิตธมฺโม (วัดอัมพวัน สิงห์บุรี) ---
+  {
+    id: 'track-charan-anisong-chanting',
+    title: 'อานิสงส์การสวดมนต์ (หลวงพ่อจรัญ ฐิตธมฺโม)',
+    temple: 'วัดอัมพวัน (สิงห์บุรี)',
+    srcWebm: 'https://archive.org/download/lp-jarun-01/10.ogg',
+    srcMp3: 'https://archive.org/download/lp-jarun-01/10.mp3',
+    durationEst: '10:05',
+    category: 'หลวงพ่อจรัญ'
+  },
+  {
+    id: 'track-charan-kammathana',
+    title: 'สอนกรรมฐาน สติปัฏฐาน ๔ (หลวงพ่อจรัญ ฐิตธมฺโม)',
+    temple: 'วัดอัมพวัน (สิงห์บุรี)',
+    srcWebm: 'https://archive.org/download/lp-jarun-01/07.ogg',
+    srcMp3: 'https://archive.org/download/lp-jarun-01/07.mp3',
+    durationEst: '14:00',
+    category: 'หลวงพ่อจรัญ'
+  },
+  {
+    id: 'track-charan-metta-ahosi',
+    title: 'วิธีแผ่เมตตาและขออโหสิกรรม (หลวงพ่อจรัญ ฐิตธมฺโม)',
+    temple: 'วัดอัมพวัน (สิงห์บุรี)',
+    srcWebm: 'https://archive.org/download/lp-jarun-002/10.ogg',
+    srcMp3: 'https://archive.org/download/lp-jarun-002/10.mp3',
+    durationEst: '15:30',
+    category: 'หลวงพ่อจรัญ'
+  },
+  {
+    id: 'track-charan-medicine',
+    title: 'สวดมนต์เป็นยาทา ภาวนาเป็นยากิน (หลวงพ่อจรัญ ฐิตธมฺโม)',
+    temple: 'วัดอัมพวัน (สิงห์บุรี)',
+    srcWebm: 'https://archive.org/download/20230529_20230529_0720/%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95%E0%B9%8C%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%A2%E0%B8%B2%E0%B8%97%E0%B8%B2%20%E0%B8%A0%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B8%B2%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%A2%E0%B8%B2%E0%B8%81%E0%B8%B4%E0%B8%99%20%20-%20%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B9%88%E0%B8%AD%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%8D.mp3',
+    srcMp3: 'https://archive.org/download/20230529_20230529_0720/%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95%E0%B9%8C%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%A2%E0%B8%B2%E0%B8%97%E0%B8%B2%20%E0%B8%A0%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B8%B2%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%A2%E0%B8%B2%E0%B8%81%E0%B8%B4%E0%B8%99%20%20-%20%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B9%88%E0%B8%AD%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%8D.mp3',
+    durationEst: '01:00',
+    category: 'หลวงพ่อจรัญ'
+  },
+  {
+    id: 'track-charan-anger',
+    title: 'ฆ่าความโกรธ (หลวงพ่อจรัญ ฐิตธมฺโม)',
+    temple: 'วัดอัมพวัน (สิงห์บุรี)',
+    srcWebm: 'https://archive.org/download/lp-jarun-01/01.ogg',
+    srcMp3: 'https://archive.org/download/lp-jarun-01/01.mp3',
+    durationEst: '13:40',
+    category: 'หลวงพ่อจรัญ'
+  },
+  {
+    id: 'track-charan-honesty',
+    title: 'ความซื่อสัตย์ (หลวงพ่อจรัญ ฐิตธมฺโม)',
+    temple: 'วัดอัมพวัน (สิงห์บุรี)',
+    srcWebm: 'https://archive.org/download/lp-jarun-002/01.ogg',
+    srcMp3: 'https://archive.org/download/lp-jarun-002/01.mp3',
+    durationEst: '15:50',
+    category: 'หลวงพ่อจรัญ'
   }
 ];
 
@@ -1009,6 +1065,20 @@ class MP3ChantingAudioEngine {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-chaddanta-paritta') || null;
     }
 
+    // 12. บทสวดสายหลวงพ่อจรัญ (วัดอัมพวัน สิงห์บุรี)
+    if (id.includes('lp-charan-complete-set') || (title.includes('หลวงพ่อจรัญ') && title.includes('ประจำวัน'))) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-charan-anisong-chanting') || null;
+    }
+    if (id.includes('lp-charan-kammathana') || (title.includes('กรรมฐาน') && (title.includes('อัมพวัน') || title.includes('จรัญ')))) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-charan-kammathana') || null;
+    }
+    if (id.includes('lp-charan-ahosikarma') || (title.includes('อโหสิกรรม') && title.includes('จรัญ'))) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-charan-metta-ahosi') || null;
+    }
+    if (title.includes('หลวงพ่อจรัญ') || title.includes('วัดอัมพวัน') || id.includes('charan') || id.includes('amphawan')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-charan-medicine') || null;
+    }
+
     // No direct matching real audio file for this prayer
     return null;
   }
@@ -1076,6 +1146,13 @@ class MP3ChantingAudioEngine {
     // มหาเมตตาใหญ่ — 2 versions
     else if (title.includes('มหาเมตตาใหญ่') || id.includes('maha-metta-yai')) {
       ['track-maha-metta-yai', 'track-karaniya-metta'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // หลวงพ่อจรัญ (วัดอัมพวัน) — 4 versions
+    else if (title.includes('หลวงพ่อจรัญ') || id.includes('lp-charan') || title.includes('วัดอัมพวัน')) {
+      ['track-charan-anisong-chanting', 'track-charan-kammathana', 'track-charan-metta-ahosi', 'track-charan-medicine'].forEach(tid => {
         const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
         if (t) results.push(t);
       });
