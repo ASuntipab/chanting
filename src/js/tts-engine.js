@@ -4,6 +4,62 @@
  * Features verse-by-verse sequential queue, karaoke highlighting & auto-scroll triggers
  */
 
+/**
+ * Converts any integer (Thai or Arabic digits) into natural spoken Thai words.
+ * Handles 1-99, hundreds, thousands, up to millions (e.g. 10 / ๑๐ -> 'สิบ').
+ */
+export function numberToThaiWords(numStr) {
+  if (numStr === null || numStr === undefined) return '';
+  const digits = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+  const places = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'];
+
+  const arabic = numStr.toString().replace(/[๐-๙]/g, d => '๐๑๒๓๔๕๖๗๘๙'.indexOf(d));
+  const cleaned = arabic.replace(/^0+/, '') || '0';
+  if (cleaned === '0') return 'ศูนย์';
+
+  function convertChunk(chunkStr) {
+    let res = '';
+    const len = chunkStr.length;
+    for (let i = 0; i < len; i++) {
+      const digit = parseInt(chunkStr[i], 10);
+      const place = len - i - 1;
+      if (digit === 0) continue;
+
+      if (place === 1) {
+        if (digit === 1) res += 'สิบ';
+        else if (digit === 2) res += 'ยี่สิบ';
+        else res += digits[digit] + 'สิบ';
+      } else if (place === 0) {
+        if (digit === 1 && len > 1 && chunkStr.slice(0, -1).split('').some(c => c !== '0')) {
+          res += 'เอ็ด';
+        } else {
+          res += digits[digit];
+        }
+      } else {
+        res += digits[digit] + places[place];
+      }
+    }
+    return res;
+  }
+
+  if (cleaned.length <= 6) return convertChunk(cleaned);
+
+  const millions = cleaned.slice(0, -6);
+  const remainder = cleaned.slice(-6);
+  return convertChunk(millions) + 'ล้าน' + convertChunk(remainder);
+}
+
+/**
+ * Replaces all Thai and Arabic numerals in text with natural spoken Thai words.
+ */
+export function convertNumbersToThaiWords(text) {
+  if (!text) return '';
+  const normalized = text.replace(/([0-9๐-๙]),([0-9๐-๙])/g, '$1$2');
+  return normalized.replace(/[0-9๐-๙]+/g, (match) => {
+    return ' ' + numberToThaiWords(match) + ' ';
+  });
+}
+
 export class DhammaTTSEngine {
   constructor() {
     this.synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
@@ -144,10 +200,20 @@ export class DhammaTTSEngine {
     if (!text) return '';
     let res = text
       .replace(/\(กราบ\)/g, '')
-      .replace(/\(สวด\s*[\d๑-๙]+\s*จบ.*?\)/g, '')
+      .replace(/\((?:สวด\s*)?([0-9๐-๙]+)\s*จบ.*?\)/g, (match, p1) => {
+        return ' ' + numberToThaiWords(p1) + 'จบ ';
+      })
       .replace(/\(๓ จบ\)/g, 'สามจบ')
       .replace(/\(3 จบ\)/g, 'สามจบ')
-      .replace(/\(๑ จบ\)/g, 'หนึ่งจบ')
+      .replace(/\(๑ จบ\)/g, 'หนึ่งจบ');
+
+    // Convert number ranges (e.g., ๙-๑๐ -> ๙ ถึง ๑๐)
+    res = res.replace(/([0-9๐-๙]+)\s*[-–—]\s*([0-9๐-๙]+)/g, '$1 ถึง $2');
+
+    // Convert all remaining digits (both Thai and Arabic) to natural Thai words
+    res = convertNumbersToThaiWords(res);
+
+    res = res
       .replace(/[\(\),.\[\]:;—–]/g, ' ')
       .replace(/-/g, ' ')
       .replace(/\s+/g, ' ')
@@ -181,9 +247,21 @@ export class DhammaTTSEngine {
 
   cleanThaiForTTS(text) {
     if (!text) return '';
-    return text
+    let res = text
       .replace(/\(กราบ\)/g, '')
-      .replace(/[\(\)]/g, ' ')
+      .replace(/\((?:สวด\s*)?([0-9๐-๙]+)\s*จบ.*?\)/g, (match, p1) => {
+        return ' ' + numberToThaiWords(p1) + 'จบ ';
+      });
+
+    // Convert number ranges (e.g., ๙-๑๐ -> ๙ ถึง ๑๐)
+    res = res.replace(/([0-9๐-๙]+)\s*[-–—]\s*([0-9๐-๙]+)/g, '$1 ถึง $2');
+
+    // Convert all remaining digits (both Thai and Arabic) to natural Thai words
+    res = convertNumbersToThaiWords(res);
+
+    return res
+      .replace(/[\(\),.\[\]:;—–]/g, ' ')
+      .replace(/-/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }

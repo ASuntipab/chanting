@@ -111,4 +111,42 @@ test('TTS Engine: Comprehensive Pali Normalization across all 28 default prayers
   assert.ok(totalVersesChecked >= 20, 'Should test at least 20 Pali verses');
 });
 
+test('TTS Engine: Natural Thai number pronunciation (10 / ๑๐ -> สิบ, 108 / ๑๐๘ -> หนึ่งร้อยแปด)', () => {
+  const engine = new DhammaTTSEngine();
+
+  // Test 1: Thai digits in title or verse (๑๐. -> สิบ)
+  const titleWithThai10 = '๑๐. บทอุทิศส่วนบุญส่วนกุศล';
+  const cleanTitle = engine.cleanPaliForTTS(titleWithThai10);
+  assert.equal(cleanTitle.includes('สิบ'), true, 'Should pronounce ๑๐ as สิบ');
+  assert.equal(cleanTitle.includes('๑๐'), false, 'Should not contain raw digits ๑๐');
+  assert.equal(cleanTitle.includes('หนึ่ง ศูนย์'), false, 'Should never pronounce as หนึ่ง ศูนย์');
+
+  // Test 2: Arabic digits (10 -> สิบ)
+  const textWithArabic10 = 'อานิสงส์ 10 ประการ';
+  const cleanArabic10 = engine.cleanThaiForTTS(textWithArabic10);
+  assert.equal(cleanArabic10.includes('สิบ'), true, 'Should pronounce 10 as สิบ');
+  assert.equal(cleanArabic10.includes('10'), false, 'Should not contain raw digits 10');
+
+  // Test 3: Thai numbers 1 to 12
+  const countingThai = '๑ ๒ ๓ ๑๐ ๑๑ ๑๒';
+  const cleanCounting = engine.cleanThaiForTTS(countingThai);
+  assert.equal(cleanCounting, 'หนึ่ง สอง สาม สิบ สิบเอ็ด สิบสอง');
+
+  // Test 4: Chanting repetition (สวด ๑๐ จบ)
+  const chantRep10 = '(สวด ๑๐ จบ)';
+  const cleanChantRep = engine.cleanPaliForTTS(chantRep10);
+  assert.equal(cleanChantRep.includes('สิบจบ'), true, 'Should pronounce (สวด ๑๐ จบ) as สิบจบ');
+
+  // Test 5: 108 repetitions (๑๐๘ จบ)
+  const chantRep108 = '(สวด ๑๐๘ จบ)';
+  const cleanChant108 = engine.cleanPaliForTTS(chantRep108);
+  assert.equal(cleanChant108.includes('หนึ่งร้อยแปดจบ'), true, 'Should pronounce ๑๐๘ จบ as หนึ่งร้อยแปดจบ');
+
+  // Test 6: Number ranges (๙-๑๐ -> เก้า ถึง สิบ)
+  const rangeText = 'บทที่ ๙-๑๐';
+  const cleanRange = engine.cleanPaliForTTS(rangeText);
+  assert.equal(cleanRange.includes('เก้า ถึง สิบ'), true, 'Should pronounce ๙-๑๐ as เก้า ถึง สิบ');
+});
+
+
 
