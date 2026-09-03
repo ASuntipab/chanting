@@ -87,6 +87,37 @@ class NativeMobileBridge {
   }
 
   /**
+   * Hide Status Bar for Immersive Fullscreen Reader Mode
+   */
+  async hideStatusBar() {
+    try {
+      if (this.statusBarPlugin) {
+        await this.statusBarPlugin.hide({ animation: 'FADE' });
+        return true;
+      }
+    } catch (e) {
+      console.warn('Failed to hide status bar:', e);
+    }
+    return false;
+  }
+
+  /**
+   * Show Status Bar when exiting Reader Mode
+   */
+  async showStatusBar() {
+    try {
+      if (this.statusBarPlugin) {
+        await this.statusBarPlugin.show({ animation: 'FADE' });
+        await this.statusBarPlugin.setStyle({ style: 'DARK' });
+        return true;
+      }
+    } catch (e) {
+      console.warn('Failed to show status bar:', e);
+    }
+    return false;
+  }
+
+  /**
    * Native Local Notification for Daily Chanting Alarms
    */
   async scheduleChantingReminder(title, body, scheduleTime) {

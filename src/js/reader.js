@@ -492,6 +492,7 @@ export class ComicReaderEngine {
     // Show HUD briefly, then smoothly fade into zen fullscreen reading
     this.showHUD();
     nativeBridge.setKeepAwake(true);
+    nativeBridge.hideStatusBar();
   }
 
   close() {
@@ -500,6 +501,7 @@ export class ComicReaderEngine {
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
+    nativeBridge.showStatusBar();
     ttsEngine.stop();
     mp3Player.pause();
     this.hideTTSSettings();
