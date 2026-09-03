@@ -598,6 +598,131 @@ export const CHANTING_AUDIO_TRACKS = [
     srcMp3: 'https://dn801303.us.archive.org/0/items/Dhammapada-Chanted-in-Pali/14-Buddhavaggo.mp3',
     durationEst: '07:30',
     category: 'พระสูตรสำคัญ'
+  },
+
+  // --- พระคาถามหาจักรพรรดิ & สายหลวงปู่ดู่ พรหมปัญโญ ---
+  {
+    id: 'track-maha-chakraphat',
+    title: 'พระคาถามหาจักรพรรดิ (นะโมพุทธายะ ฉบับเต็ม)',
+    temple: 'หลวงปู่ดู่ พรหมปัญโญ / วัดสะแก',
+    srcWebm: 'https://archive.org/download/KaTha_201411/KaTha%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%94%E0%B8%B4%29.ogg',
+    srcMp3: 'https://archive.org/download/KaTha_201411/KaTha%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%94%E0%B8%B4%29.mp3',
+    durationEst: '15:40',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-supphe-du',
+    title: 'บทสวดสัพเพ แผ่บุญปรับภพภูมิ (๕ จบ)',
+    temple: 'หลวงปู่ดู่ พรหมปัญโญ / วัดถ้ำเมืองนะ',
+    srcWebm: 'https://archive.org/download/108_20211114/02_%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%AA%E0%B8%B1%E0%B8%9E%E0%B9%80%E0%B8%9E%205%20%E0%B8%88%E0%B8%9A.mp3',
+    srcMp3: 'https://archive.org/download/108_20211114/02_%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%AA%E0%B8%B1%E0%B8%9E%E0%B9%80%E0%B8%9E%205%20%E0%B8%88%E0%B8%9A.mp3',
+    durationEst: '02:55',
+    category: 'บทสวดประจำวัน'
+  },
+
+  // --- ยอดพระกัณฑ์ไตรปิฎก & วัดพระราม ๙ กาญจนาภิเษก ---
+  {
+    id: 'track-yod-phrakand',
+    title: 'ยอดพระกัณฑ์ไตรปิฎก (ฉบับโบราณสมบูรณ์)',
+    temple: 'วัดพระราม ๙ กาญจนาภิเษก',
+    srcWebm: 'https://archive.org/download/PraySong/PS1280012.ogg',
+    srcMp3: 'https://archive.org/download/PraySong/PS1280012.MP3',
+    durationEst: '22:30',
+    category: 'คาถาศักดิ์สิทธิ์'
+  },
+  {
+    id: 'track-baramee-30-tas',
+    title: 'พระคาถาบารมี ๓๐ ทัศ (ทานะ ปาระมี สัมปันโน...)',
+    temple: 'วัดพระราม ๙ กาญจนาภิเษก',
+    srcWebm: 'https://archive.org/download/PraySong/PS1280008.ogg',
+    srcMp3: 'https://archive.org/download/PraySong/PS1280008.MP3',
+    durationEst: '04:50',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-katha-photibat',
+    title: 'พระคาถาโพธิบาท (กันภัย ๑๐ ทิศ - บูรพารัสมิง...)',
+    temple: 'วัดพระราม ๙ กาญจนาภิเษก',
+    srcWebm: 'https://archive.org/download/PraySong/PS1280007.ogg',
+    srcMp3: 'https://archive.org/download/PraySong/PS1280007.MP3',
+    durationEst: '06:35',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-yatha-sappi',
+    title: 'บทกรวดน้ำให้พร ยะถา สัพพี',
+    temple: 'วัดพระราม ๙ กาญจนาภิเษก',
+    srcWebm: 'https://archive.org/download/PraySong/PS1280009.ogg',
+    srcMp3: 'https://archive.org/download/PraySong/PS1280009.MP3',
+    durationEst: '04:50',
+    category: 'แผ่เมตตา'
+  },
+
+  // --- มหาเมตตาใหญ่ & พระคาถาเงินล้าน ---
+  {
+    id: 'track-maha-metta-yai',
+    title: 'บทสวดมหาเมตตาใหญ่ (ฉบับเต็ม ๑๒ หน้า)',
+    temple: 'เมตตาพรหมวิหาระภาวนา',
+    srcWebm: 'https://archive.org/download/01Mahamettayai_201411/01%20Mahamettayai%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95%E0%B9%8C%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B9%80%E0%B8%A1%E0%B8%95%E0%B8%95%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88.ogg',
+    srcMp3: 'https://archive.org/download/01Mahamettayai_201411/01%20Mahamettayai%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95%E0%B9%8C%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B9%80%E0%B8%A1%E0%B8%95%E0%B8%95%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88.mp3',
+    durationEst: '35:00',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-katha-ngoen-lan',
+    title: 'พระคาถาเงินล้าน ๙ จบ (สัมปะจิตฉามิ นาสังสิโม...)',
+    temple: 'หลวงพ่อฤๅษีลิงดำ (วัดท่าซุง)',
+    srcWebm: 'https://archive.org/download/20230602_20230602_0904/%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%87%E0%B8%B4%E0%B8%99%E0%B8%A5%E0%B9%89%E0%B8%B2%E0%B8%99%20%E0%B9%99%20%E0%B8%88%E0%B8%9A.mp3',
+    srcMp3: 'https://archive.org/download/20230602_20230602_0904/%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%87%E0%B8%B4%E0%B8%99%E0%B8%A5%E0%B9%89%E0%B8%B2%E0%B8%99%20%E0%B9%99%20%E0%B8%88%E0%B8%9A.mp3',
+    durationEst: '04:30',
+    category: 'คาถาศักดิ์สิทธิ์'
+  },
+
+  // --- พระปริตรโบราณ (โมรปริตร, ธชัคค, วัฏฏกะ, มงคลจักรวาฬใหญ่, ฉัททันตะ) ---
+  {
+    id: 'track-mora-paritta',
+    title: 'โมรปริตร (พระคาถาพญานกยูงทอง)',
+    temple: 'สายพระป่ากรรมฐาน / หลวงปู่มั่น ภูริทัตโต',
+    srcWebm: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./09.%E0%B9%82%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.ogg',
+    srcMp3: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./09.%E0%B9%82%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.mp3',
+    durationEst: '01:10',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-vattaka-paritta',
+    title: 'วัฏฏกปริตร (ดับไฟ ป้องกันอัคคีภัย)',
+    temple: 'พระปริตรโบราณ',
+    srcWebm: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./10.%E0%B8%A7%E0%B8%B1%E0%B8%8F%E0%B8%8F%E0%B8%B0%E0%B8%81%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.ogg',
+    srcMp3: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./10.%E0%B8%A7%E0%B8%B1%E0%B8%8F%E0%B8%8F%E0%B8%B0%E0%B8%81%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.mp3',
+    durationEst: '00:50',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-dhajagga-paritta',
+    title: 'ธชัคคสูตร / ธชัคคปริตร (ยอดธงแห่งชัยชนะ ป้องกันภัย)',
+    temple: 'พระปริตรโบราณ',
+    srcWebm: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./11.%E0%B8%98%E0%B8%B0%E0%B8%8A%E0%B8%B1%E0%B8%84%E0%B8%84%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%B1%E0%B8%87.ogg',
+    srcMp3: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./11.%E0%B8%98%E0%B8%B0%E0%B8%8A%E0%B8%B1%E0%B8%84%E0%B8%84%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%B1%E0%B8%87.mp3',
+    durationEst: '06:05',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-mongkol-chakrawan-yai',
+    title: 'มงคลจักรวาฬใหญ่ (สิริธิติมะติเตโช...)',
+    temple: 'พระปริตรโบราณ',
+    srcWebm: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./18.%E0%B8%A1%E0%B8%87%E0%B8%84%E0%B8%A5%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%A7%E0%B8%B2%E0%B8%AC%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88.ogg',
+    srcMp3: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./18.%E0%B8%A1%E0%B8%87%E0%B8%84%E0%B8%A5%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%A7%E0%B8%B2%E0%B8%AC%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88.mp3',
+    durationEst: '02:35',
+    category: 'ชัยมงคลคาถา'
+  },
+  {
+    id: 'track-chaddanta-paritta',
+    title: 'ฉัททันตปริตร (คุ้มครองดวงชะตาและแคล้วคลาด)',
+    temple: 'พระปริตรโบราณ',
+    srcWebm: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./08.%E0%B8%89%E0%B8%B1%E0%B8%97%E0%B8%97%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.ogg',
+    srcMp3: 'https://ia601800.us.archive.org/17/items/pinthavong_yahoo_12./08.%E0%B8%89%E0%B8%B1%E0%B8%97%E0%B8%97%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B0%E0%B8%9B%E0%B8%A0%E0%B8%A3%E0%B8%B4%E0%B8%95%E0%B8%95%E0%B8%B1%E0%B8%87.mp3',
+    durationEst: '00:35',
+    category: 'ชัยมงคลคาถา'
   }
 ];
 
@@ -837,6 +962,53 @@ class MP3ChantingAudioEngine {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-salutation-nanachat') || null;
     }
 
+    // 8. พระคาถามหาจักรพรรดิ & สัพเพ (หลวงปู่ดู่)
+    if (title.includes('มหาจักรพรรดิ') || id.includes('maha-chakraphat')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-maha-chakraphat') || null;
+    }
+    if (title.includes('สัพเพ') || id.includes('supphe')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-supphe-du') || null;
+    }
+
+    // 9. ยอดพระกัณฑ์ไตรปิฎก, บารมี ๓๐ ทัศ, โพธิบาท & ยะถาสัพพี (วัดพระราม ๙)
+    if (title.includes('ยอดพระกัณฑ์') || id.includes('yod-phrakand')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-yod-phrakand') || null;
+    }
+    if (title.includes('บารมี ๓๐ ทัศ') || title.includes('บารมี 30 ทัศ') || id.includes('baramee-30-tas')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-baramee-30-tas') || null;
+    }
+    if (title.includes('โพธิบาท') || title.includes('กันภัย ๑๐ ทิศ') || title.includes('กันภัย 10 ทิศ') || id.includes('photibat')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-katha-photibat') || null;
+    }
+    if (title.includes('ยะถา') || title.includes('กรวดน้ำ') || id.includes('imina') || id.includes('yatha')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-yatha-sappi') || null;
+    }
+
+    // 10. มหาเมตตาใหญ่ & พระคาถาเงินล้าน
+    if (title.includes('มหาเมตตาใหญ่') || id.includes('maha-metta-yai')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-maha-metta-yai') || null;
+    }
+    if (title.includes('เงินล้าน') || id.includes('katha-ngoen-lan')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-katha-ngoen-lan') || null;
+    }
+
+    // 11. พระปริตรสำคัญ (โมรปริตร, วัฏฏกะ, ธชัคคะ, มงคลจักรวาฬใหญ่, ฉัททันตะ)
+    if (title.includes('โมรปริตร') || title.includes('พญานกยูงทอง') || id.includes('mora-paritta')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-mora-paritta') || null;
+    }
+    if (title.includes('วัฏฏก') || id.includes('vattaka')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-vattaka-paritta') || null;
+    }
+    if (title.includes('ธชัคค') || id.includes('dhajagga')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-dhajagga-paritta') || null;
+    }
+    if (title.includes('มงคลจักรวาฬ') || id.includes('mongkol-chakrawan')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-mongkol-chakrawan-yai') || null;
+    }
+    if (title.includes('ฉัททันต') || id.includes('chaddanta')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-chaddanta-paritta') || null;
+    }
+
     // No direct matching real audio file for this prayer
     return null;
   }
@@ -890,6 +1062,20 @@ class MP3ChantingAudioEngine {
     // ทำวัตรเช้า — 4 versions
     else if (title.includes('ทำวัตรเช้า') || id.includes('morning')) {
       ['track-morning-chanting', 'track-morning-nanachat-01', 'track-morning-pali-thai-1', 'track-morning-pali-thai-2', 'track-morning-pali-thai-3'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // มหาจักรพรรดิ & สัพเพ — 2 versions
+    else if (title.includes('มหาจักรพรรดิ') || id.includes('maha-chakraphat')) {
+      ['track-maha-chakraphat', 'track-supphe-du'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // มหาเมตตาใหญ่ — 2 versions
+    else if (title.includes('มหาเมตตาใหญ่') || id.includes('maha-metta-yai')) {
+      ['track-maha-metta-yai', 'track-karaniya-metta'].forEach(tid => {
         const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
         if (t) results.push(t);
       });
