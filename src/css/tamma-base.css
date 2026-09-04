@@ -1310,3 +1310,75 @@ textarea.form-control {
     font-size: 1.45rem;
   }
 }
+\ n / *   = = =   B l o o m i n g   L o t u s   B a c k g r o u n d   = = =   * /  
+ 
+/* ==========================================================================
+   Blooming Lotus Background System (Gamification & Mindfulness Art)
+   ========================================================================== */
+.lotus-bg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.14;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+body.theme-parchment .lotus-bg-container {
+  opacity: 0.08;
+}
+
+.lotus-svg {
+  width: 160px;
+  height: 160px;
+  color: var(--accent-gold);
+  transform: translateY(18px) scale(calc(0.72 + (var(--bloom-progress, 0) * 0.38)));
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+}
+
+.lotus-svg path {
+  transform-origin: 50px 80px;
+  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease;
+}
+
+.petal-outer-left {
+  transform: rotate(calc(45deg * (1 - var(--bloom-progress, 0))));
+  opacity: calc(0.2 + (0.8 * var(--bloom-progress, 0)));
+}
+.petal-outer-right {
+  transform: rotate(calc(-45deg * (1 - var(--bloom-progress, 0))));
+  opacity: calc(0.2 + (0.8 * var(--bloom-progress, 0)));
+}
+.petal-inner-left {
+  transform: rotate(calc(20deg * (1 - var(--bloom-progress, 0))));
+  opacity: calc(0.5 + (0.5 * var(--bloom-progress, 0)));
+}
+.petal-inner-right {
+  transform: rotate(calc(-20deg * (1 - var(--bloom-progress, 0))));
+  opacity: calc(0.5 + (0.5 * var(--bloom-progress, 0)));
+}
+.petal-center {
+  transform: scaleY(calc(0.85 + (0.15 * var(--bloom-progress, 0))));
+}
+.petal-leaf-left {
+  transform: rotate(calc(15deg * (1 - var(--bloom-progress, 0))));
+}
+.petal-leaf-right {
+  transform: rotate(calc(-15deg * (1 - var(--bloom-progress, 0))));
+}
+
+.card-inner-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  flex-grow: 1;
+}
