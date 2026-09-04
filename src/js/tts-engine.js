@@ -60,6 +60,54 @@ export function convertNumbersToThaiWords(text) {
   });
 }
 
+/**
+ * Parses Thai or Arabic number string into an integer.
+ */
+export function parseRepeatCount(str) {
+  if (!str) return 1;
+  const arabic = str.toString().replace(/[๐-๙]/g, d => '๐๑๒๓๔๕๖๗๘๙'.indexOf(d));
+  const num = parseInt(arabic, 10);
+  return isNaN(num) || num <= 0 ? 1 : num;
+}
+
+/**
+ * Detects repetition patterns in chanting verses or instructions.
+ * Supports:
+ * - Suffix repeat: "นะโม ตัสสะ... (๓ จบ)" or "นำมอไต๋ซื้อ... (3 รอบ)"
+ * - Namo instruction: "ท่อง  นโม 3 รอบ", "ตั้งนะโม ๓ จบ", "สวด นะโม 3 จบ"
+ */
+export function extractLineRepeats(line, isPali = true) {
+  if (!line) return null;
+  const trimmed = line.trim();
+
+  // 1. Suffix repeat format: e.g. "นะโม ตัสสะ... (๓ จบ)" or "... (3 รอบ)"
+  const suffixMatch = trimmed.match(/^(.*?)\s*[\(\[]\s*(?:สวด|ท่อง|ตั้ง|ว่า)?\s*([0-9๐-๙]+)\s*(?:จบ|รอบ)\s*[\)\]]\s*$/);
+  if (suffixMatch && suffixMatch[1].trim().length > 0) {
+    let count = parseRepeatCount(suffixMatch[2]);
+    count = Math.min(count, 9);
+    return {
+      coreText: suffixMatch[1].trim(),
+      count
+    };
+  }
+
+  // 2. Namo instruction format: e.g. "ท่อง  นโม 3 รอบ" or "ตั้งนะโม ๓ จบ"
+  const namoMatch = trimmed.match(/^[\(\[]?\s*(?:ให้)?(?:สวด|ท่อง|ตั้ง|ว่า)?\s*(?:นะโม|นโม)\s*([0-9๐-๙]+)\s*(?:จบ|รอบ)\s*[\)\]]?$/);
+  if (namoMatch) {
+    let count = parseRepeatCount(namoMatch[1]);
+    count = Math.min(count, 9);
+    const coreText = isPali
+      ? 'นะโม ตัสสะ ภะคะวะโต อะระหะโต สัมมาสัมพุทธัสสะ'
+      : 'ขอนอบน้อมแด่พระผู้มีพระภาคเจ้า พระองค์นั้น ซึ่งเป็นผู้ไกลจากกิเลส ตรัสรู้ชอบได้โดยพระองค์เอง';
+    return {
+      coreText,
+      count
+    };
+  }
+
+  return null;
+}
+
 export class DhammaTTSEngine {
   constructor() {
     this.synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
@@ -140,16 +188,35 @@ export class DhammaTTSEngine {
       if (page.pali && (this.mode === 'both' || this.mode === 'pali')) {
         const paliLines = page.pali.split('\n').filter(l => l.trim().length > 0);
         paliLines.forEach((line) => {
-          const cleanText = this.cleanPaliForTTS(line);
-          if (cleanText) {
-            this.queue.push({
-              id: 'tts-chunk-' + (chunkSeq++),
-              pageIndex,
-              type: 'pali',
-              text: cleanText,
-              rawText: line,
-              rate: this.rate
-            });
+          const repeatInfo = extractLineRepeats(line, true);
+          if (repeatInfo) {
+            const cleanText = this.cleanPaliForTTS(repeatInfo.coreText);
+            if (cleanText) {
+              for (let r = 0; r < repeatInfo.count; r++) {
+                this.queue.push({
+                  id: 'tts-chunk-' + (chunkSeq++),
+                  pageIndex,
+                  type: 'pali',
+                  text: cleanText,
+                  rawText: line,
+                  rate: this.rate,
+                  repeatRound: r + 1,
+                  totalRounds: repeatInfo.count
+                });
+              }
+            }
+          } else {
+            const cleanText = this.cleanPaliForTTS(line);
+            if (cleanText) {
+              this.queue.push({
+                id: 'tts-chunk-' + (chunkSeq++),
+                pageIndex,
+                type: 'pali',
+                text: cleanText,
+                rawText: line,
+                rate: this.rate
+              });
+            }
           }
         });
       }
@@ -158,16 +225,35 @@ export class DhammaTTSEngine {
       if (page.thai && (this.mode === 'both' || this.mode === 'thai')) {
         const thaiLines = page.thai.split('\n').filter(l => l.trim().length > 0);
         thaiLines.forEach((line) => {
-          const cleanText = this.cleanThaiForTTS(line);
-          if (cleanText) {
-            this.queue.push({
-              id: 'tts-chunk-' + (chunkSeq++),
-              pageIndex,
-              type: 'thai',
-              text: cleanText,
-              rawText: line,
-              rate: Math.min(this.rate * 1.08, 1.15)
-            });
+          const repeatInfo = extractLineRepeats(line, false);
+          if (repeatInfo) {
+            const cleanText = this.cleanThaiForTTS(repeatInfo.coreText);
+            if (cleanText) {
+              for (let r = 0; r < repeatInfo.count; r++) {
+                this.queue.push({
+                  id: 'tts-chunk-' + (chunkSeq++),
+                  pageIndex,
+                  type: 'thai',
+                  text: cleanText,
+                  rawText: line,
+                  rate: Math.min(this.rate * 1.08, 1.15),
+                  repeatRound: r + 1,
+                  totalRounds: repeatInfo.count
+                });
+              }
+            }
+          } else {
+            const cleanText = this.cleanThaiForTTS(line);
+            if (cleanText) {
+              this.queue.push({
+                id: 'tts-chunk-' + (chunkSeq++),
+                pageIndex,
+                type: 'thai',
+                text: cleanText,
+                rawText: line,
+                rate: Math.min(this.rate * 1.08, 1.15)
+              });
+            }
           }
         });
       }
@@ -176,16 +262,35 @@ export class DhammaTTSEngine {
       if (!page.pali && !page.thai && page.content) {
         const contentLines = page.content.split('\n').filter(l => l.trim().length > 0);
         contentLines.forEach((line) => {
-          const cleanText = this.cleanThaiForTTS(line);
-          if (cleanText) {
-            this.queue.push({
-              id: 'tts-chunk-' + (chunkSeq++),
-              pageIndex,
-              type: 'thai',
-              text: cleanText,
-              rawText: line,
-              rate: this.rate
-            });
+          const repeatInfo = extractLineRepeats(line, true);
+          if (repeatInfo) {
+            const cleanText = this.cleanThaiForTTS(repeatInfo.coreText);
+            if (cleanText) {
+              for (let r = 0; r < repeatInfo.count; r++) {
+                this.queue.push({
+                  id: 'tts-chunk-' + (chunkSeq++),
+                  pageIndex,
+                  type: 'thai',
+                  text: cleanText,
+                  rawText: line,
+                  rate: this.rate,
+                  repeatRound: r + 1,
+                  totalRounds: repeatInfo.count
+                });
+              }
+            }
+          } else {
+            const cleanText = this.cleanThaiForTTS(line);
+            if (cleanText) {
+              this.queue.push({
+                id: 'tts-chunk-' + (chunkSeq++),
+                pageIndex,
+                type: 'thai',
+                text: cleanText,
+                rawText: line,
+                rate: this.rate
+              });
+            }
           }
         });
       }
