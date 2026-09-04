@@ -736,17 +736,58 @@ class TammaApp {
   }
 
   getLotusBgSvgHtml() {
+    const petalD = "M 0,0 C -12,-8 -13,-24 0,-33 C 13,-24 12,-8 0,0 Z";
     return `
-      <div class="lotus-bg-container" style="position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; display: flex !important; align-items: center !important; justify-content: center !important; opacity: 0.20 !important; overflow: hidden !important;">
-        <svg class="lotus-svg" viewBox="0 0 100 100" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width: 180px; height: 180px; color: var(--accent-lotus, #f472b6); pointer-events: none !important;">
-          <path d="M50 95 C 48 90, 48 85, 50 80 C 52 85, 52 90, 50 95 Z" fill="currentColor" fill-opacity="0.45" stroke="none"/>
-          <path class="petal-outer-left" d="M50 80 C 25 75, 15 65, 15 50 C 25 55, 35 65, 50 80 Z" fill="currentColor" fill-opacity="0.70"/>
-          <path class="petal-outer-right" d="M50 80 C 75 75, 85 65, 85 50 C 75 55, 65 65, 50 80 Z" fill="currentColor" fill-opacity="0.70"/>
-          <path class="petal-inner-left" d="M50 80 C 35 65, 30 50, 35 35 C 40 45, 45 60, 50 80 Z" fill="currentColor" fill-opacity="0.85"/>
-          <path class="petal-inner-right" d="M50 80 C 65 65, 70 50, 65 35 C 60 45, 55 60, 50 80 Z" fill="currentColor" fill-opacity="0.85"/>
-          <path class="petal-center" d="M50 80 C 40 60, 45 40, 50 20 C 55 40, 60 60, 50 80 Z" fill="currentColor" fill-opacity="0.95"/>
-          <path class="petal-leaf-left" d="M50 85 C 20 85, 10 90, 10 95 C 25 92, 35 90, 50 85 Z" fill="currentColor" fill-opacity="0.55"/>
-          <path class="petal-leaf-right" d="M50 85 C 80 85, 90 90, 90 95 C 75 92, 65 90, 50 85 Z" fill="currentColor" fill-opacity="0.55"/>
+      <div class="lotus-bg-container" style="position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; display: flex !important; align-items: center !important; justify-content: center !important; opacity: 0.22 !important; overflow: hidden !important;">
+        <svg class="lotus-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width: 175px; height: 175px; pointer-events: none !important; overflow: visible;">
+          <defs>
+            <radialGradient id="padGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#4ade80"/>
+              <stop offset="65%" stop-color="#22c55e"/>
+              <stop offset="100%" stop-color="#15803d"/>
+            </radialGradient>
+          </defs>
+          <!-- Golden Aura Glow -->
+          <circle class="lotus-aura" cx="60" cy="60" r="50" fill="#fbbf24" opacity="0.3" filter="blur(6px)" />
+          <!-- Green Lily Pad with top notch -->
+          <path class="lotus-pad" d="M 60,34 L 54,16 A 48 46 0 1 0 66,16 Z" fill="url(#padGrad)" stroke="#166534" stroke-width="1.8" stroke-linejoin="round" />
+          <path class="lotus-pad-veins" d="M 60,60 Q 35,42 20,46 M 60,60 Q 28,66 16,72 M 60,60 Q 40,88 34,98 M 60,60 Q 80,88 86,98 M 60,60 Q 92,66 104,72 M 60,60 Q 85,42 100,46" stroke="#14532d" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.32" />
+          <!-- Lotus Flower Petals -->
+          <g class="lotus-flower-group">
+            <g class="lotus-outer-petals">
+              <path class="petal-outer-left" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(0) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-left" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(45) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-left" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(90) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-left" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(135) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-right" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(180) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-right" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(225) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-right" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(270) scale(1.05) translate(0, -3)" />
+              <path class="petal-outer-right" d="${petalD}" fill="#ec4899" fill-opacity="0.95" stroke="#be185d" stroke-width="0.8" transform="translate(60, 60) rotate(315) scale(1.05) translate(0, -3)" />
+            </g>
+            <g class="lotus-mid-petals">
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(22.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(67.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(112.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(157.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(202.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(247.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(292.5) scale(0.88) translate(0, -1)" />
+              <path class="petal-mid" d="${petalD}" fill="#f472b6" fill-opacity="0.95" stroke="#e11d48" stroke-width="0.8" transform="translate(60, 60) rotate(337.5) scale(0.88) translate(0, -1)" />
+            </g>
+            <g class="lotus-inner-petals">
+              <path class="petal-inner" d="${petalD}" fill="#fbcfe8" fill-opacity="1" stroke="#f472b6" stroke-width="0.8" transform="translate(60, 60) rotate(0) scale(0.68)" />
+              <path class="petal-inner" d="${petalD}" fill="#fbcfe8" fill-opacity="1" stroke="#f472b6" stroke-width="0.8" transform="translate(60, 60) rotate(60) scale(0.68)" />
+              <path class="petal-inner" d="${petalD}" fill="#fbcfe8" fill-opacity="1" stroke="#f472b6" stroke-width="0.8" transform="translate(60, 60) rotate(120) scale(0.68)" />
+              <path class="petal-inner" d="${petalD}" fill="#fbcfe8" fill-opacity="1" stroke="#f472b6" stroke-width="0.8" transform="translate(60, 60) rotate(180) scale(0.68)" />
+              <path class="petal-inner" d="${petalD}" fill="#fbcfe8" fill-opacity="1" stroke="#f472b6" stroke-width="0.8" transform="translate(60, 60) rotate(240) scale(0.68)" />
+              <path class="petal-inner" d="${petalD}" fill="#fbcfe8" fill-opacity="1" stroke="#f472b6" stroke-width="0.8" transform="translate(60, 60) rotate(300) scale(0.68)" />
+            </g>
+            <g class="lotus-center-stamen">
+              <circle cx="60" cy="60" r="10" fill="#facc15" stroke="#ca8a04" stroke-width="1.2" />
+              <circle cx="60" cy="60" r="6.5" fill="#fef08a" />
+              <circle cx="58" cy="58" r="2.2" fill="#ffffff" opacity="0.75" />
+            </g>
+          </g>
         </svg>
       </div>
     `;
