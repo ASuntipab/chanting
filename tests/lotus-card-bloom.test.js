@@ -11,8 +11,8 @@ test('Blooming Lotus Background & Readability Verification', async (t) => {
   await t.test('CSS Verification: .lotus-bg-container is absolute with z-index 0 and subtle opacity', () => {
     assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*position:\s*absolute/, '.lotus-bg-container must be absolute');
     assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*z-index:\s*0/, '.lotus-bg-container must have z-index 0');
-    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.20/, '.lotus-bg-container default opacity must be 0.20 for text clarity');
-    assert.match(baseCssContent, /body\.theme-parchment\s+\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.10/, 'Parchment theme opacity must be 0.10');
+    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.2[02]/, '.lotus-bg-container default opacity must be subtle for text clarity');
+    assert.match(baseCssContent, /body\.theme-parchment\s+\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.1[02]/, 'Parchment theme opacity must be 0.10-0.12');
   });
 
   await t.test('CSS Verification: .card-inner-content has relative position and z-index 1 for perfect readability', () => {
@@ -20,9 +20,9 @@ test('Blooming Lotus Background & Readability Verification', async (t) => {
     assert.match(baseCssContent, /\.card-inner-content\s*\{[^}]*z-index:\s*1;/, '.card-inner-content must have z-index 1');
   });
 
-  await t.test('CSS Verification: .lotus-svg has petal rotation transforms bound to --bloom-progress', () => {
-    assert.match(baseCssContent, /\.petal-outer-left\s*\{[^}]*var\(--bloom-progress/, 'Petal left rotation must use --bloom-progress');
-    assert.match(baseCssContent, /\.petal-outer-right\s*\{[^}]*var\(--bloom-progress/, 'Petal right rotation must use --bloom-progress');
+  await t.test('CSS Verification: .lotus-svg has petal scaling transforms bound to --bloom-progress', () => {
+    assert.match(baseCssContent, /\.petal-outer-left[^{]*\{[^}]*var\(--bloom-progress/, 'Petal left rotation/scale must use --bloom-progress');
+    assert.match(baseCssContent, /\.petal-outer-right[^{]*\{[^}]*var\(--bloom-progress/, 'Petal right rotation/scale must use --bloom-progress');
   });
 
   await t.test('JS Verification: app.js contains getLotusBgSvgHtml and sets --bloom-progress based on 9 chants', () => {

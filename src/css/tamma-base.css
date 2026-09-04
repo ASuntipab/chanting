@@ -1327,54 +1327,60 @@ textarea.form-control {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  opacity: 0.20 !important;
+  opacity: 0.22 !important;
   pointer-events: none !important;
   overflow: hidden !important;
   transition: opacity 0.3s ease;
 }
 
 body.theme-parchment .lotus-bg-container {
-  opacity: 0.10 !important;
+  opacity: 0.12 !important;
 }
 
 .lotus-svg {
-  width: 180px;
-  height: 180px;
-  color: var(--accent-lotus, #f472b6);
-  transform: translateY(6px) scale(calc(0.85 + (var(--bloom-progress, 0) * 0.25)));
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+  width: 175px;
+  height: 175px;
+  transform: scale(calc(0.90 + (var(--bloom-progress, 0) * 0.20)));
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none !important;
+  overflow: visible;
 }
 
-.lotus-svg path {
-  transform-origin: 50px 80px;
-  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease;
+.lotus-aura {
+  opacity: calc(0.15 + (0.35 * var(--bloom-progress, 0)));
+  transition: opacity 0.8s ease;
 }
 
-.petal-outer-left {
-  transform: rotate(calc(42deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.6 + (0.4 * var(--bloom-progress, 0)));
+.lotus-pad {
+  transform-origin: 60px 60px;
+  transition: transform 0.8s ease;
 }
+
+.lotus-outer-petals,
+.petal-outer-left,
 .petal-outer-right {
-  transform: rotate(calc(-42deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.6 + (0.4 * var(--bloom-progress, 0)));
+  transform-origin: 60px 60px;
+  transform: scale(calc(var(--bloom-progress, 0)));
+  opacity: calc(var(--bloom-progress, 0));
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
 }
-.petal-inner-left {
-  transform: rotate(calc(20deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.8 + (0.2 * var(--bloom-progress, 0)));
+
+.lotus-mid-petals {
+  transform-origin: 60px 60px;
+  transform: scale(calc(0.50 + (0.50 * var(--bloom-progress, 0))));
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.petal-inner-right {
-  transform: rotate(calc(-20deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.8 + (0.2 * var(--bloom-progress, 0)));
+
+.lotus-inner-petals {
+  transform-origin: 60px 60px;
+  transform: scale(calc(0.70 + (0.30 * var(--bloom-progress, 0))));
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.petal-center {
-  transform: scaleY(calc(0.9 + (0.1 * var(--bloom-progress, 0))));
-}
-.petal-leaf-left {
-  transform: rotate(calc(12deg * (1 - var(--bloom-progress, 0))));
-}
-.petal-leaf-right {
-  transform: rotate(calc(-12deg * (1 - var(--bloom-progress, 0))));
+
+.lotus-center-stamen {
+  transform-origin: 60px 60px;
+  transform: scale(calc(0.35 + (0.65 * var(--bloom-progress, 0))));
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .card-inner-content {
