@@ -737,8 +737,8 @@ class TammaApp {
 
   getLotusBgSvgHtml() {
     return `
-      <div class="lotus-bg-container">
-        <svg class="lotus-svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <div class="lotus-bg-container" style="position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; display: flex !important; align-items: center !important; justify-content: center !important; opacity: 0.08 !important; overflow: hidden !important;">
+        <svg class="lotus-svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width: 140px; height: 140px; color: var(--accent-gold); pointer-events: none !important;">
           <path d="M50 95 C 48 90, 48 85, 50 80 C 52 85, 52 90, 50 95 Z" fill="currentColor" stroke="none" opacity="0.6"/>
           <path class="petal-outer-left" d="M50 80 C 25 75, 15 65, 15 50 C 25 55, 35 65, 50 80 Z"/>
           <path class="petal-outer-right" d="M50 80 C 75 75, 85 65, 85 50 C 75 55, 65 65, 50 80 Z"/>
@@ -765,10 +765,11 @@ class TammaApp {
 
       const card = document.createElement('div');
       card.className = `prayer-card ${hasAudio ? 'has-monk-audio' : ''}`;
+      card.style.position = 'relative';
       card.style.setProperty('--bloom-progress', bloomProgress);
       card.innerHTML = `
         ${this.getLotusBgSvgHtml()}
-        <div class="card-inner-content">
+        <div class="card-inner-content" style="position: relative !important; z-index: 1 !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; flex-grow: 1 !important; pointer-events: auto !important;">
           <div>
             <div class="card-header">
               <div class="card-badges">
@@ -905,11 +906,12 @@ class TammaApp {
         }
 
         const bloomProgress = Math.min(chantCount / 9, 1);
+        card.style.position = 'relative';
         card.style.setProperty('--bloom-progress', bloomProgress);
 
         card.innerHTML = `
           ${this.getLotusBgSvgHtml()}
-          <div class="card-inner-content">
+          <div class="card-inner-content" style="position: relative !important; z-index: 1 !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; flex-grow: 1 !important; pointer-events: auto !important;">
             <div>
               <div class="card-header">
                 <span class="card-category" style="color: ${pitakaColor}; background: ${pitakaBadgeClass}; border: 1px solid ${pitakaColor};">

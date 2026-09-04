@@ -1316,30 +1316,34 @@ textarea.form-control {
    Blooming Lotus Background System (Gamification & Mindfulness Art)
    ========================================================================== */
 .lotus-bg-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.14;
-  pointer-events: none;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.08 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
   transition: opacity 0.3s ease;
 }
 
 body.theme-parchment .lotus-bg-container {
-  opacity: 0.08;
+  opacity: 0.05 !important;
 }
 
 .lotus-svg {
-  width: 160px;
-  height: 160px;
+  width: 150px;
+  height: 150px;
   color: var(--accent-gold);
   transform: translateY(18px) scale(calc(0.72 + (var(--bloom-progress, 0) * 0.38)));
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+  pointer-events: none !important;
 }
 
 .lotus-svg path {

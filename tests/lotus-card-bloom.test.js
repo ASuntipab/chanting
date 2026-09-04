@@ -9,10 +9,10 @@ test('Blooming Lotus Background & Readability Verification', async (t) => {
   const appJsContent = fs.readFileSync(path.join(rootDir, 'src/js/app.js'), 'utf8');
 
   await t.test('CSS Verification: .lotus-bg-container is absolute with z-index 0 and subtle opacity', () => {
-    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*position:\s*absolute;/, '.lotus-bg-container must be absolute');
-    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*z-index:\s*0;/, '.lotus-bg-container must have z-index 0');
-    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.14;/, '.lotus-bg-container default opacity must be 0.14 for text clarity');
-    assert.match(baseCssContent, /body\.theme-parchment\s+\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.08;/, 'Parchment theme opacity must be 0.08');
+    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*position:\s*absolute/, '.lotus-bg-container must be absolute');
+    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*z-index:\s*0/, '.lotus-bg-container must have z-index 0');
+    assert.match(baseCssContent, /\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.08/, '.lotus-bg-container default opacity must be 0.08 for text clarity');
+    assert.match(baseCssContent, /body\.theme-parchment\s+\.lotus-bg-container\s*\{[^}]*opacity:\s*0\.05/, 'Parchment theme opacity must be 0.05');
   });
 
   await t.test('CSS Verification: .card-inner-content has relative position and z-index 1 for perfect readability', () => {
