@@ -148,5 +148,70 @@ test('TTS Engine: Natural Thai number pronunciation (10 / ๑๐ -> สิบ, 1
   assert.equal(cleanRange.includes('เก้า ถึง สิบ'), true, 'Should pronounce ๙-๑๐ as เก้า ถึง สิบ');
 });
 
+test('TTS Engine: Real Chanting Repetition (ท่อง นโม 3 รอบ and (๓ จบ) chant 3 times in reality)', () => {
+  const engine = new DhammaTTSEngine();
+
+  // Test 1: Verse ending with (๓ จบ) should generate 3 chanting chunks
+  const prayerWithNamoSuffix = {
+    pages: [
+      {
+        verseTitle: 'บทเริ่มต้น',
+        pali: 'นะโม ตัสสะ ภะคะวะโต อะระหะโต สัมมาสัมพุทธัสสะ (๓ จบ)\nปุตตะกาโม ละเภปุตตัง'
+      }
+    ]
+  };
+
+  engine.prepareQueue(prayerWithNamoSuffix);
+  const namoChunks = engine.queue.filter(c => c.type === 'pali' && c.rawText.includes('นะโม ตัสสะ'));
+  assert.equal(namoChunks.length, 3, 'Must create exactly 3 chunks for (๓ จบ)');
+  namoChunks.forEach((chunk, idx) => {
+    assert.equal(chunk.repeatRound, idx + 1, `Round should be ${idx + 1}`);
+    assert.equal(chunk.totalRounds, 3, 'Total rounds must be 3');
+    assert.equal(chunk.text.includes('สามจบ'), false, 'Should not say สามจบ inside the chant');
+    assert.equal(chunk.text.includes('(๓ จบ)'), false, 'Should not say (๓ จบ)');
+    assert.equal(chunk.text.includes('นะโม'), true, 'Must chant Namo');
+    assert.equal(chunk.text.includes('ตัดสะ'), true, 'Must chant phonetic Tassa');
+  });
+
+  // Test 2: Custom prayer with instruction line "ท่อง  นโม 3 รอบ"
+  const prayerWithInstruction = {
+    pages: [
+      {
+        verseTitle: 'คาถาเงินล้าน',
+        pali: 'ท่อง  นโม 3 รอบ\nสัมปะจิตฉามิ นาสังสิโม'
+      }
+    ]
+  };
+
+  engine.prepareQueue(prayerWithInstruction);
+  const instructionChunks = engine.queue.filter(c => c.type === 'pali' && c.rawText.includes('ท่อง  นโม 3 รอบ'));
+  assert.equal(instructionChunks.length, 3, 'Must expand "ท่อง  นโม 3 รอบ" into exactly 3 chanting chunks');
+  instructionChunks.forEach((chunk, idx) => {
+    assert.equal(chunk.repeatRound, idx + 1);
+    assert.equal(chunk.totalRounds, 3);
+    assert.equal(chunk.text.includes('ท่อง'), false, 'Should not say ท่อง');
+    assert.equal(chunk.text.includes('รอบ'), false, 'Should not say รอบ');
+    assert.equal(chunk.text.includes('นะโม ตัดสะ พะคะวะโต'), true, 'Must chant the real full Namo verse');
+  });
+
+  // Test 3: Thai translation with (๓ จบ)
+  const prayerWithThaiSuffix = {
+    pages: [
+      {
+        thai: 'ขอนอบน้อมแด่พระผู้มีพระภาคเจ้าพระองค์นั้น (๓ จบ)'
+      }
+    ]
+  };
+
+  engine.prepareQueue(prayerWithThaiSuffix);
+  const thaiChunks = engine.queue.filter(c => c.type === 'thai');
+  assert.equal(thaiChunks.length, 3, 'Must create 3 Thai translation chunks');
+  thaiChunks.forEach(chunk => {
+    assert.equal(chunk.text.includes('สามจบ'), false, 'Should not say สามจบ');
+    assert.equal(chunk.text.includes('ขอนอบน้อม'), true, 'Must chant the translation');
+  });
+});
+
+
 
 
