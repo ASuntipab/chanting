@@ -1327,21 +1327,21 @@ textarea.form-control {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  opacity: 0.08 !important;
+  opacity: 0.22 !important;
   pointer-events: none !important;
   overflow: hidden !important;
   transition: opacity 0.3s ease;
 }
 
 body.theme-parchment .lotus-bg-container {
-  opacity: 0.05 !important;
+  opacity: 0.10 !important;
 }
 
 .lotus-svg {
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   color: var(--accent-gold);
-  transform: translateY(18px) scale(calc(0.72 + (var(--bloom-progress, 0) * 0.38)));
+  transform: translateY(6px) scale(calc(0.85 + (var(--bloom-progress, 0) * 0.25)));
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
   pointer-events: none !important;
 }
@@ -1352,29 +1352,29 @@ body.theme-parchment .lotus-bg-container {
 }
 
 .petal-outer-left {
-  transform: rotate(calc(45deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.2 + (0.8 * var(--bloom-progress, 0)));
+  transform: rotate(calc(42deg * (1 - var(--bloom-progress, 0))));
+  opacity: calc(0.6 + (0.4 * var(--bloom-progress, 0)));
 }
 .petal-outer-right {
-  transform: rotate(calc(-45deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.2 + (0.8 * var(--bloom-progress, 0)));
+  transform: rotate(calc(-42deg * (1 - var(--bloom-progress, 0))));
+  opacity: calc(0.6 + (0.4 * var(--bloom-progress, 0)));
 }
 .petal-inner-left {
   transform: rotate(calc(20deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.5 + (0.5 * var(--bloom-progress, 0)));
+  opacity: calc(0.8 + (0.2 * var(--bloom-progress, 0)));
 }
 .petal-inner-right {
   transform: rotate(calc(-20deg * (1 - var(--bloom-progress, 0))));
-  opacity: calc(0.5 + (0.5 * var(--bloom-progress, 0)));
+  opacity: calc(0.8 + (0.2 * var(--bloom-progress, 0)));
 }
 .petal-center {
-  transform: scaleY(calc(0.85 + (0.15 * var(--bloom-progress, 0))));
+  transform: scaleY(calc(0.9 + (0.1 * var(--bloom-progress, 0))));
 }
 .petal-leaf-left {
-  transform: rotate(calc(15deg * (1 - var(--bloom-progress, 0))));
+  transform: rotate(calc(12deg * (1 - var(--bloom-progress, 0))));
 }
 .petal-leaf-right {
-  transform: rotate(calc(-15deg * (1 - var(--bloom-progress, 0))));
+  transform: rotate(calc(-12deg * (1 - var(--bloom-progress, 0))));
 }
 
 .card-inner-content {
