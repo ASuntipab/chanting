@@ -737,16 +737,16 @@ class TammaApp {
 
   getLotusBgSvgHtml() {
     return `
-      <div class="lotus-bg-container" style="position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; display: flex !important; align-items: center !important; justify-content: center !important; opacity: 0.22 !important; overflow: hidden !important;">
-        <svg class="lotus-svg" viewBox="0 0 100 100" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width: 180px; height: 180px; color: var(--accent-gold); pointer-events: none !important;">
-          <path d="M50 95 C 48 90, 48 85, 50 80 C 52 85, 52 90, 50 95 Z" fill="currentColor" fill-opacity="0.25" stroke="none"/>
-          <path class="petal-outer-left" d="M50 80 C 25 75, 15 65, 15 50 C 25 55, 35 65, 50 80 Z"/>
-          <path class="petal-outer-right" d="M50 80 C 75 75, 85 65, 85 50 C 75 55, 65 65, 50 80 Z"/>
-          <path class="petal-inner-left" d="M50 80 C 35 65, 30 50, 35 35 C 40 45, 45 60, 50 80 Z"/>
-          <path class="petal-inner-right" d="M50 80 C 65 65, 70 50, 65 35 C 60 45, 55 60, 50 80 Z"/>
-          <path class="petal-center" d="M50 80 C 40 60, 45 40, 50 20 C 55 40, 60 60, 50 80 Z"/>
-          <path class="petal-leaf-left" d="M50 85 C 20 85, 10 90, 10 95 C 25 92, 35 90, 50 85 Z"/>
-          <path class="petal-leaf-right" d="M50 85 C 80 85, 90 90, 90 95 C 75 92, 65 90, 50 85 Z"/>
+      <div class="lotus-bg-container" style="position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; display: flex !important; align-items: center !important; justify-content: center !important; opacity: 0.20 !important; overflow: hidden !important;">
+        <svg class="lotus-svg" viewBox="0 0 100 100" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width: 180px; height: 180px; color: var(--accent-lotus, #f472b6); pointer-events: none !important;">
+          <path d="M50 95 C 48 90, 48 85, 50 80 C 52 85, 52 90, 50 95 Z" fill="currentColor" fill-opacity="0.45" stroke="none"/>
+          <path class="petal-outer-left" d="M50 80 C 25 75, 15 65, 15 50 C 25 55, 35 65, 50 80 Z" fill="currentColor" fill-opacity="0.70"/>
+          <path class="petal-outer-right" d="M50 80 C 75 75, 85 65, 85 50 C 75 55, 65 65, 50 80 Z" fill="currentColor" fill-opacity="0.70"/>
+          <path class="petal-inner-left" d="M50 80 C 35 65, 30 50, 35 35 C 40 45, 45 60, 50 80 Z" fill="currentColor" fill-opacity="0.85"/>
+          <path class="petal-inner-right" d="M50 80 C 65 65, 70 50, 65 35 C 60 45, 55 60, 50 80 Z" fill="currentColor" fill-opacity="0.85"/>
+          <path class="petal-center" d="M50 80 C 40 60, 45 40, 50 20 C 55 40, 60 60, 50 80 Z" fill="currentColor" fill-opacity="0.95"/>
+          <path class="petal-leaf-left" d="M50 85 C 20 85, 10 90, 10 95 C 25 92, 35 90, 50 85 Z" fill="currentColor" fill-opacity="0.55"/>
+          <path class="petal-leaf-right" d="M50 85 C 80 85, 90 90, 90 95 C 75 92, 65 90, 50 85 Z" fill="currentColor" fill-opacity="0.55"/>
         </svg>
       </div>
     `;
