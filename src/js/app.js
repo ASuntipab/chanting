@@ -735,6 +735,23 @@ class TammaApp {
     this.renderPrayerCards(container, favPrayers);
   }
 
+  getLotusBgSvgHtml() {
+    return `
+      <div class="lotus-bg-container">
+        <svg class="lotus-svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 95 C 48 90, 48 85, 50 80 C 52 85, 52 90, 50 95 Z" fill="currentColor" stroke="none" opacity="0.6"/>
+          <path class="petal-outer-left" d="M50 80 C 25 75, 15 65, 15 50 C 25 55, 35 65, 50 80 Z"/>
+          <path class="petal-outer-right" d="M50 80 C 75 75, 85 65, 85 50 C 75 55, 65 65, 50 80 Z"/>
+          <path class="petal-inner-left" d="M50 80 C 35 65, 30 50, 35 35 C 40 45, 45 60, 50 80 Z"/>
+          <path class="petal-inner-right" d="M50 80 C 65 65, 70 50, 65 35 C 60 45, 55 60, 50 80 Z"/>
+          <path class="petal-center" d="M50 80 C 40 60, 45 40, 50 20 C 55 40, 60 60, 50 80 Z"/>
+          <path class="petal-leaf-left" d="M50 85 C 20 85, 10 90, 10 95 C 25 92, 35 90, 50 85 Z"/>
+          <path class="petal-leaf-right" d="M50 85 C 80 85, 90 90, 90 95 C 75 92, 65 90, 50 85 Z"/>
+        </svg>
+      </div>
+    `;
+  }
+
   renderPrayerCards(container, prayers) {
     container.innerHTML = '';
     const trackerData = storage.getTrackerData();
@@ -744,44 +761,49 @@ class TammaApp {
       const chantCount = trackerData.totalCounts[prayer.id] || 0;
       const audioTrack = mp3Player.getTrackForPrayer(prayer);
       const hasAudio = !!audioTrack;
+      const bloomProgress = Math.min(chantCount / 9, 1);
 
       const card = document.createElement('div');
       card.className = `prayer-card ${hasAudio ? 'has-monk-audio' : ''}`;
+      card.style.setProperty('--bloom-progress', bloomProgress);
       card.innerHTML = `
-        <div>
-          <div class="card-header">
-            <div class="card-badges">
-              <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
-              ${hasAudio ? `
-                <span class="card-audio-badge" title="มีเสียงพระสงฆ์สวดจริง: ${audioTrack.title} (${audioTrack.temple})">
-                  <span class="audio-wave-dot"></span>🎵 มีเสียงพระสวด
+        ${this.getLotusBgSvgHtml()}
+        <div class="card-inner-content">
+          <div>
+            <div class="card-header">
+              <div class="card-badges">
+                <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
+                ${hasAudio ? `
+                  <span class="card-audio-badge" title="มีเสียงพระสงฆ์สวดจริง: ${audioTrack.title} (${audioTrack.temple})">
+                    <span class="audio-wave-dot"></span>🎵 มีเสียงพระสวด
+                  </span>
+                ` : ''}
+              </div>
+              <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${prayer.id}" aria-label="รายการโปรด">
+                ${isFav ? '❤️' : '🤍'}
+              </button>
+            </div>
+            <div class="card-title">${prayer.title}</div>
+            ${prayer.author ? `<div class="card-author" title="${prayer.author}">🙏 ${prayer.author}</div>` : ''}
+            <div class="card-excerpt">${prayer.description || (prayer.pages?.[0]?.thai || prayer.pages?.[0]?.pali || '')}</div>
+          </div>
+          <div class="card-footer">
+            <div class="card-stats">
+              <span class="card-stat-item">🔔 ${chantCount} จบ</span>
+              ${hasAudio && audioTrack.temple ? `
+                <span class="card-stat-audio" title="บันทึกเสียงจาก: ${audioTrack.temple}">
+                  🎧 ${audioTrack.temple.split('/')[0].trim()}
                 </span>
               ` : ''}
             </div>
-            <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${prayer.id}" aria-label="รายการโปรด">
-              ${isFav ? '❤️' : '🤍'}
-            </button>
-          </div>
-          <div class="card-title">${prayer.title}</div>
-          ${prayer.author ? `<div class="card-author" title="${prayer.author}">🙏 ${prayer.author}</div>` : ''}
-          <div class="card-excerpt">${prayer.description || (prayer.pages?.[0]?.thai || prayer.pages?.[0]?.pali || '')}</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-stats">
-            <span class="card-stat-item">🔔 ${chantCount} จบ</span>
-            ${hasAudio && audioTrack.temple ? `
-              <span class="card-stat-audio" title="บันทึกเสียงจาก: ${audioTrack.temple}">
-                🎧 ${audioTrack.temple.split('/')[0].trim()}
-              </span>
-            ` : ''}
-          </div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-icon btn-card-share" data-id="${prayer.id}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์บทสวด">
-              📤
-            </button>
-            <button class="btn-primary btn-read-card" style="padding: 4px 12px; font-size: 0.85rem;">
-              เปิดอ่าน
-            </button>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-icon btn-card-share" data-id="${prayer.id}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์บทสวด">
+                📤
+              </button>
+              <button class="btn-primary btn-read-card" style="padding: 4px 12px; font-size: 0.85rem;">
+                เปิดอ่าน
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -882,32 +904,38 @@ class TammaApp {
           pitakaColor = '#9d4edd';
         }
 
+        const bloomProgress = Math.min(chantCount / 9, 1);
+        card.style.setProperty('--bloom-progress', bloomProgress);
+
         card.innerHTML = `
-          <div>
-            <div class="card-header">
-              <span class="card-category" style="color: ${pitakaColor}; background: ${pitakaBadgeClass}; border: 1px solid ${pitakaColor};">
-                ${vol.pitaka} • เล่มที่ ${vol.volume}
-              </span>
-              <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${volId}" aria-label="รายการโปรด">
-                ${isFav ? '❤️' : '🤍'}
-              </button>
+          ${this.getLotusBgSvgHtml()}
+          <div class="card-inner-content">
+            <div>
+              <div class="card-header">
+                <span class="card-category" style="color: ${pitakaColor}; background: ${pitakaBadgeClass}; border: 1px solid ${pitakaColor};">
+                  ${vol.pitaka} • เล่มที่ ${vol.volume}
+                </span>
+                <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${volId}" aria-label="รายการโปรด">
+                  ${isFav ? '❤️' : '🤍'}
+                </button>
+              </div>
+              <div class="card-title">${vol.bookTitle}</div>
+              <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 6px; font-style: italic;">${vol.bookPali}</div>
+              <div class="card-excerpt">${vol.description}</div>
             </div>
-            <div class="card-title">${vol.bookTitle}</div>
-            <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 6px; font-style: italic;">${vol.bookPali}</div>
-            <div class="card-excerpt">${vol.description}</div>
-          </div>
-          <div class="card-footer" style="margin-top: 12px;">
-            <div class="card-stats">
-              <span class="card-stat-item">📑 ${vol.totalSections} กัณฑ์/สูตร</span>
-              <span class="card-stat-item" style="margin-left: 8px;">🔔 ${chantCount} จบ</span>
-            </div>
-            <div style="display: flex; gap: 6px;">
-              <button class="btn-icon btn-card-share" data-id="${volId}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์">
-                📤
-              </button>
-              <button class="btn-primary btn-read-card" style="padding: 4px 14px; font-size: 0.85rem;">
-                📖 เปิดอ่าน
-              </button>
+            <div class="card-footer" style="margin-top: 12px;">
+              <div class="card-stats">
+                <span class="card-stat-item">📑 ${vol.totalSections} กัณฑ์/สูตร</span>
+                <span class="card-stat-item" style="margin-left: 8px;">🔔 ${chantCount} จบ</span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-icon btn-card-share" data-id="${volId}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์">
+                  📤
+                </button>
+                <button class="btn-primary btn-read-card" style="padding: 4px 14px; font-size: 0.85rem;">
+                  📖 เปิดอ่าน
+                </button>
+              </div>
             </div>
           </div>
         `;
