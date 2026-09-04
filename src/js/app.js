@@ -8,6 +8,7 @@ import { starfield } from './starfield.js';
 import { nativeBridge } from './native-bridge.js';
 import { renderQRCodeToCanvas } from './qrcode.js';
 import { tipitakaLoader } from './tipitaka-loader.js';
+import { mp3Player } from './mp3-player.js';
 
 class TammaApp {
   constructor() {
@@ -603,7 +604,9 @@ class TammaApp {
     let prayers = [...allPrayers];
 
     // Filter by Category
-    if (this.currentCategory !== 'all') {
+    if (this.currentCategory === 'has-audio') {
+      prayers = prayers.filter(p => !!mp3Player.getTrackForPrayer(p));
+    } else if (this.currentCategory !== 'all') {
       prayers = prayers.filter(p => p.category === this.currentCategory);
     }
 
@@ -638,13 +641,18 @@ class TammaApp {
     const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
 
     const categoryCounts = {};
+    let withAudioCount = 0;
     allPrayers.forEach(p => {
       const cat = p.category || 'บทสวดมนต์';
       categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+      if (mp3Player.getTrackForPrayer(p)) {
+        withAudioCount++;
+      }
     });
 
     const categoryIcons = {
       'all': '✨',
+      'has-audio': '🎵',
       'หลวงพ่อจรัญ': '🪷',
       'หลวงปู่มั่น': '⛰️',
       'หลวงตามหาบัว': '🪷',
@@ -663,6 +671,8 @@ class TammaApp {
       const icon = categoryIcons[val] || '📿';
       if (val === 'all') {
         opt.textContent = `${icon} ทุกหมวดหมู่ (${toThai(allPrayers.length)} บท)`;
+      } else if (val === 'has-audio') {
+        opt.textContent = `${icon} มีเสียงพระสวดจริง (${toThai(withAudioCount)} บท)`;
       } else {
         const count = categoryCounts[val] || 0;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
@@ -732,23 +742,38 @@ class TammaApp {
     prayers.forEach(prayer => {
       const isFav = storage.isFavorite(prayer.id);
       const chantCount = trackerData.totalCounts[prayer.id] || 0;
+      const audioTrack = mp3Player.getTrackForPrayer(prayer);
+      const hasAudio = !!audioTrack;
 
       const card = document.createElement('div');
-      card.className = 'prayer-card';
+      card.className = `prayer-card ${hasAudio ? 'has-monk-audio' : ''}`;
       card.innerHTML = `
         <div>
           <div class="card-header">
-            <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
+            <div class="card-badges">
+              <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
+              ${hasAudio ? `
+                <span class="card-audio-badge" title="มีเสียงพระสงฆ์สวดจริง: ${audioTrack.title} (${audioTrack.temple})">
+                  <span class="audio-wave-dot"></span>🎵 มีเสียงพระสวด
+                </span>
+              ` : ''}
+            </div>
             <button class="card-fav-btn ${isFav ? 'active' : ''}" data-id="${prayer.id}" aria-label="รายการโปรด">
               ${isFav ? '❤️' : '🤍'}
             </button>
           </div>
           <div class="card-title">${prayer.title}</div>
+          ${prayer.author ? `<div class="card-author" title="${prayer.author}">🙏 ${prayer.author}</div>` : ''}
           <div class="card-excerpt">${prayer.description || (prayer.pages?.[0]?.thai || prayer.pages?.[0]?.pali || '')}</div>
         </div>
         <div class="card-footer">
           <div class="card-stats">
             <span class="card-stat-item">🔔 ${chantCount} จบ</span>
+            ${hasAudio && audioTrack.temple ? `
+              <span class="card-stat-audio" title="บันทึกเสียงจาก: ${audioTrack.temple}">
+                🎧 ${audioTrack.temple.split('/')[0].trim()}
+              </span>
+            ` : ''}
           </div>
           <div style="display: flex; gap: 6px;">
             <button class="btn-icon btn-card-share" data-id="${prayer.id}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์บทสวด">
