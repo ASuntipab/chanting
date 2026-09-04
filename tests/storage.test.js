@@ -416,3 +416,28 @@ test('Library Header: Accurate Prayer Count & Thai Numeral Formatting', () => {
   assert.ok(totalCount >= 100, 'Should have at least 100 active prayers in default library');
   assert.equal(toThai(totalCount), String(totalCount).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]));
 });
+
+test('Monk Audio Identification & Card Indicators: Detects prayers with real monastic audio', async () => {
+  const { mp3Player } = await import('../src/js/mp3-player.js');
+
+  const prayersWithAudio = DEFAULT_PRAYERS.filter(p => !!mp3Player.getTrackForPrayer(p));
+  assert.ok(prayersWithAudio.length >= 50, `Should have at least 50 prayers with monk audio recordings (found ${prayersWithAudio.length})`);
+
+  // Key Prayers that MUST have monk audio
+  const chinabanchorn = DEFAULT_PRAYERS.find(p => p.id === 'old-chinabanchorn' || p.title.includes('ชินบัญชร'));
+  const trackChina = mp3Player.getTrackForPrayer(chinabanchorn);
+  assert.ok(trackChina, 'ชินบัญชร must have matching monk audio track');
+
+  const pahung = DEFAULT_PRAYERS.find(p => p.id === 'pahung-mahaka');
+  const trackPahung = mp3Player.getTrackForPrayer(pahung);
+  assert.ok(trackPahung, 'พาหุงมหากา must have matching monk audio track');
+
+  const charan = DEFAULT_PRAYERS.find(p => p.id === 'lp-charan-complete-set');
+  const trackCharan = mp3Player.getTrackForPrayer(charan);
+  assert.ok(trackCharan, 'ชุดสวดมนต์ประจำวัน หลวงพ่อจรัญ must have matching monk audio track');
+  assert.ok(trackCharan.temple.includes('อัมพวัน'), 'Charan track should be from Wat Amphawan');
+
+  // Verify prayer author metadata exists for key monk chants
+  assert.ok(charan.author, 'Charan suite must have author field');
+  assert.ok(charan.author.includes('หลวงพ่อจรัญ'), 'Author should mention Luang Por Charan');
+});

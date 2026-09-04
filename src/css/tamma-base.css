@@ -897,6 +897,13 @@ body.theme-parchment .tipitaka-pill.active {
   margin-bottom: 10px;
 }
 
+.card-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .card-category {
   font-size: 0.75rem;
   color: var(--accent-gold);
@@ -904,6 +911,97 @@ body.theme-parchment .tipitaka-pill.active {
   padding: 3px 10px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+}
+
+.card-audio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  padding: 2.5px 9px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+  letter-spacing: 0.2px;
+  transition: all 0.2s ease;
+}
+
+.audio-wave-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #38bdf8;
+  display: inline-block;
+  box-shadow: 0 0 6px #38bdf8;
+  animation: audioPulse 2s infinite ease-in-out;
+}
+
+@keyframes audioPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #38bdf8; }
+}
+
+body.theme-parchment .card-audio-badge {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.35);
+  box-shadow: none;
+}
+body.theme-parchment .audio-wave-dot {
+  background-color: #0284c7;
+  box-shadow: 0 0 4px #0284c7;
+}
+
+body.theme-gold .card-audio-badge {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+}
+body.theme-gold .audio-wave-dot {
+  background-color: #fbbf24;
+  box-shadow: 0 0 6px #fbbf24;
+}
+
+.prayer-card.has-monk-audio:hover .card-audio-badge {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.card-author {
+  font-size: 0.78rem;
+  color: var(--accent-gold);
+  margin-top: -3px;
+  margin-bottom: 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.88;
+}
+
+.card-stat-audio {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #38bdf8;
+  font-size: 0.74rem;
+  margin-left: 6px;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.theme-parchment .card-stat-audio {
+  color: #0284c7;
+}
+body.theme-gold .card-stat-audio {
+  color: #fbbf24;
 }
 
 .card-fav-btn {
@@ -1212,3 +1310,5 @@ textarea.form-control {
     font-size: 1.45rem;
   }
 }
+\ n / *   = = =   B l o o m i n g   L o t u s   B a c k g r o u n d   = = =   * /  
+ 
