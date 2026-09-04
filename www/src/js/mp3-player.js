@@ -779,6 +779,89 @@ export const CHANTING_AUDIO_TRACKS = [
     srcMp3: 'https://archive.org/download/lp-jarun-002/01.mp3',
     durationEst: '15:50',
     category: 'หลวงพ่อจรัญ'
+  },
+
+  // --- เสียงสวดมนต์แปลไทยทำวัตร และธรรมปฏิบัติสายวัดป่า ---
+  {
+    id: 'track-akara-32',
+    title: 'ทวัตติงสาการปาฐะ (อาการ ๓๒ และพิจารณาธาตุ ๔)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/03%20%E0%B8%97%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%95%E0%B8%B4%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%B2%E0%B8%90%E0%B8%B0%20%28%E0%B8%ac%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%93%E0%B9%92%29.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/03%20%E0%B8%97%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%95%E0%B8%B4%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%B2%E0%B8%90%E0%B8%B0%20%28%E0%B8%ac%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%93%E0%B9%92%29.mp3',
+    durationEst: '04:10',
+    category: 'หลวงปู่มั่น'
+  },
+  {
+    id: 'track-abhinha-thai',
+    title: 'อภิณหปัจจเวกขณปาฐะ (บทพิจารณา ๕ ประการ แปลไทย)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/04%20%E0%B8%AD%E0%B8%A0%E0%B8%B4%E0%B8%93%E0%B8%AB%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B9%80%E0%B8%A7%E0%B8%81%E0%B8%82%E0%B8%93%E0%B8%9B%E0%B8%B2%E0%B8%90%E0%B8%B0.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/04%20%E0%B8%AD%E0%B8%A0%E0%B8%B4%E0%B8%93%E0%B8%AB%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B9%80%E0%B8%A7%E0%B8%81%E0%B8%82%E0%B8%93%E0%B8%9B%E0%B8%B2%E0%B8%90%E0%B8%B0.mp3',
+    durationEst: '02:30',
+    category: 'บทสวดประจำวัน'
+  },
+  {
+    id: 'track-phicharana-sangkhan',
+    title: 'บทพิจารณาสังขาร (อนิจจัง ทุกขัง อนัตตา)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/05%20%E0%B8%9A%E0%B8%97%E0%B8%9E%E0%B8%B4%E0%B8%88%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B8%B2%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%82%E0%B8%B2%E0%B8%A3.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/05%20%E0%B8%9A%E0%B8%97%E0%B8%9E%E0%B8%B4%E0%B8%88%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B8%B2%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%82%E0%B8%B2%E0%B8%A3.mp3',
+    durationEst: '03:30',
+    category: 'พิธีกรรม'
+  },
+  {
+    id: 'track-sappapattidana',
+    title: 'สัพพปัตติทานคาถา (บทกรวดน้ำแผ่ส่วนบุญ)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/06%20%E0%B8%AA%E0%B8%B1%E0%B8%9E%E0%B8%9E%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%95%E0%B8%B4%E0%B8%97%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/06%20%E0%B8%AA%E0%B8%B1%E0%B8%9E%E0%B8%9E%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%95%E0%B8%B4%E0%B8%97%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.mp3',
+    durationEst: '03:30',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-tilakkhana',
+    title: 'ติลักขณาทิคาถา (สัพเพ สังขารา อะนิจจา)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/11%20%E0%B8%95%E0%B8%B4%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%82%E0%B8%93%E0%B8%B2%E0%B8%97%E0%B8%B4%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/11%20%E0%B8%95%E0%B8%B4%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%82%E0%B8%93%E0%B8%B2%E0%B8%97%E0%B8%B4%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.mp3',
+    durationEst: '04:15',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-bhara-sutta',
+    title: 'ภารสุตตคาถา (ขันธ์ ๕ เป็นภาระอันหนัก)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/12%20%E0%B8%A0%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B8%E0%B8%95%E0%B8%95%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/12%20%E0%B8%A0%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B8%E0%B8%95%E0%B8%95%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.mp3',
+    durationEst: '01:35',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-bhaddekaratta',
+    title: 'ภัทเทกรัตตคาถา (ผู้มีราตรีเดียวเจริญ)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/13%20%E0%B8%A0%E0%B8%B1%E0%B8%97%E0%B9%80%E0%B8%97%E0%B8%81%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/13%20%E0%B8%A0%E0%B8%B1%E0%B8%97%E0%B9%80%E0%B8%97%E0%B8%81%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.mp3',
+    durationEst: '02:25',
+    category: 'พระสูตรสำคัญ'
+  },
+  {
+    id: 'track-imina-uddisana',
+    title: 'อุททิสสนาธิฏฐานคาถา (บทกรวดน้ำอิมินาฉบับทำวัตร)',
+    temple: 'สวดมนต์แปลไทยทำวัตร',
+    srcWebm: 'https://archive.org/download/prayer3/18%20%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B8%AA%E0%B8%AA%E0%B8%99%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%8F%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.ogg',
+    srcMp3: 'https://archive.org/download/prayer3/18%20%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B8%AA%E0%B8%AA%E0%B8%99%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%8F%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%B2%E0%B8%96%E0%B8%B2.mp3',
+    durationEst: '05:00',
+    category: 'แผ่เมตตา'
+  },
+  {
+    id: 'track-luangta-mahabua-kammathana',
+    title: 'เรียนกรรมฐานเพื่ออะไร (หลวงตามหาบัว ญาณสัมปันโน)',
+    temple: 'วัดป่าบ้านตาด (อุดรธานี)',
+    srcWebm: 'https://archive.org/download/Luangtamahabua/03-1818.ogg',
+    srcMp3: 'https://archive.org/download/Luangtamahabua/03-1818.mp3',
+    durationEst: '06:30',
+    category: 'หลวงตามหาบัว'
   }
 ];
 
@@ -1005,6 +1088,9 @@ class MP3ChantingAudioEngine {
     if (title.includes('ปาติโมกข์') || id.includes('patimokkha')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-patimokkha-full') || null;
     }
+    if (title.includes('มหาบัว') || id.includes('bua') || title.includes('บ้านตาด')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-luangta-mahabua-kammathana') || null;
+    }
     if (title.includes('แผ่เมตตา') || title.includes('แผ่ส่วนบุญ') || id.includes('metta-sharing')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-sharing-blessings') || null;
     }
@@ -1036,7 +1122,7 @@ class MP3ChantingAudioEngine {
     if (title.includes('โพธิบาท') || title.includes('กันภัย ๑๐ ทิศ') || title.includes('กันภัย 10 ทิศ') || id.includes('photibat')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-katha-photibat') || null;
     }
-    if (title.includes('ยะถา') || title.includes('กรวดน้ำ') || id.includes('imina') || id.includes('yatha')) {
+    if (title.includes('ยะถา') || title.includes('สัพพี') || id.includes('yatha')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-yatha-sappi') || null;
     }
 
@@ -1077,6 +1163,29 @@ class MP3ChantingAudioEngine {
     }
     if (title.includes('หลวงพ่อจรัญ') || title.includes('วัดอัมพวัน') || id.includes('charan') || id.includes('amphawan')) {
       return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-charan-medicine') || null;
+    }
+
+    // 13. อาการ ๓๒, พิจารณาสังขาร, อภิณหปัจจเวกขณ์, กรวดน้ำอิมินา, หลวงตามหาบัว
+    if (id.includes('akara-32') || title.includes('อาการ ๓๒') || title.includes('อาการ 32') || id.includes('lp-mun-kammathana') || title.includes('พิจารณากายและธาตุ')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-akara-32') || null;
+    }
+    if (title.includes('พิจารณาสังขาร') || id.includes('bangsukun') || title.includes('บังสุกุล')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-phicharana-sangkhan') || null;
+    }
+    if (id.includes('imina') || title.includes('อิมินา') || title.includes('อุททิสสนาธิฏฐาน') || title.includes('กรวดน้ำ')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-imina-uddisana') || null;
+    }
+    if (title.includes('สัพพปัตติทาน') || id.includes('sappapatti')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-sappapattidana') || null;
+    }
+    if (title.includes('ติลักขณ') || id.includes('tilakkhana')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-tilakkhana') || null;
+    }
+    if (title.includes('ภารสุตต') || id.includes('bhara-sutta')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-bhara-sutta') || null;
+    }
+    if (title.includes('ภัทเทกรัตต') || id.includes('bhaddekaratta')) {
+      return CHANTING_AUDIO_TRACKS.find(t => t.id === 'track-bhaddekaratta') || null;
     }
 
     // No direct matching real audio file for this prayer
@@ -1153,6 +1262,20 @@ class MP3ChantingAudioEngine {
     // หลวงพ่อจรัญ (วัดอัมพวัน) — 4 versions
     else if (title.includes('หลวงพ่อจรัญ') || id.includes('lp-charan') || title.includes('วัดอัมพวัน')) {
       ['track-charan-anisong-chanting', 'track-charan-kammathana', 'track-charan-metta-ahosi', 'track-charan-medicine'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // กรวดน้ำ / อิมินา / สัพพปัตติทาน — 3 versions
+    else if (title.includes('กรวดน้ำ') || title.includes('อิมินา') || id.includes('imina') || id.includes('yatha')) {
+      ['track-imina-uddisana', 'track-yatha-sappi', 'track-sappapattidana'].forEach(tid => {
+        const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
+        if (t) results.push(t);
+      });
+    }
+    // อภิณหปัจจเวกขณ์ — 2 versions
+    else if (title.includes('อภิณห') || id.includes('abhinha')) {
+      ['track-abhinhapaccavekkhana', 'track-abhinha-thai'].forEach(tid => {
         const t = CHANTING_AUDIO_TRACKS.find(tr => tr.id === tid);
         if (t) results.push(t);
       });

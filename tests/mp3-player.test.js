@@ -5,7 +5,7 @@ import { TIPITAKA_SUTTA_PRAYERS } from '../src/js/prayers-tipitaka-suttas.js';
 
 test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t) => {
   await t.test('CHANTING_AUDIO_TRACKS provides authentic public domain chanting sources', () => {
-    assert.ok(CHANTING_AUDIO_TRACKS.length >= 78, `Expected 78+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
+    assert.ok(CHANTING_AUDIO_TRACKS.length >= 87, `Expected 87+ tracks, got ${CHANTING_AUDIO_TRACKS.length}`);
     
     CHANTING_AUDIO_TRACKS.forEach(track => {
       assert.ok(track.id, 'Track must have an ID');
@@ -108,6 +108,22 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
     const lpCharanAhosi = { id: 'lp-charan-ahosikarma', title: 'บทขอขมาและอธิษฐานขออโหสิกรรม หลวงพ่อจรัญ' };
     assert.strictEqual(mp3Player.getTrackForPrayer(lpCharanAhosi).id, 'track-charan-metta-ahosi');
 
+    // prayer3 & Luangta Mahabua prayer audio matches
+    const lpMunKammathana = { id: 'lp-mun-kammathana', title: 'บทพิจารณากายและธาตุ ๔ (วิปัสสนา หลวงปู่มั่น)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(lpMunKammathana).id, 'track-akara-32');
+
+    const abhinha = { id: 'abhinhapaccavekkhana-patha', title: 'อภิณหปัจจเวกขณปาฐะ (บทพิจารณา ๕ ข้อ)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(abhinha).id, 'track-abhinhapaccavekkhana');
+
+    const bangsukun = { id: 'bangsukun-tai-pen', title: 'บทบังสุกุลตาย - บังสุกุลเป็น (พิจารณาสังขารและสืบชะตา)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(bangsukun).id, 'track-phicharana-sangkhan');
+
+    const imina = { id: 'imina-dedication', title: 'บทกรวดน้ำอิมินา (อิมินา ปุญญะกัมเมนะ ฉบับสมบูรณ์)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(imina).id, 'track-imina-uddisana');
+
+    const lpBua = { id: 'lp-maha-bua-metta', title: 'บทแผ่เมตตาจิตครอบสามแดนโลกธาตุ (หลวงตามหาบัว)' };
+    assert.strictEqual(mp3Player.getTrackForPrayer(lpBua).id, 'track-luangta-mahabua-kammathana');
+
     // All track IDs must be unique
     const ids = CHANTING_AUDIO_TRACKS.map(t => t.id);
     assert.strictEqual(ids.length, new Set(ids).size, 'All track IDs must be unique');
@@ -130,6 +146,12 @@ test('MP3 Chanting Audio Engine & Strict Prayer Matching Verification', async (t
 
     const altCharan = mp3Player.getAlternativeTracks({ title: 'หลวงพ่อจรัญ วัดอัมพวัน' });
     assert.ok(altCharan.length >= 4, `หลวงพ่อจรัญ should have 4+ versions, got ${altCharan.length}`);
+
+    const altImina = mp3Player.getAlternativeTracks({ title: 'บทกรวดน้ำอิมินา' });
+    assert.ok(altImina.length >= 3, `กรวดน้ำ should have 3+ versions, got ${altImina.length}`);
+
+    const altAbhinha = mp3Player.getAlternativeTracks({ title: 'อภิณหปัจจเวกขณ์' });
+    assert.ok(altAbhinha.length >= 2, `อภิณหควรมี 2+ versions, got ${altAbhinha.length}`);
   });
 
   await t.test('MP3 player utility functions: time formatting, speed, loop', () => {
