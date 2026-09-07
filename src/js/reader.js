@@ -861,7 +861,8 @@ export class ComicReaderEngine {
 
     const moreIndicator = document.createElement('div');
     moreIndicator.className = 'scroll-more-indicator';
-    moreIndicator.innerHTML = '<span>มีต่อ</span> <span>▼</span> <span class="more-subtext">(ปัดขึ้น/แตะ)</span>';
+    moreIndicator.innerHTML = '<span>มีต่อ</span> <span class="more-arrow">▼</span> <span class="more-subtext">(ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง)</span>';
+    moreIndicator.title = 'ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
     const handleMoreClick = (e) => {
       e.preventDefault();
       e.stopPropagation();

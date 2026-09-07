@@ -506,20 +506,49 @@ body.theme-midnight .reader-view:not(.layout-centered) .verse-thai-wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  font-size: 0.78rem;
-  font-family: var(--font-header);
+  gap: 5px;
+  font-size: 0.76rem;
+  font-family: var(--font-header, sans-serif);
   color: var(--accent-gold);
-  background: rgba(212, 175, 55, 0.15);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  padding: 2px 12px;
-  border-radius: var(--radius-full);
+  background: rgba(212, 175, 55, 0.16);
+  border: 1px solid rgba(212, 175, 55, 0.38);
+  padding: 3px 14px;
+  border-radius: var(--radius-full, 9999px);
   margin-bottom: 2px;
   cursor: pointer;
   animation: floatPulse 2.2s infinite ease-in-out;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s ease;
   user-select: none;
   line-height: 1.4;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.scroll-more-indicator:hover {
+  background: rgba(212, 175, 55, 0.28);
+  border-color: var(--accent-gold);
+}
+
+.scroll-more-indicator:active {
+  transform: scale(0.96);
+}
+
+.scroll-more-indicator .more-arrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  animation: arrowBounce 1.5s infinite ease-in-out;
+}
+
+@keyframes arrowBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+.scroll-more-indicator .more-subtext {
+  font-size: 0.72rem;
+  opacity: 0.92;
+  color: #fde68a;
+  font-weight: 500;
 }
 
 .scroll-more-indicator.hidden {

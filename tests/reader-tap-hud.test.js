@@ -74,5 +74,6 @@ test('Reader Gesture Hint & Auto-Hide HUD Live Verification', async (t) => {
     assert.ok(jsContent.includes('toggleReaderHelp()'), 'toggleReaderHelp method must exist');
     // Ensure that handleTouchEnd and handleMouseUp call hideHUD()
     assert.ok(jsContent.includes('if (this.hudVisible) this.hideHUD();'), 'HUD must hide automatically when navigating pages or swiping');
+    assert.ok(jsContent.includes('(ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง)'), 'moreIndicator must inform user about swiping left-right and scrolling up-down');
   });
 });
