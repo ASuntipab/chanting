@@ -73,18 +73,32 @@
 | แพลตฟอร์ม | ประเภทรูปภาพ | ขนาดที่กำหนด (พิกเซล) | สถานะในโปรเจกต์ |
 | :--- | :--- | :--- | :---: |
 | **Android** | App Icon (Launcher) | 512 x 512 (32-bit PNG) | ✅ มีพร้อมใน `src/assets/icon-512.png` |
-| **Android** | กราฟิกโปรโมต (Feature Graphic) | 1024 x 500 (JPG/PNG แนวนอน) | แนะนำแคปภาพหน้าจอในธีม Cosmic |
-| **Android** | ภาพหน้าจอ (Phone Screenshots) | อัตราส่วน 16:9 หรือ 18:9 (อย่างน้อย 2 รูป) | แคปหน้าจอ 4-6 หน้า (คลัง, อ่าน, สถิติ, พระไตรปิฎก) |
+| **Android** | กราฟิกโปรโมต (Feature Graphic) | 1024 x 500 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/android_feature_graphic_1024x500/` |
+| **Android** | ภาพหน้าจอโทรศัพท์ (Phone Screenshots) | 1080 x 2400 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/android_phone_1080x2400/` (๗ รูป) |
+| **Android** | ภาพหน้าจอแท็บเล็ต 7 นิ้ว (7" Tablet) | 1200 x 1920 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/android_tablet_7inch_1200x1920/` (๗ รูป) |
+| **Android** | ภาพหน้าจอแท็บเล็ต 10 นิ้ว (10" Tablet) | 1600 x 2560 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/android_tablet_10inch_1600x2560/` (๗ รูป) |
 | **iOS** | App Store Icon | 1024 x 1024 (ไม่มี Alpha/ความโปร่งใส) | ✅ มีพร้อมใน `AppIcon.appiconset` |
 | **iOS** | ภาพหน้าจอ iPhone 6.5" (ตามหน้าจอ App Store Connect) | 1284 x 2778 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.5_1284x2778/` (๗ รูป) |
 | **iOS** | ภาพหน้าจอ iPhone 6.5" (ขนาดทางเลือก) | 1242 x 2688 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.5_1242x2688/` (๗ รูป) |
 | **iOS** | ภาพหน้าจอ iPhone 6.7" (iPhone 14/15/16 Pro Max) | 1290 x 2796 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.7_1290x2796/` (๗ รูป) |
 | **iOS** | ภาพหน้าจอ iPad 12.9" (ถ้าเปิดใช้) | 2048 x 2732 | แคปจาก Simulator iPad |
 
-### 💡 คำสั่งสร้างภาพหน้าจอชุดใหม่ทุกขนาดอัตโนมัติ:
+### 💡 คำสั่งสร้างภาพหน้าจอชุดใหม่ทุกระบบ (iOS + Android) อัตโนมัติ:
 ```bash
 npm run screenshots:generate
 ```
-โฟลเดอร์สำหรับลากไฟล์ขึ้น App Store Connect ทันที:
-👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_6.5_1284x2778\`
+- สำหรับ iOS: `npm run screenshots:generate:ios`
+- สำหรับ Android: `npm run screenshots:generate:android`
+
+### 📂 โฟลเดอร์สำหรับลากไฟล์ขึ้น Store ทันที:
+- **Apple App Store Connect (iPhone 6.5"):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_6.5_1284x2778\`
+- **Google Play Console (Feature Graphic 1024x500):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\android_feature_graphic_1024x500\`
+- **Google Play Console (Phone 1080x2400):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\android_phone_1080x2400\`
+- **Google Play Console (Tablet 7" & 10"):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\android_tablet_7inch_1200x1920\`  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\android_tablet_10inch_1600x2560\`
+
 
