@@ -324,6 +324,44 @@
           🔔 อ่านจบแล้ว (บันทึกการสวด)
         </button>
       </div>
+
+      <!-- Itipiso / Custom Chanting Tally Counter Widget (Auto-appears on itipiso page or repeatable prayers) -->
+      <div id="itipisoCounterWidget" class="itipiso-counter-widget" style="display: none;">
+        <div class="itipiso-widget-card">
+          <div class="itipiso-widget-header">
+            <span class="itipiso-widget-badge">📿 สวดพุทธคุณ (เท่าอายุ + ๑)</span>
+            <button id="btnItipisoSettings" class="btn-icon btn-itipiso-gear" title="ตั้งค่าอายุ / จำนวนจบเป้าหมาย">⚙️</button>
+          </div>
+          
+          <div class="itipiso-tally-row">
+            <div class="itipiso-count-display">
+              <span class="itipiso-count-label">จบที่</span>
+              <span id="itipisoCurrent" class="itipiso-count-current">0</span>
+              <span class="itipiso-count-divider">/</span>
+              <span id="itipisoTarget" class="itipiso-count-target">41</span>
+              <span class="itipiso-count-unit">จบ</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="itipiso-progress-track">
+            <div id="itipisoProgressBar" class="itipiso-progress-fill" style="width: 0%;"></div>
+          </div>
+
+          <!-- Quick Action Buttons: Easy Tap Count (+1), Minus (-1), Reset (↺) -->
+          <div class="itipiso-actions-row">
+            <button id="btnItipisoMinus" class="btn-itipiso-sub" title="ลดย้อน 1 จบ">-๑</button>
+            <button id="btnItipisoCount" class="btn-itipiso-main" title="แตะนับจบ (+๑)">
+              <span class="itipiso-main-icon">🔔</span>
+              <span class="itipiso-main-text">แตะนับจบ (+๑)</span>
+            </button>
+            <button id="btnItipisoReset" class="btn-itipiso-sub btn-itipiso-reset" title="เคลียร์ตัวนับรอบ (↺)">
+              <span class="itipiso-reset-icon">↺</span>
+              <span class="itipiso-reset-text">เคลียร์</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Reader Bottom Floating Bar (Auto-hiding HUD) - Fast Jump & Controls -->
@@ -441,6 +479,70 @@
         <div class="reader-help-footer">
           <button id="btnGotReaderHelp" class="btn-primary" style="width: 100%; padding: 10px; border-radius: var(--radius-full);">
             ✨ เข้าใจแล้ว เริ่มสวดมนต์
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Itipiso Age & Target Setting Modal -->
+    <div id="itipisoAgeModal" class="itipiso-modal-overlay" style="display: none;">
+      <div class="itipiso-modal-card">
+        <div class="itipiso-modal-header">
+          <div class="itipiso-modal-title-wrap">
+            <span class="itipiso-modal-badge">⚙️ ตั้งค่าการสวดพุทธคุณ</span>
+            <h4 class="itipiso-modal-title">กำหนดอายุและเป้าหมายรอบ</h4>
+          </div>
+          <button id="btnCloseItipisoAgeModal" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;" title="ปิด">✕</button>
+        </div>
+        <div class="itipiso-modal-body">
+          <div class="itipiso-setting-field">
+            <label for="itipisoUserAgeInput" class="itipiso-field-label">อายุของท่าน (ปี):</label>
+            <div class="itipiso-age-input-row">
+              <input type="number" id="itipisoUserAgeInput" class="itipiso-age-input" min="1" max="150" value="40">
+              <span class="itipiso-age-calc-badge">= สวด <strong id="itipisoCalculatedTarget">41</strong> จบ</span>
+            </div>
+            <p class="itipiso-field-hint">ระบบจะคำนวณตามตำราโบราณ "อายุ + ๑ จบ" ให้อัตโนมัติ เพื่อคุ้มครองดวงชะตาและเจริญสติ</p>
+          </div>
+
+          <div class="itipiso-preset-section">
+            <label class="itipiso-field-label">หรือเลือกจำนวนจบยอดนิยม:</label>
+            <div class="itipiso-preset-pills">
+              <button class="itipiso-preset-btn active" data-preset="age-plus-1">เท่าอายุ + ๑</button>
+              <button class="itipiso-preset-btn" data-target="3">๓ จบ</button>
+              <button class="itipiso-preset-btn" data-target="9">๙ จบ</button>
+              <button class="itipiso-preset-btn" data-target="108">๑๐๘ จบ</button>
+            </div>
+          </div>
+        </div>
+        <div class="itipiso-modal-footer">
+          <button id="btnSaveItipisoAge" class="btn-primary" style="width: 100%; padding: 10px; border-radius: var(--radius-full);">
+            💾 บันทึกเป้าหมายการสวด
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Itipiso Completion Celebration Modal (Auto Clear on Finish) -->
+    <div id="itipisoCompleteModal" class="itipiso-modal-overlay" style="display: none;">
+      <div class="itipiso-modal-card complete-celebration-card">
+        <div class="itipiso-complete-icon-wrap">
+          <span class="itipiso-complete-big-icon">🎉 📿 ✨</span>
+        </div>
+        <div class="itipiso-complete-content">
+          <h3 class="itipiso-complete-title">สาธุ อนุโมทนาบุญ!</h3>
+          <p id="itipisoCompleteDesc" class="itipiso-complete-desc">
+            ท่านได้สวดพุทธคุณ (อิติปิโส) ครบ <strong id="itipisoCompleteRounds">41</strong> จบ บริบูรณ์แล้ว!
+          </p>
+          <p class="itipiso-blessing-text">
+            "ขออานุภาพแห่งพระพุทธคุณ คุ้มครองรักษาท่านและครอบครัวให้ปราศจากสรรพทุกข์ สรรพโศก สรรพโรค สรรพภัย เจริญด้วยอายุ วรรณะ สุขะ พละ เทอญ"
+          </p>
+        </div>
+        <div class="itipiso-complete-footer">
+          <button id="btnItipisoCompleteClear" class="btn-primary" style="width: 100%; padding: 12px; border-radius: var(--radius-full); font-size: 1rem;">
+            ↺ เคลียร์ตัวนับ เพื่อเริ่มรอบใหม่
+          </button>
+          <button id="btnItipisoCompleteClose" class="btn-secondary" style="width: 100%; padding: 8px; border-radius: var(--radius-full); margin-top: 8px;">
+            ปิดหน้าต่างนี้
           </button>
         </div>
       </div>

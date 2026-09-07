@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   FAVORITES: 'tamma_favorites_v1',
   TRACKER: 'tamma_tracker_v1',
   SETTINGS: 'tamma_settings_v1',
-  ADMIN_AUTH: 'tamma_admin_auth_v1'
+  ADMIN_AUTH: 'tamma_admin_auth_v1',
+  ITIPISO_ROUNDS: 'tamma_itipiso_rounds_v1'
 };
 
 class DhammaStorageEngine {
@@ -329,7 +330,9 @@ class DhammaStorageEngine {
       theme: 'cosmic',
       fontSize: 1.15,
       fontFamily: 'sarabun',
-      soundEnabled: true
+      soundEnabled: true,
+      userAge: 40,
+      itipisoCustomTarget: 0
     });
   }
 
@@ -338,6 +341,47 @@ class DhammaStorageEngine {
     const merged = { ...current, ...settings };
     this.save(STORAGE_KEYS.SETTINGS, merged);
     return merged;
+  }
+
+  // --- Itipiso Tally Counter API ---
+  getItipisoTarget() {
+    const settings = this.getSettings();
+    if (settings.itipisoCustomTarget && settings.itipisoCustomTarget > 0) {
+      return parseInt(settings.itipisoCustomTarget, 10);
+    }
+    const age = parseInt(settings.userAge, 10) || 40;
+    return age + 1;
+  }
+
+  getItipisoRound(prayerId = 'default') {
+    const rounds = this.get(STORAGE_KEYS.ITIPISO_ROUNDS, {});
+    return rounds[prayerId] || 0;
+  }
+
+  setItipisoRound(prayerId = 'default', count = 0) {
+    const rounds = this.get(STORAGE_KEYS.ITIPISO_ROUNDS, {});
+    rounds[prayerId] = Math.max(0, count);
+    this.save(STORAGE_KEYS.ITIPISO_ROUNDS, rounds);
+    return rounds[prayerId];
+  }
+
+  incrementItipisoRound(prayerId = 'default') {
+    const current = this.getItipisoRound(prayerId) + 1;
+    const target = this.getItipisoTarget();
+    this.setItipisoRound(prayerId, current);
+    const completed = current >= target;
+    return { current, target, completed };
+  }
+
+  decrementItipisoRound(prayerId = 'default') {
+    const current = Math.max(0, this.getItipisoRound(prayerId) - 1);
+    const target = this.getItipisoTarget();
+    this.setItipisoRound(prayerId, current);
+    return { current, target };
+  }
+
+  resetItipisoRound(prayerId = 'default') {
+    return this.setItipisoRound(prayerId, 0);
   }
 
   // --- Admin Role API ---

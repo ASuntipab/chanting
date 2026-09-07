@@ -136,6 +136,25 @@ export class ComicReaderEngine {
     this.readerGestureHint = document.getElementById('readerGestureHint');
     this.gestureHintTimer = null;
     this.lastWheelTime = 0;
+
+    // Itipiso Tally Counter Elements
+    this.itipisoCounterWidget = document.getElementById('itipisoCounterWidget');
+    this.itipisoCurrent = document.getElementById('itipisoCurrent');
+    this.itipisoTarget = document.getElementById('itipisoTarget');
+    this.itipisoProgressBar = document.getElementById('itipisoProgressBar');
+    this.btnItipisoCount = document.getElementById('btnItipisoCount');
+    this.btnItipisoMinus = document.getElementById('btnItipisoMinus');
+    this.btnItipisoReset = document.getElementById('btnItipisoReset');
+    this.btnItipisoSettings = document.getElementById('btnItipisoSettings');
+    this.itipisoAgeModal = document.getElementById('itipisoAgeModal');
+    this.itipisoUserAgeInput = document.getElementById('itipisoUserAgeInput');
+    this.itipisoCalculatedTarget = document.getElementById('itipisoCalculatedTarget');
+    this.btnSaveItipisoAge = document.getElementById('btnSaveItipisoAge');
+    this.btnCloseItipisoAgeModal = document.getElementById('btnCloseItipisoAgeModal');
+    this.itipisoCompleteModal = document.getElementById('itipisoCompleteModal');
+    this.itipisoCompleteRounds = document.getElementById('itipisoCompleteRounds');
+    this.btnItipisoCompleteClear = document.getElementById('btnItipisoCompleteClear');
+    this.btnItipisoCompleteClose = document.getElementById('btnItipisoCompleteClose');
   }
 
   bindEvents() {
@@ -372,11 +391,76 @@ export class ComicReaderEngine {
       mp3Player.seekPercent(percent);
     });
 
-    // Prevent clicks inside Toolbar & Bottom bar from toggling page
+    // Prevent clicks inside Toolbar, Bottom bar & Modals from toggling page
     this.readerToolbar?.addEventListener('click', (e) => e.stopPropagation());
     this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
     this.ttsSettingsModal?.addEventListener('click', (e) => e.stopPropagation());
     this.mp3PlayerDeck?.addEventListener('click', (e) => e.stopPropagation());
+    this.itipisoCounterWidget?.addEventListener('click', (e) => e.stopPropagation());
+    this.itipisoAgeModal?.addEventListener('click', (e) => e.stopPropagation());
+    this.itipisoCompleteModal?.addEventListener('click', (e) => e.stopPropagation());
+
+    // Itipiso Tally Counter Action Events
+    this.btnItipisoCount?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleItipisoCount();
+    });
+    this.btnItipisoMinus?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleItipisoMinus();
+    });
+    this.btnItipisoReset?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleItipisoReset();
+    });
+    this.btnItipisoSettings?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.showItipisoAgeModal();
+    });
+    this.btnCloseItipisoAgeModal?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideItipisoAgeModal();
+    });
+    this.btnSaveItipisoAge?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.saveItipisoAgeSettings();
+    });
+    this.itipisoUserAgeInput?.addEventListener('input', (e) => {
+      const age = parseInt(e.target.value, 10) || 40;
+      if (this.itipisoCalculatedTarget) {
+        this.itipisoCalculatedTarget.textContent = age + 1;
+      }
+    });
+
+    // Itipiso Preset Buttons
+    const presetBtns = this.itipisoAgeModal?.querySelectorAll('.itipiso-preset-btn');
+    presetBtns?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.preset === 'age-plus-1') {
+          const age = parseInt(this.itipisoUserAgeInput?.value, 10) || 40;
+          if (this.itipisoCalculatedTarget) this.itipisoCalculatedTarget.textContent = age + 1;
+          this.tempCustomTarget = 0;
+        } else if (btn.dataset.target) {
+          const t = parseInt(btn.dataset.target, 10);
+          if (this.itipisoCalculatedTarget) this.itipisoCalculatedTarget.textContent = t;
+          this.tempCustomTarget = t;
+        }
+      });
+    });
+
+    // Itipiso Completion Modal Buttons
+    this.btnItipisoCompleteClear?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleItipisoReset();
+      this.hideItipisoCompleteModal();
+    });
+    this.btnItipisoCompleteClose?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideItipisoCompleteModal();
+    });
 
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
@@ -542,6 +626,9 @@ export class ComicReaderEngine {
     mp3Player.pause();
     this.hideTTSSettings();
     this.hideMP3Deck();
+    this.hideItipisoAgeModal();
+    this.hideItipisoCompleteModal();
+    if (this.itipisoCounterWidget) this.itipisoCounterWidget.style.display = 'none';
     if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
       window.tammaApp.refreshCurrentViews();
     }
@@ -792,6 +879,7 @@ export class ComicReaderEngine {
 
     this.updateDots();
     this.updateNavButtons();
+    this.checkItipisoPage();
   }
 
   goToPage(index, animate = true) {
@@ -891,7 +979,7 @@ export class ComicReaderEngine {
     if (e.touches.length !== 1) return;
     const target = e.target;
     // Ignore interactive controls to prevent button/HUD clash
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       this.isSwiping = false;
       this.touchStartTime = 0;
       return;
@@ -926,7 +1014,7 @@ export class ComicReaderEngine {
     this.lastTouchTime = Date.now();
 
     const target = e.target;
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       return;
     }
 
@@ -958,7 +1046,7 @@ export class ComicReaderEngine {
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
     const target = e.target;
     // Ignore interactive controls to prevent button/HUD clash
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       this.isMouseDown = false;
       this.touchStartTime = 0;
       return;
@@ -991,7 +1079,7 @@ export class ComicReaderEngine {
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
 
     const target = e.target;
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       return;
     }
 
@@ -1406,5 +1494,138 @@ export class ComicReaderEngine {
 
   selectMP3Track(trackId) {
     mp3Player.loadTrack(trackId);
+  }
+
+  // --- Itipiso Tally Counter Controllers ---
+  getPrayerKey() {
+    return this.currentPrayer ? this.currentPrayer.id : 'default';
+  }
+
+  isItipisoPage(index) {
+    if (!this.currentPrayer) return false;
+    const rawPages = this.currentPrayer.pages;
+    if (rawPages && rawPages[index]) {
+      const page = rawPages[index];
+      const title = (page.verseTitle || '').toLowerCase();
+      const pali = (page.pali || '').toLowerCase();
+      const thai = (page.thai || '').toLowerCase();
+      if (title.includes('เท่าอายุ') || title.includes('อายุ + ๑') || title.includes('อายุ+๑') || thai.includes('เท่าอายุ')) {
+        return true;
+      }
+      if (title.includes('อิติปิโส') || title.includes('พุทธคุณ') || pali.includes('อิติปิ โส') || pali.includes('อิติปิโส')) {
+        return true;
+      }
+    }
+    const prayerTitle = (this.currentPrayer.title || '').toLowerCase();
+    return prayerTitle.includes('เท่าอายุ') || prayerTitle.includes('อิติปิโส');
+  }
+
+  checkItipisoPage() {
+    if (!this.itipisoCounterWidget) return;
+    if (this.isItipisoPage(this.viewportIndex)) {
+      this.updateItipisoDisplay();
+      this.itipisoCounterWidget.style.display = 'block';
+    } else {
+      this.itipisoCounterWidget.style.display = 'none';
+      this.hideItipisoAgeModal();
+    }
+  }
+
+  updateItipisoDisplay() {
+    const key = this.getPrayerKey();
+    const current = storage.getItipisoRound(key);
+    const target = storage.getItipisoTarget();
+
+    if (this.itipisoCurrent) this.itipisoCurrent.textContent = current;
+    if (this.itipisoTarget) this.itipisoTarget.textContent = target;
+
+    if (this.itipisoProgressBar) {
+      const pct = Math.min(100, Math.round((current / Math.max(1, target)) * 100));
+      this.itipisoProgressBar.style.width = `${pct}%`;
+    }
+  }
+
+  handleItipisoCount() {
+    const key = this.getPrayerKey();
+    const result = storage.incrementItipisoRound(key);
+
+    // Play sweet chime bell & haptic vibration
+    audio.playBell(580);
+    nativeBridge.hapticSuccess();
+
+    // Bump animation on number
+    if (this.itipisoCurrent) {
+      this.itipisoCurrent.textContent = result.current;
+      this.itipisoCurrent.classList.remove('bump');
+      void this.itipisoCurrent.offsetWidth; // trigger reflow
+      this.itipisoCurrent.classList.add('bump');
+      setTimeout(() => this.itipisoCurrent?.classList.remove('bump'), 180);
+    }
+
+    if (this.itipisoProgressBar) {
+      const pct = Math.min(100, Math.round((result.current / Math.max(1, result.target)) * 100));
+      this.itipisoProgressBar.style.width = `${pct}%`;
+    }
+
+    // Check completion & celebrate!
+    if (result.completed) {
+      setTimeout(() => {
+        this.showItipisoCompleteModal(result.current);
+      }, 350);
+    }
+  }
+
+  handleItipisoMinus() {
+    const key = this.getPrayerKey();
+    storage.decrementItipisoRound(key);
+    nativeBridge.hapticLight?.();
+    this.updateItipisoDisplay();
+  }
+
+  handleItipisoReset() {
+    const key = this.getPrayerKey();
+    storage.resetItipisoRound(key);
+    nativeBridge.hapticSuccess();
+    this.updateItipisoDisplay();
+    if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
+      window.tammaApp.showToast('↺ เคลียร์ตัวนับรอบเรียบร้อยแล้ว');
+    }
+  }
+
+  showItipisoAgeModal() {
+    if (!this.itipisoAgeModal) return;
+    const settings = storage.getSettings();
+    const age = settings.userAge || 40;
+    if (this.itipisoUserAgeInput) this.itipisoUserAgeInput.value = age;
+    if (this.itipisoCalculatedTarget) this.itipisoCalculatedTarget.textContent = storage.getItipisoTarget();
+    this.itipisoAgeModal.style.display = 'flex';
+  }
+
+  hideItipisoAgeModal() {
+    if (this.itipisoAgeModal) this.itipisoAgeModal.style.display = 'none';
+  }
+
+  saveItipisoAgeSettings() {
+    const age = parseInt(this.itipisoUserAgeInput?.value, 10) || 40;
+    const customTarget = this.tempCustomTarget !== undefined ? this.tempCustomTarget : 0;
+    storage.saveSettings({ userAge: age, itipisoCustomTarget: customTarget });
+    this.hideItipisoAgeModal();
+    this.updateItipisoDisplay();
+    if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
+      const target = storage.getItipisoTarget();
+      window.tammaApp.showToast(`บันทึกเป้าหมาย: ${target} จบ เรียบร้อย`);
+    }
+  }
+
+  showItipisoCompleteModal(rounds) {
+    if (!this.itipisoCompleteModal) return;
+    audio.playBell(648); // Miraculous bell chime on completion
+    nativeBridge.hapticSuccess();
+    if (this.itipisoCompleteRounds) this.itipisoCompleteRounds.textContent = rounds;
+    this.itipisoCompleteModal.style.display = 'flex';
+  }
+
+  hideItipisoCompleteModal() {
+    if (this.itipisoCompleteModal) this.itipisoCompleteModal.style.display = 'none';
   }
 }
