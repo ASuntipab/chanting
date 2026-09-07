@@ -2605,20 +2605,21 @@ body.theme-parchment .gesture-guide-item {
 }
 
 .btn-itipiso-reset {
-  color: #fca5a5 !important;
+  color: #f87171 !important;
   border-color: rgba(248, 113, 113, 0.35) !important;
-  background: rgba(248, 113, 113, 0.1) !important;
-  font-size: 1.25rem;
+  background: rgba(248, 113, 113, 0.12) !important;
+  transition: all 0.2s ease;
 }
 
 .btn-itipiso-reset:hover {
-  background: rgba(248, 113, 113, 0.22) !important;
-  color: #fee2e2 !important;
+  background: rgba(248, 113, 113, 0.25) !important;
+  color: #fca5a5 !important;
+  transform: rotate(-45deg);
 }
 
 .btn-itipiso-reset:active {
-  transform: scale(0.92) rotate(-45deg);
-  background: rgba(248, 113, 113, 0.28) !important;
+  transform: scale(0.9) rotate(-90deg);
+  background: rgba(248, 113, 113, 0.35) !important;
 }
 
 @media (min-width: 600px) {
