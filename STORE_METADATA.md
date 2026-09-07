@@ -1,4 +1,4 @@
-﻿# 📦 เอกสารเตรียมข้อมูลนำแอปขึ้น Google Play Store และ Apple App Store
+# 📦 เอกสารเตรียมข้อมูลนำแอปขึ้น Google Play Store และ Apple App Store
 > แอปพลิเคชัน: **บทสวดมนต์ (Chant)** | Package Name / Bundle ID: `com.kaisoft.chant`
 
 ---
@@ -76,5 +76,15 @@
 | **Android** | กราฟิกโปรโมต (Feature Graphic) | 1024 x 500 (JPG/PNG แนวนอน) | แนะนำแคปภาพหน้าจอในธีม Cosmic |
 | **Android** | ภาพหน้าจอ (Phone Screenshots) | อัตราส่วน 16:9 หรือ 18:9 (อย่างน้อย 2 รูป) | แคปหน้าจอ 4-6 หน้า (คลัง, อ่าน, สถิติ, พระไตรปิฎก) |
 | **iOS** | App Store Icon | 1024 x 1024 (ไม่มี Alpha/ความโปร่งใส) | ✅ มีพร้อมใน `AppIcon.appiconset` |
-| **iOS** | ภาพหน้าจอ iPhone 6.7" / 6.5" | 1290 x 2796 หรือ 1242 x 2688 | แคปจาก Simulator หรือเครื่องจริง |
+| **iOS** | ภาพหน้าจอ iPhone 6.5" (ตามหน้าจอ App Store Connect) | 1284 x 2778 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.5_1284x2778/` (๗ รูป) |
+| **iOS** | ภาพหน้าจอ iPhone 6.5" (ขนาดทางเลือก) | 1242 x 2688 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.5_1242x2688/` (๗ รูป) |
+| **iOS** | ภาพหน้าจอ iPhone 6.7" (iPhone 14/15/16 Pro Max) | 1290 x 2796 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.7_1290x2796/` (๗ รูป) |
 | **iOS** | ภาพหน้าจอ iPad 12.9" (ถ้าเปิดใช้) | 2048 x 2732 | แคปจาก Simulator iPad |
+
+### 💡 คำสั่งสร้างภาพหน้าจอชุดใหม่ทุกขนาดอัตโนมัติ:
+```bash
+npm run screenshots:generate
+```
+โฟลเดอร์สำหรับลากไฟล์ขึ้น App Store Connect ทันที:
+👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_6.5_1284x2778\`
+
