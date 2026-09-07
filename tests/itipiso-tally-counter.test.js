@@ -88,6 +88,8 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     assert.ok(html.includes('id="btnItipisoCount"'), 'btnItipisoCount must exist');
     assert.ok(html.includes('id="btnItipisoReset"'), 'btnItipisoReset must exist');
     assert.ok(html.includes('id="btnItipisoMinus"'), 'btnItipisoMinus must exist');
+    assert.ok(html.includes('id="itipisoVerseCard"'), 'itipisoVerseCard must exist for tap-to-count');
+    assert.ok(html.includes('itipiso-tap-badge'), 'itipiso-tap-badge must exist for visual guidance');
     assert.ok(html.includes('id="btnCloseItipisoWidget"'), 'btnCloseItipisoWidget must exist in modal');
     assert.ok(html.includes('itipiso-chant-pali-text'), 'itipiso-chant-pali-text must exist in popup');
     assert.ok(html.includes('อิติปิ โส ภะคะวา'), 'Pali verse text must be embedded directly in popup modal');
@@ -97,6 +99,8 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     // CSS rules
     assert.ok(css.includes('.itipiso-counter-widget'), '.itipiso-counter-widget must be styled in reader.css');
     assert.ok(css.includes('.itipiso-chant-modal-card'), '.itipiso-chant-modal-card must be styled');
+    assert.ok(css.includes('.itipiso-chant-verse-card'), '.itipiso-chant-verse-card must be styled');
+    assert.ok(css.includes('.itipiso-tap-badge'), '.itipiso-tap-badge must be styled');
     assert.ok(css.includes('.btn-itipiso-main'), '.btn-itipiso-main must be styled');
     assert.ok(css.includes('.btn-itipiso-reset'), '.btn-itipiso-reset must be styled');
     assert.ok(css.includes('.itipiso-modal-overlay'), '.itipiso-modal-overlay must be styled');
@@ -108,5 +112,6 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     assert.ok(js.includes('hideItipisoWidget()'), 'hideItipisoWidget method must exist');
     assert.ok(js.includes('handleItipisoCount()'), 'handleItipisoCount method must exist');
     assert.ok(js.includes('handleItipisoReset()'), 'handleItipisoReset method must exist');
+    assert.ok(js.includes('itipisoVerseCard'), 'itipisoVerseCard event listener must exist');
   });
 });

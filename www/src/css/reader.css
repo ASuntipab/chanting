@@ -2273,11 +2273,26 @@ body.theme-parchment .gesture-guide-item {
 
 .itipiso-chant-verse-card {
   background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(212, 175, 55, 0.28);
+  border: 1.5px solid rgba(212, 175, 55, 0.3);
   border-radius: 14px;
   padding: 14px 16px;
   text-align: center;
   box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.itipiso-chant-verse-card:hover {
+  border-color: rgba(251, 191, 36, 0.55);
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.itipiso-chant-verse-card:active {
+  transform: scale(0.985);
+  border-color: var(--accent-gold);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 20px rgba(251, 191, 36, 0.3);
 }
 
 .itipiso-chant-verse-header {
@@ -2287,6 +2302,22 @@ body.theme-parchment .gesture-guide-item {
   margin-bottom: 8px;
   letter-spacing: 0.5px;
   opacity: 0.95;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.itipiso-tap-badge {
+  font-size: 0.72rem;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 9999px);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .itipiso-chant-pali-text {
@@ -2453,50 +2484,50 @@ body.theme-parchment .gesture-guide-item {
 .itipiso-actions-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 12px;
+  margin-top: 6px;
 }
 
 .btn-itipiso-main {
   flex: 1;
-  height: 48px;
+  height: 56px;
   background: linear-gradient(135deg, #d97706, #f59e0b);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: var(--radius-full, 9999px);
   color: #120e0b;
   font-family: var(--font-thai, sans-serif);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
-  transition: transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45);
+  transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .btn-itipiso-main:active {
   transform: scale(0.96);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-  filter: brightness(1.15);
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+  filter: brightness(1.18);
 }
 
 .itipiso-main-icon {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
 }
 
 .btn-itipiso-sub {
-  height: 48px;
-  min-width: 52px;
-  padding: 0 14px;
+  height: 56px;
+  min-width: 58px;
+  padding: 0 16px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-full, 9999px);
   color: var(--text-secondary);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -2504,6 +2535,8 @@ body.theme-parchment .gesture-guide-item {
   justify-content: center;
   gap: 4px;
   transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-itipiso-sub:active {
@@ -2512,13 +2545,35 @@ body.theme-parchment .gesture-guide-item {
 }
 
 .btn-itipiso-reset {
-  color: #f87171;
-  border-color: rgba(248, 113, 113, 0.25);
-  background: rgba(248, 113, 113, 0.08);
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+  background: rgba(248, 113, 113, 0.08) !important;
+  transition: all 0.2s ease;
 }
 
 .btn-itipiso-reset:hover {
-  background: rgba(248, 113, 113, 0.18);
+  background: rgba(248, 113, 113, 0.22) !important;
+  color: #fca5a5 !important;
+  transform: rotate(-45deg);
+}
+
+@media (min-width: 600px) {
+  .itipiso-chant-modal-card {
+    max-width: 520px;
+    border-radius: 24px;
+  }
+  .itipiso-chant-pali-text {
+    font-size: 1.25rem;
+    line-height: 1.95;
+  }
+  .btn-itipiso-main {
+    height: 60px;
+    font-size: 1.22rem;
+  }
+  .btn-itipiso-sub {
+    height: 60px;
+    min-width: 64px;
+  }
 }
 
 /* Parchment Theme adjustments */

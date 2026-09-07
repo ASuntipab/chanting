@@ -151,6 +151,7 @@ export class ComicReaderEngine {
     this.itipisoCurrent = document.getElementById('itipisoCurrent');
     this.itipisoTarget = document.getElementById('itipisoTarget');
     this.itipisoProgressBar = document.getElementById('itipisoProgressBar');
+    this.itipisoVerseCard = document.getElementById('itipisoVerseCard');
     this.btnItipisoCount = document.getElementById('btnItipisoCount');
     this.btnItipisoMinus = document.getElementById('btnItipisoMinus');
     this.btnItipisoReset = document.getElementById('btnItipisoReset');
@@ -441,6 +442,10 @@ export class ComicReaderEngine {
 
     // Itipiso Tally Counter Action Events
     this.btnItipisoCount?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleItipisoCount();
+    });
+    this.itipisoVerseCard?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.handleItipisoCount();
     });
@@ -1732,6 +1737,11 @@ export class ComicReaderEngine {
 
   handleItipisoReset() {
     const key = this.getPrayerKey();
+    const current = storage.getItipisoRound(key);
+    if (current > 0 && typeof window !== 'undefined' && typeof window.confirm === 'function') {
+      const confirmed = window.confirm(`ท่านสวดไปแล้ว ${current} จบ ต้องการเคลียร์ตัวนับรอบเพื่อเริ่มใหม่ใช่หรือไม่?`);
+      if (!confirmed) return;
+    }
     storage.resetItipisoRound(key);
     nativeBridge.hapticSuccess();
     this.updateItipisoDisplay();
