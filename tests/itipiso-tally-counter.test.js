@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { storage } from '../src/js/storage.js';
 import fs from 'node:fs';
@@ -88,11 +88,15 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     assert.ok(html.includes('id="btnItipisoCount"'), 'btnItipisoCount must exist');
     assert.ok(html.includes('id="btnItipisoReset"'), 'btnItipisoReset must exist');
     assert.ok(html.includes('id="btnItipisoMinus"'), 'btnItipisoMinus must exist');
+    assert.ok(html.includes('id="btnCloseItipisoWidget"'), 'btnCloseItipisoWidget must exist in modal');
+    assert.ok(html.includes('itipiso-chant-pali-text'), 'itipiso-chant-pali-text must exist in popup');
+    assert.ok(html.includes('อิติปิ โส ภะคะวา'), 'Pali verse text must be embedded directly in popup modal');
     assert.ok(html.includes('id="itipisoAgeModal"'), 'itipisoAgeModal must exist');
     assert.ok(html.includes('id="itipisoCompleteModal"'), 'itipisoCompleteModal must exist');
 
     // CSS rules
     assert.ok(css.includes('.itipiso-counter-widget'), '.itipiso-counter-widget must be styled in reader.css');
+    assert.ok(css.includes('.itipiso-chant-modal-card'), '.itipiso-chant-modal-card must be styled');
     assert.ok(css.includes('.btn-itipiso-main'), '.btn-itipiso-main must be styled');
     assert.ok(css.includes('.btn-itipiso-reset'), '.btn-itipiso-reset must be styled');
     assert.ok(css.includes('.itipiso-modal-overlay'), '.itipiso-modal-overlay must be styled');
@@ -100,6 +104,8 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     // JS Engine logic
     assert.ok(js.includes('isItipisoPage('), 'isItipisoPage method must exist');
     assert.ok(js.includes('checkItipisoPage()'), 'checkItipisoPage method must exist');
+    assert.ok(js.includes('showItipisoWidget()'), 'showItipisoWidget method must exist');
+    assert.ok(js.includes('hideItipisoWidget()'), 'hideItipisoWidget method must exist');
     assert.ok(js.includes('handleItipisoCount()'), 'handleItipisoCount method must exist');
     assert.ok(js.includes('handleItipisoReset()'), 'handleItipisoReset method must exist');
   });

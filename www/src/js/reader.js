@@ -155,6 +155,7 @@ export class ComicReaderEngine {
     this.btnItipisoMinus = document.getElementById('btnItipisoMinus');
     this.btnItipisoReset = document.getElementById('btnItipisoReset');
     this.btnItipisoSettings = document.getElementById('btnItipisoSettings');
+    this.btnCloseItipisoWidget = document.getElementById('btnCloseItipisoWidget');
     this.itipisoAgeModal = document.getElementById('itipisoAgeModal');
     this.itipisoUserAgeInput = document.getElementById('itipisoUserAgeInput');
     this.itipisoCalculatedTarget = document.getElementById('itipisoCalculatedTarget');
@@ -226,6 +227,13 @@ export class ComicReaderEngine {
     this.btnChantInReader?.addEventListener('click', (e) => {
       e.stopPropagation();
       if (!this.currentPrayer) return;
+
+      // ถ้าเป็นชุดบทสวดที่มีบทพุทธคุณเท่าอายุ + ๑ ให้เปิดห้องสวดนับจบแบบ Popup ทันที!
+      if (this.isItipisoChantAvailable()) {
+        this.showItipisoWidget();
+        return;
+      }
+
       audio.playBell();
       nativeBridge.hapticSuccess();
       const count = storage.incrementPrayerCount(this.currentPrayer.id);
@@ -412,9 +420,24 @@ export class ComicReaderEngine {
     this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
     this.ttsSettingsModal?.addEventListener('click', (e) => e.stopPropagation());
     this.mp3PlayerDeck?.addEventListener('click', (e) => e.stopPropagation());
-    this.itipisoCounterWidget?.addEventListener('click', (e) => e.stopPropagation());
     this.itipisoAgeModal?.addEventListener('click', (e) => e.stopPropagation());
     this.itipisoCompleteModal?.addEventListener('click', (e) => e.stopPropagation());
+
+    // Itipiso Modal Background Click to Close
+    this.itipisoCounterWidget?.addEventListener('click', (e) => {
+      if (e.target === this.itipisoCounterWidget) {
+        e.stopPropagation();
+        this.hideItipisoWidget();
+      } else {
+        e.stopPropagation();
+      }
+    });
+
+    // Close Itipiso Popup Button
+    this.btnCloseItipisoWidget?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideItipisoWidget();
+    });
 
     // Itipiso Tally Counter Action Events
     this.btnItipisoCount?.addEventListener('click', (e) => {
@@ -792,6 +815,25 @@ export class ComicReaderEngine {
           contentWrap.appendChild(stanzaEl);
         });
         section.appendChild(contentWrap);
+      }
+
+      // ตรวจสอบว่าหน้านี้เป็นบทพุทธคุณเท่าอายุ + ๑ หรือไม่ เพื่อแสดงปุ่มเปิดห้องสวดนับจบ
+      const pTitle = (page.verseTitle || '').toLowerCase();
+      const pThai = (page.thai || '').toLowerCase();
+      const pPali = (page.pali || '').toLowerCase();
+      if (pTitle.includes('เท่าอายุ') || pThai.includes('เท่าอายุ') || (pTitle.includes('อิติปิโส') && pPali.includes('อิติปิ โส'))) {
+        const launchBox = document.createElement('div');
+        launchBox.className = 'itipiso-launch-box';
+        const launchBtn = document.createElement('button');
+        launchBtn.type = 'button';
+        launchBtn.className = 'btn-launch-itipiso-modal';
+        launchBtn.innerHTML = '<span>📿</span> <span>แตะเปิดห้องสวดนับจบ (เท่าอายุ + ๑)</span>';
+        launchBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.showItipisoWidget();
+        });
+        launchBox.appendChild(launchBtn);
+        section.appendChild(launchBox);
       }
 
       flow.appendChild(section);
@@ -1584,6 +1626,21 @@ export class ComicReaderEngine {
     return this.currentPrayer ? this.currentPrayer.id : 'default';
   }
 
+  isItipisoChantAvailable() {
+    if (!this.currentPrayer) return false;
+    const pTitle = (this.currentPrayer.title || '').toLowerCase();
+    if (pTitle.includes('เท่าอายุ') || pTitle.includes('อิติปิโส') || pTitle.includes('หลวงพ่อจรัญ')) {
+      return true;
+    }
+    const pages = this.currentPrayer.pages || [];
+    return pages.some(p => {
+      const t = (p.verseTitle || '').toLowerCase();
+      const pali = (p.pali || '').toLowerCase();
+      const thai = (p.thai || '').toLowerCase();
+      return t.includes('เท่าอายุ') || thai.includes('เท่าอายุ') || (t.includes('อิติปิโส') && pali.includes('อิติปิ โส'));
+    });
+  }
+
   isItipisoPage(index) {
     if (!this.currentPrayer) return false;
     const rawPages = this.currentPrayer.pages;
@@ -1599,16 +1656,24 @@ export class ComicReaderEngine {
         return true;
       }
     }
-    const prayerTitle = (this.currentPrayer.title || '').toLowerCase();
-    return prayerTitle.includes('เท่าอายุ') || prayerTitle.includes('อิติปิโส');
+    return false;
   }
 
   checkItipisoPage() {
+    // ปรับปรุงตามคำสั่งผู้ใช้: ไม่บังคับเปิด widget ลอยทับหน้าจออ่านปกติโดยอัตโนมัติ
+    // เพื่อป้องกันการแสดงผลผิดจุดและไม่บดบังเนื้อหาบทสวดมนต์
+    // ผู้ใช้สามารถกดเปิดห้องสวดนับจบได้จากปุ่มในหน้าบทสวด หรือปุ่มนับจบในแถบควบคุม
+    this.updateItipisoDisplay();
+  }
+
+  showItipisoWidget() {
     if (!this.itipisoCounterWidget) return;
-    if (this.isItipisoPage(this.viewportIndex)) {
-      this.updateItipisoDisplay();
-      this.itipisoCounterWidget.style.display = 'block';
-    } else {
+    this.updateItipisoDisplay();
+    this.itipisoCounterWidget.style.display = 'flex';
+  }
+
+  hideItipisoWidget() {
+    if (this.itipisoCounterWidget) {
       this.itipisoCounterWidget.style.display = 'none';
       this.hideItipisoAgeModal();
     }
