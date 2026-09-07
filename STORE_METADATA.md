@@ -25,7 +25,7 @@
   ```
 - **หมวดหมู่ (Category):** หนังสือและการอ้างอิง (Books & Reference)
 - **การจัดเรตติ้ง (Content Rating):** ทุกคน (Everyone / All Ages)
-- **อีเมลสนับสนุน (Support Email):** `support@kaisoft.dev` (หรืออีเมลของผู้พัฒนา)
+- **อีเมลสนับสนุน (Support Email):** `admin@kaisoft.net` (หรืออีเมลของผู้พัฒนา)
 - **นโยบายความเป็นส่วนตัว (Privacy Policy URL):** ลิงก์ไปยังหน้า `privacy-policy.html`
 
 ### 🛠️ ไฟล์และขั้นตอนการบิลด์สำหรับ Google Play:
