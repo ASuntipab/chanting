@@ -92,9 +92,18 @@ export class ComicReaderEngine {
     this.btnFontMinus = document.getElementById('btnFontMinus');
     this.fontSizeDisplay = document.getElementById('fontSizeDisplay');
     this.readerFontSelect = document.getElementById('readerFontSelect');
+    this.readerLayoutSelect = document.getElementById('readerLayoutSelect');
     this.btnReaderThemeToggle = document.getElementById('btnReaderThemeToggle');
     this.paliScriptSelect = document.getElementById('paliScriptSelect');
     this.btnChantInReader = document.getElementById('btnChantInReader');
+
+    // Layout Mode (Traditional Book Indent vs Centered)
+    const savedLayout = (typeof storage !== 'undefined' && storage.getSettings) ? storage.getSettings().readerLayout : null;
+    this.currentLayout = savedLayout || (typeof localStorage !== 'undefined' ? localStorage.getItem('tamma_reader_layout') : null) || 'book';
+    if (this.readerLayoutSelect) {
+      this.readerLayoutSelect.value = this.currentLayout;
+    }
+    this.applyLayout(this.currentLayout, false);
 
     // Fast Page Scrubber & Quick Navigation
     this.readerScrubber = document.getElementById('readerScrubber');
@@ -244,6 +253,13 @@ export class ComicReaderEngine {
     this.readerFontSelect?.addEventListener('change', (e) => {
       e.stopPropagation();
       this.applyFontFamily(e.target.value, true);
+      this.scheduleAutoHide(5000);
+    });
+
+    // Layout Mode Switcher (Traditional Book Indent vs Centered)
+    this.readerLayoutSelect?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      this.applyLayout(e.target.value, true);
       this.scheduleAutoHide(5000);
     });
 
@@ -662,7 +678,8 @@ export class ComicReaderEngine {
 
     // Continuous Flow Container
     const flow = document.createElement('div');
-    flow.className = 'page-verse-flow';
+    const layoutClass = `layout-${this.currentLayout || 'book'}`;
+    flow.className = `page-verse-flow ${layoutClass}`;
     this.flowEl = flow;
 
     rawPages.forEach((page, idx) => {
@@ -689,24 +706,34 @@ export class ComicReaderEngine {
       if (page.pali) {
         const paliWrap = document.createElement('div');
         paliWrap.className = 'verse-pali-wrap';
-        const paliLines = page.pali.split('\n').filter(l => l.trim().length > 0);
-        paliLines.forEach(line => {
-          const paliEl = document.createElement('div');
-          paliEl.className = 'verse-pali verse-clickable';
-          paliEl.dataset.pageIndex = idx;
-          paliEl.dataset.type = 'pali';
-          paliEl.dataset.text = line.trim();
-          const displayPali = (this.currentScript && this.currentScript !== 'thai-phonetic')
-            ? paliScript.transliterate(line, this.currentScript)
-            : line;
-          paliEl.innerHTML = this.escapeHtml(displayPali);
-          paliEl.addEventListener('click', (e) => {
-            if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-              e.stopPropagation();
-              this.playFromElement(paliEl);
-            }
+        
+        // แยกบท/ตอนตามย่อหน้า (เว้นบรรทัดว่าง \n\s*\n)
+        const stanzas = page.pali.split(/\n\s*\n+/).filter(s => s.trim().length > 0);
+        stanzas.forEach((stanza, sIdx) => {
+          const stanzaEl = document.createElement('div');
+          stanzaEl.className = 'verse-stanza';
+          stanzaEl.dataset.stanzaIndex = sIdx;
+          
+          const lines = stanza.split('\n').filter(l => l.trim().length > 0);
+          lines.forEach((line, lIdx) => {
+            const paliEl = document.createElement('div');
+            paliEl.className = 'verse-pali verse-clickable' + (lIdx === 0 ? ' stanza-first-line' : '');
+            paliEl.dataset.pageIndex = idx;
+            paliEl.dataset.type = 'pali';
+            paliEl.dataset.text = line.trim();
+            const displayPali = (this.currentScript && this.currentScript !== 'thai-phonetic')
+              ? paliScript.transliterate(line, this.currentScript)
+              : line;
+            paliEl.innerHTML = this.escapeHtml(displayPali);
+            paliEl.addEventListener('click', (e) => {
+              if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+                e.stopPropagation();
+                this.playFromElement(paliEl);
+              }
+            });
+            stanzaEl.appendChild(paliEl);
           });
-          paliWrap.appendChild(paliEl);
+          paliWrap.appendChild(stanzaEl);
         });
         section.appendChild(paliWrap);
       }
@@ -714,21 +741,28 @@ export class ComicReaderEngine {
       if (page.thai) {
         const thaiWrap = document.createElement('div');
         thaiWrap.className = 'verse-thai-wrap';
-        const thaiLines = page.thai.split('\n').filter(l => l.trim().length > 0);
-        thaiLines.forEach(line => {
+        
+        // แยกย่อหน้าคำแปลภาษาไทย
+        const thaiStanzas = page.thai.split(/\n+/).filter(s => s.trim().length > 0);
+        thaiStanzas.forEach((stanza, sIdx) => {
+          const stanzaEl = document.createElement('div');
+          stanzaEl.className = 'verse-thai-stanza';
+          stanzaEl.dataset.stanzaIndex = sIdx;
+          
           const thaiEl = document.createElement('div');
-          thaiEl.className = 'verse-thai verse-clickable';
+          thaiEl.className = 'verse-thai verse-clickable stanza-first-line';
           thaiEl.dataset.pageIndex = idx;
           thaiEl.dataset.type = 'thai';
-          thaiEl.dataset.text = line.trim();
-          thaiEl.innerHTML = this.escapeHtml(line);
+          thaiEl.dataset.text = stanza.trim();
+          thaiEl.innerHTML = this.escapeHtml(stanza);
           thaiEl.addEventListener('click', (e) => {
             if (ttsEngine.isPlaying || ttsEngine.isPaused) {
               e.stopPropagation();
               this.playFromElement(thaiEl);
             }
           });
-          thaiWrap.appendChild(thaiEl);
+          stanzaEl.appendChild(thaiEl);
+          thaiWrap.appendChild(stanzaEl);
         });
         section.appendChild(thaiWrap);
       }
@@ -736,21 +770,26 @@ export class ComicReaderEngine {
       if (!page.pali && !page.thai && page.content) {
         const contentWrap = document.createElement('div');
         contentWrap.className = 'verse-thai-wrap';
-        const contentLines = page.content.split('\n').filter(l => l.trim().length > 0);
-        contentLines.forEach(line => {
+        const contentStanzas = page.content.split(/\n+/).filter(s => s.trim().length > 0);
+        contentStanzas.forEach((stanza, sIdx) => {
+          const stanzaEl = document.createElement('div');
+          stanzaEl.className = 'verse-thai-stanza';
+          stanzaEl.dataset.stanzaIndex = sIdx;
+          
           const contentEl = document.createElement('div');
-          contentEl.className = 'verse-thai verse-clickable';
+          contentEl.className = 'verse-thai verse-clickable stanza-first-line';
           contentEl.dataset.pageIndex = idx;
           contentEl.dataset.type = 'thai';
-          contentEl.dataset.text = line.trim();
-          contentEl.innerHTML = this.escapeHtml(line);
+          contentEl.dataset.text = stanza.trim();
+          contentEl.innerHTML = this.escapeHtml(stanza);
           contentEl.addEventListener('click', (e) => {
             if (ttsEngine.isPlaying || ttsEngine.isPaused) {
               e.stopPropagation();
               this.playFromElement(contentEl);
             }
           });
-          contentWrap.appendChild(contentEl);
+          stanzaEl.appendChild(contentEl);
+          contentWrap.appendChild(stanzaEl);
         });
         section.appendChild(contentWrap);
       }
@@ -1220,6 +1259,50 @@ export class ComicReaderEngine {
     }
 
     // Recalculate viewports with new font metrics
+    if (this.currentPrayer && this.isOpen()) {
+      const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+      requestAnimationFrame(() => {
+        this.calculateViewportMetrics();
+        const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
+        this.goToViewport(newIndex, false);
+      });
+    }
+  }
+
+  // --- Reader Layout Mode (Traditional Book Indent vs Modern Centered) ---
+  applyLayout(layoutKey, save = false) {
+    const validLayout = layoutKey === 'centered' ? 'centered' : 'book';
+    this.currentLayout = validLayout;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('tamma_reader_layout', validLayout);
+      } catch (e) {
+        // ignore quota errors
+      }
+    }
+    if (save && typeof storage !== 'undefined' && storage.saveSettings) {
+      storage.saveSettings({ readerLayout: validLayout });
+    }
+
+    if (this.readerView) {
+      this.readerView.classList.remove('layout-book', 'layout-centered');
+      this.readerView.classList.add(`layout-${validLayout}`);
+    }
+
+    if (typeof document !== 'undefined') {
+      const flows = document.querySelectorAll('.page-verse-flow');
+      flows.forEach(flow => {
+        flow.classList.remove('layout-book', 'layout-centered');
+        flow.classList.add(`layout-${validLayout}`);
+      });
+    }
+
+    if (this.readerLayoutSelect && this.readerLayoutSelect.value !== validLayout) {
+      this.readerLayoutSelect.value = validLayout;
+    }
+
+    // Recalculate viewports with new layout metrics
     if (this.currentPrayer && this.isOpen()) {
       const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
       requestAnimationFrame(() => {
