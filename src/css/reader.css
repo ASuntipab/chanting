@@ -2238,7 +2238,7 @@ body.theme-parchment .gesture-guide-item {
 .itipiso-counter-widget {
   position: absolute;
   inset: 0;
-  z-index: 60;
+  z-index: 150;
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -2296,7 +2296,7 @@ body.theme-parchment .gesture-guide-item {
 }
 
 .itipiso-chant-verse-header {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--accent-gold);
   font-weight: 600;
   margin-bottom: 8px;
@@ -2305,6 +2305,14 @@ body.theme-parchment .gesture-guide-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.itipiso-verse-title-text {
+  white-space: nowrap;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
 
 .itipiso-tap-badge {
@@ -2318,6 +2326,7 @@ body.theme-parchment .gesture-guide-item {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .itipiso-chant-pali-text {
@@ -2669,7 +2678,7 @@ body.theme-parchment .btn-itipiso-sub {
   background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  z-index: 55;
+  z-index: 250;
   display: flex;
   align-items: center;
   justify-content: center;
