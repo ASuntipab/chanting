@@ -96,11 +96,17 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     assert.ok(html.includes('id="itipisoAgeModal"'), 'itipisoAgeModal must exist');
     assert.ok(html.includes('id="itipisoCompleteModal"'), 'itipisoCompleteModal must exist');
 
+    assert.ok(html.includes('itipiso-verse-pair'), 'itipiso-verse-pair must format stanzas as liturgical pairs');
+    assert.ok(html.includes('chant-phrase'), 'chant-phrase must protect chanting tokens from mid-word breaks');
+
     // CSS rules
     assert.ok(css.includes('.itipiso-counter-widget'), '.itipiso-counter-widget must be styled in reader.css');
     assert.ok(css.includes('.itipiso-chant-modal-card'), '.itipiso-chant-modal-card must be styled');
     assert.ok(css.includes('.itipiso-chant-verse-card'), '.itipiso-chant-verse-card must be styled');
+    assert.ok(css.includes('.itipiso-verse-pair'), '.itipiso-verse-pair must be styled in reader.css');
+    assert.ok(css.includes('.chant-phrase'), '.chant-phrase must be styled with non-breaking rules in reader.css');
     assert.ok(css.includes('.itipiso-tap-badge'), '.itipiso-tap-badge must be styled');
+    assert.ok(css.includes('.chant-count-flash'), '.chant-count-flash must provide visual flash on count');
     assert.ok(css.includes('.btn-itipiso-main'), '.btn-itipiso-main must be styled');
     assert.ok(css.includes('.btn-itipiso-reset'), '.btn-itipiso-reset must be styled');
     assert.ok(css.includes('.itipiso-modal-overlay'), '.itipiso-modal-overlay must be styled');

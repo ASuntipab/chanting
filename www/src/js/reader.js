@@ -1715,6 +1715,14 @@ export class ComicReaderEngine {
       setTimeout(() => this.itipisoCurrent?.classList.remove('bump'), 180);
     }
 
+    // Flash animation on verse card to give delightful feedback
+    if (this.itipisoVerseCard) {
+      this.itipisoVerseCard.classList.remove('chant-count-flash');
+      void this.itipisoVerseCard.offsetWidth;
+      this.itipisoVerseCard.classList.add('chant-count-flash');
+      setTimeout(() => this.itipisoVerseCard?.classList.remove('chant-count-flash'), 320);
+    }
+
     if (this.itipisoProgressBar) {
       const pct = Math.min(100, Math.round((result.current / Math.max(1, result.target)) * 100));
       this.itipisoProgressBar.style.width = `${pct}%`;
