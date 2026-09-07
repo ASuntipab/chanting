@@ -464,9 +464,8 @@
             <h4 class="itipiso-modal-title">สวดเจริญสติภาวนา</h4>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="btnItipisoReset" class="btn-icon btn-itipiso-reset" title="เคลียร์ตัวนับรอบ (↺)" style="width: 30px; height: 30px; font-size: 0.9rem;">↺</button>
             <button id="btnItipisoSettings" class="btn-icon btn-itipiso-gear" title="ตั้งค่าอายุ / จำนวนจบเป้าหมาย">⚙️</button>
-            <button id="btnCloseItipisoWidget" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;" title="ปิดหน้าต่างสวด">✕</button>
+            <button id="btnCloseItipisoWidget" class="btn-icon" style="width: 30px; height: 30px; font-size: 0.9rem;" title="ปิดหน้าต่างสวด">✕</button>
           </div>
         </div>
 
@@ -491,37 +490,40 @@
           <div id="itipisoVerseCard" class="itipiso-chant-verse-card" title="แตะที่บทสวดเพื่อนับจบ (+๑) ได้เช่นกัน">
             <div class="itipiso-chant-verse-header">
               <span class="itipiso-verse-title-text">📜 บทสวดพุทธคุณ (อิติปิโส)</span>
-              <span class="itipiso-tap-badge">แตะที่บทสวดเพื่อนับได้ 👆</span>
+              <span class="itipiso-tap-badge">แตะท่องเพื่อนับ 📿</span>
             </div>
             <div class="itipiso-chant-pali-text">
-              <div class="itipiso-verse-pair">
+              <div class="itipiso-stanza">
                 <span class="chant-phrase verse-lead">อิติปิ โส ภะคะวา</span>
                 <span class="chant-phrase verse-follow">อะระหัง สัมมาสัมพุทโธ,</span>
               </div>
-              <div class="itipiso-verse-pair">
+              <div class="itipiso-stanza">
                 <span class="chant-phrase verse-lead">วิชชาจะระณะสัมปันโน,</span>
                 <span class="chant-phrase verse-follow">สุคะโต, โลกะวิทู,</span>
               </div>
-              <div class="itipiso-verse-pair">
+              <div class="itipiso-stanza">
                 <span class="chant-phrase verse-lead">อะนุตตะโร</span>
                 <span class="chant-phrase verse-follow">ปุริสะทัมมะสาระถิ,</span>
               </div>
-              <div class="itipiso-verse-pair">
+              <div class="itipiso-stanza">
                 <span class="chant-phrase verse-lead">สัตถา เทวะมะนุสสานัง,</span>
                 <span class="chant-phrase verse-follow">พุทโธ, ภะคะวาติ.</span>
               </div>
             </div>
             <div class="itipiso-chant-verse-hint">
-              💡 สวดจบ ๑ รอบ แตะที่บทสวด หรือแตะปุ่มด้านล่างเพื่อนับจบ (+๑)
+              💡 สวดจบ ๑ จบแล้ว แตะที่บทสวดหรือปุ่มด้านล่างเพื่อนับจบ (+๑)
             </div>
           </div>
 
-          <!-- Quick Action Buttons: Easy Tap Count (+1), Minus (-1) -->
+          <!-- Quick Action Buttons: Symmetrical 3-Button Row (Minus, Hero Center Count, Reset) -->
           <div class="itipiso-actions-row">
             <button id="btnItipisoMinus" class="btn-itipiso-sub" title="ลดย้อน ๑ จบ">-๑</button>
             <button id="btnItipisoCount" class="btn-itipiso-main" title="แตะนับจบ (+๑)">
               <span class="itipiso-main-icon">🔔</span>
               <span class="itipiso-main-text">แตะนับจบ (+๑)</span>
+            </button>
+            <button id="btnItipisoReset" class="btn-itipiso-sub btn-itipiso-reset" title="เคลียร์ตัวนับรอบ (↺)">
+              <span class="itipiso-reset-icon">↺</span>
             </button>
           </div>
         </div>

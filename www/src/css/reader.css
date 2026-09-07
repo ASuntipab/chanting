@@ -2330,59 +2330,46 @@ body.theme-parchment .gesture-guide-item {
 }
 
 .itipiso-chant-pali-text {
-  font-family: var(--reader-font-family, var(--font-body));
-  font-size: clamp(0.96rem, 3.6vw, 1.15rem);
-  line-height: 1.85;
-  color: #fde68a;
-  font-weight: 600;
-  text-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
-  letter-spacing: 0.3px;
-  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  margin-bottom: 8px;
   word-break: keep-all;
+  width: 100%;
 }
 
-.itipiso-verse-pair {
+.itipiso-stanza {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  padding: 3px 6px;
-  border-radius: 8px;
-  transition: background 0.15s ease;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
 }
 
 .chant-phrase {
-  display: inline-block;
+  display: block;
+  width: 100%;
+  text-align: center;
   white-space: nowrap;
   word-break: keep-all;
-  overflow-wrap: normal;
+  font-family: var(--reader-font-family, var(--font-body));
+  font-size: clamp(1.02rem, 3.8vw, 1.2rem);
+  line-height: 1.55;
+  letter-spacing: 0.3px;
 }
 
 .chant-phrase.verse-lead {
-  text-align: left;
   color: #fef08a;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
 }
 
 .chant-phrase.verse-follow {
-  text-align: right;
-  margin-left: auto;
   color: #fde047;
-}
-
-@media (max-width: 380px) {
-  .itipiso-verse-pair {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-  .chant-phrase.verse-follow {
-    margin-left: 1.5em;
-    text-align: left;
-  }
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
 }
 
 /* Flash feedback when counting round */
@@ -2550,19 +2537,21 @@ body.theme-parchment .gesture-guide-item {
   box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
 }
 
-/* Actions Row */
+/* Actions Row: Balanced Symmetrical 3-Button Layout */
 .itipiso-actions-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-top: 6px;
+  width: 100%;
 }
 
 .btn-itipiso-main {
   flex: 1;
-  height: 56px;
+  height: 54px;
   background: linear-gradient(135deg, #d97706, #f59e0b);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.38);
   border-radius: var(--radius-full, 9999px);
   color: #120e0b;
   font-family: var(--font-thai, sans-serif);
@@ -2571,7 +2560,7 @@ body.theme-parchment .gesture-guide-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45);
   transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
@@ -2586,45 +2575,50 @@ body.theme-parchment .gesture-guide-item {
 }
 
 .itipiso-main-icon {
-  font-size: 1.35rem;
+  font-size: 1.3rem;
 }
 
 .btn-itipiso-sub {
-  height: 56px;
-  min-width: 58px;
-  padding: 0 16px;
+  height: 52px;
+  width: 52px;
+  min-width: 52px;
+  padding: 0;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-full, 9999px);
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
 
 .btn-itipiso-sub:active {
-  transform: scale(0.94);
-  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .btn-itipiso-reset {
-  color: #f87171 !important;
-  border-color: rgba(248, 113, 113, 0.3) !important;
-  background: rgba(248, 113, 113, 0.08) !important;
-  transition: all 0.2s ease;
+  color: #fca5a5 !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+  background: rgba(248, 113, 113, 0.1) !important;
+  font-size: 1.25rem;
 }
 
 .btn-itipiso-reset:hover {
   background: rgba(248, 113, 113, 0.22) !important;
-  color: #fca5a5 !important;
-  transform: rotate(-45deg);
+  color: #fee2e2 !important;
+}
+
+.btn-itipiso-reset:active {
+  transform: scale(0.92) rotate(-45deg);
+  background: rgba(248, 113, 113, 0.28) !important;
 }
 
 @media (min-width: 600px) {
