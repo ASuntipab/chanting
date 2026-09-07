@@ -127,6 +127,15 @@ export class ComicReaderEngine {
     this.btnMP3Forward10 = document.getElementById('btnMP3Forward10');
     this.btnMP3Loop = document.getElementById('btnMP3Loop');
     this.mp3SpeedSelect = document.getElementById('mp3SpeedSelect');
+
+    // Gesture Guide & Help Modal Elements
+    this.btnReaderHelp = document.getElementById('btnReaderHelp');
+    this.readerHelpModal = document.getElementById('readerHelpModal');
+    this.btnCloseReaderHelp = document.getElementById('btnCloseReaderHelp');
+    this.btnGotReaderHelp = document.getElementById('btnGotReaderHelp');
+    this.readerGestureHint = document.getElementById('readerGestureHint');
+    this.gestureHintTimer = null;
+    this.lastWheelTime = 0;
   }
 
   bindEvents() {
@@ -135,18 +144,35 @@ export class ComicReaderEngine {
     // Navigation buttons
     this.btnPrev?.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.prevPage();
-      this.scheduleAutoHide();
     });
     this.btnNext?.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.nextPage();
-      this.scheduleAutoHide();
     });
     this.btnClose?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.close();
     });
+
+    // Gesture Help & Navigation Guide Modal Events
+    this.btnReaderHelp?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleReaderHelp();
+    });
+    this.btnCloseReaderHelp?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideReaderHelp();
+    });
+    this.btnGotReaderHelp?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideReaderHelp();
+    });
+    this.readerHelpModal?.addEventListener('click', (e) => e.stopPropagation());
 
     // Quick Jump: First Page & Last Page Buttons
     this.btnJumpFirst?.addEventListener('click', (e) => {
@@ -357,9 +383,13 @@ export class ComicReaderEngine {
       if (!this.isOpen()) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault();
+        if (this.hudVisible) this.hideHUD();
+        this.hideGestureHint();
         this.nextPage();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
+        if (this.hudVisible) this.hideHUD();
+        this.hideGestureHint();
         this.prevPage();
       } else if (e.key === 'Escape') {
         this.close();
@@ -377,6 +407,9 @@ export class ComicReaderEngine {
       stage.addEventListener('mousedown', (e) => this.handleMouseDown(e));
       window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
       window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+
+      // Mouse Wheel / Trackpad Scroll to navigate pages & hide HUD
+      stage.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
     }
 
     // Dynamic Live Viewport Recalculation on Screen Resize / Orientation Change
@@ -491,6 +524,7 @@ export class ComicReaderEngine {
 
     // Show HUD briefly, then smoothly fade into zen fullscreen reading
     this.showHUD();
+    this.showGestureHint();
     nativeBridge.setKeepAwake(true);
     nativeBridge.hideStatusBar();
   }
@@ -499,6 +533,8 @@ export class ComicReaderEngine {
     this.readerView.classList.remove('active');
     this.readerView.classList.remove('tts-active');
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
+    this.hideGestureHint();
+    this.hideReaderHelp();
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
     nativeBridge.showStatusBar();
@@ -652,11 +688,13 @@ export class ComicReaderEngine {
 
     const moreIndicator = document.createElement('div');
     moreIndicator.className = 'scroll-more-indicator';
-    moreIndicator.innerHTML = '<span>มีต่อ</span> <span>▼</span>';
+    moreIndicator.innerHTML = '<span>มีต่อ</span> <span>▼</span> <span class="more-subtext">(ปัดขึ้น/แตะ)</span>';
     const handleMoreClick = (e) => {
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.nextPage();
     };
     moreIndicator.addEventListener('click', handleMoreClick);
@@ -871,6 +909,15 @@ export class ComicReaderEngine {
     if (!this.isSwiping || e.touches.length !== 1) return;
     this.touchCurrentX = e.touches[0].clientX;
     this.touchCurrentY = e.touches[0].clientY;
+
+    const deltaX = this.touchStartX - this.touchCurrentX;
+    const deltaY = this.touchStartY - this.touchCurrentY;
+
+    // เมื่อเริ่มปัดซ้าย-ขวา หรือเลื่อนขึ้น-ลง เกิน 15px ให้ซ่อนแผงควบคุมและ Hint ทันที
+    if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) {
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
+    }
   }
 
   handleTouchEnd(e) {
@@ -889,14 +936,19 @@ export class ComicReaderEngine {
 
     // 1. Unified Swipe Handling: Swipe Left OR Swipe Up -> Next Viewport
     if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.nextPage();
     } 
     // 2. Swipe Right OR Swipe Down -> Prev Viewport
     else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.prevPage();
     } 
     // 3. Clean Tap on reading text area -> Toggle HUD
     else if (elapsed < 500 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
+      this.hideGestureHint();
       this.toggleHUD();
     }
   }
@@ -923,6 +975,14 @@ export class ComicReaderEngine {
     if (!this.isMouseDown) return;
     this.touchCurrentX = e.clientX;
     this.touchCurrentY = e.clientY;
+
+    const deltaX = this.touchStartX - this.touchCurrentX;
+    const deltaY = this.touchStartY - this.touchCurrentY;
+
+    if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) {
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
+    }
   }
 
   handleMouseUp(e) {
@@ -941,16 +1001,83 @@ export class ComicReaderEngine {
 
     // Swipe Left or Up -> Next Viewport
     if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.nextPage();
     } 
     // Swipe Right or Down -> Prev Viewport
     else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
       this.prevPage();
     } 
     // Clean Click on reading text area -> Toggle HUD
     else if (elapsed < 500 && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
+      this.hideGestureHint();
       this.toggleHUD();
     }
+  }
+
+  // --- Mouse Wheel & Trackpad Gesture Controller ---
+  handleWheel(e) {
+    if (!this.isOpen()) return;
+    const target = e.target;
+    if (target.closest('select, input, .reader-toolbar, .reader-bottom-bar, .tts-settings-card, .reader-help-card, .mp3-player-deck')) {
+      return;
+    }
+    const now = Date.now();
+    if (this.lastWheelTime && now - this.lastWheelTime < 280) return;
+
+    if (Math.abs(e.deltaY) > 20 || Math.abs(e.deltaX) > 20) {
+      e.preventDefault();
+      this.lastWheelTime = now;
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
+      if (e.deltaY > 0 || e.deltaX > 0) {
+        this.nextPage();
+      } else {
+        this.prevPage();
+      }
+    }
+  }
+
+  // --- Gesture Hints & Guide Controller ---
+  showGestureHint() {
+    if (!this.readerGestureHint) return;
+    if (this.gestureHintTimer) {
+      clearTimeout(this.gestureHintTimer);
+    }
+    this.readerGestureHint.classList.add('show');
+    // Auto-hide hint smoothly after 5 seconds
+    this.gestureHintTimer = setTimeout(() => {
+      this.hideGestureHint();
+    }, 5000);
+  }
+
+  hideGestureHint() {
+    if (this.gestureHintTimer) {
+      clearTimeout(this.gestureHintTimer);
+      this.gestureHintTimer = null;
+    }
+    this.readerGestureHint?.classList.remove('show');
+  }
+
+  toggleReaderHelp() {
+    if (this.readerHelpModal && this.readerHelpModal.style.display !== 'none') {
+      this.hideReaderHelp();
+    } else {
+      this.showReaderHelp();
+    }
+  }
+
+  showReaderHelp() {
+    if (!this.readerHelpModal) return;
+    this.readerHelpModal.style.display = 'flex';
+  }
+
+  hideReaderHelp() {
+    if (!this.readerHelpModal) return;
+    this.readerHelpModal.style.display = 'none';
   }
 
   // --- Font Scaling & Preference Persistence (Up to 300% for Elders) ---

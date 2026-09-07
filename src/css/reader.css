@@ -1799,6 +1799,227 @@ body.theme-parchment .mp3-speed-select {
   color: #332211;
 }
 
+/* ==========================================================================
+   READER GESTURE HINTS & HELP MODAL (UX REFINEMENT)
+   ========================================================================== */
+
+/* Floating Gesture Hint Pill (Subtle floating badge) */
+.reader-gesture-hint {
+  position: absolute;
+  bottom: calc(var(--safe-bottom) + 56px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px) scale(0.92);
+  z-index: 22;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.4s;
+}
+
+.reader-gesture-hint.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.gesture-hint-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 14, 11, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  padding: 8px 18px;
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.3);
+  color: var(--accent-gold);
+  font-family: var(--font-thai, sans-serif);
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.gesture-hint-icon {
+  font-size: 0.95rem;
+  animation: gestureArrowBounce 2s infinite ease-in-out;
+}
+
+.gesture-hint-text {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes gestureArrowBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+body.theme-parchment .gesture-hint-content {
+  background: rgba(253, 251, 247, 0.92);
+  border-color: rgba(180, 130, 40, 0.45);
+  box-shadow: 0 10px 30px rgba(80, 50, 10, 0.15), 0 0 15px rgba(212, 175, 55, 0.25);
+}
+
+body.theme-parchment .gesture-hint-text {
+  color: #332211;
+  text-shadow: none;
+}
+
+/* Bottom HUD Dock Inline Hint */
+.reader-dock-hint {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--accent-gold);
+  opacity: 0.9;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px dashed rgba(212, 175, 55, 0.25);
+  border-radius: var(--radius-sm, 6px);
+  padding: 3px 8px;
+  margin: 4px 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+
+body.theme-parchment .reader-dock-hint {
+  color: #8c5f23;
+  background: rgba(140, 95, 35, 0.08);
+  border-color: rgba(140, 95, 35, 0.25);
+}
+
+/* Subtext in More Indicator */
+.more-subtext {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* Reader Help Modal Overlay & Card */
+.reader-help-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.reader-help-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.reader-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.reader-help-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reader-help-badge {
+  font-size: 0.72rem;
+  color: var(--accent-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reader-help-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.reader-help-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.gesture-guide-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.theme-parchment .gesture-guide-item {
+  background: rgba(140, 95, 35, 0.04);
+  border-color: rgba(140, 95, 35, 0.12);
+}
+
+.gesture-guide-icon-box {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+}
+
+.gesture-guide-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gesture-guide-desc strong {
+  font-size: 0.88rem;
+  color: var(--accent-gold);
+}
+
+.gesture-guide-desc p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.reader-help-footer {
+  padding: 12px 18px 16px 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+
 
 
 

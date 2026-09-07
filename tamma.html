@@ -202,8 +202,11 @@
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
       </div>
 
-      <!-- Top Audio Controls: AI TTS Play & Voice Control Options & Theme Switcher -->
+      <!-- Top Audio Controls: AI TTS Play & Voice Control Options & Theme Switcher & Help -->
       <div class="reader-audio-dock">
+        <button id="btnReaderHelp" class="btn-icon btn-reader-help" title="คำแนะนำท่าทางและการเลื่อนอ่าน (💡)" aria-label="วิธีเลื่อนอ่าน">
+          💡
+        </button>
         <button id="btnReaderThemeToggle" class="btn-icon btn-reader-theme" title="สลับธีมตอนอ่าน (🎨)">
           🎨
         </button>
@@ -306,6 +309,15 @@
       
       <button id="btnNextPage" class="comic-nav-btn next" aria-label="หน้าถัดไป">›</button>
 
+      <!-- Floating Gesture Hint Pill (Visible on Open, Auto-fades smoothly) -->
+      <div id="readerGestureHint" class="reader-gesture-hint" role="status" aria-live="polite">
+        <div class="gesture-hint-content">
+          <span class="gesture-hint-icon">👈👉</span>
+          <span class="gesture-hint-text">ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า</span>
+          <span class="gesture-hint-icon">👆👇</span>
+        </div>
+      </div>
+
       <!-- Finished Chanting Pop-up Button -->
       <div id="finishChantOverlay" class="finish-chant-overlay">
         <button id="btnFinishChantBig" class="btn-primary" style="padding: 14px 28px; font-size: 1.1rem; border-radius: 30px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);">
@@ -324,6 +336,11 @@
         </div>
         <span id="readerPageBadge" class="reader-scrubber-badge">1 / 1</span>
         <button id="btnJumpLast" class="btn-scrubber-nav" title="ไปหน้าสุดท้าย">หน้าสุดท้าย ⏭</button>
+      </div>
+
+      <!-- Hint bar inside control dock -->
+      <div class="reader-dock-hint">
+        <span>💡 ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า (แตะเพื่อซ่อนเมนู)</span>
       </div>
 
       <div class="reader-dock-divider"></div>
@@ -376,6 +393,54 @@
           <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
             <span>🔔</span>
             <span id="readerChantCount">0 จบ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reader Gesture & Navigation Guide Modal -->
+    <div id="readerHelpModal" class="reader-help-modal-overlay" style="display: none;">
+      <div class="reader-help-card">
+        <div class="reader-help-header">
+          <div class="reader-help-title-wrap">
+            <span class="reader-help-badge">📖 คู่มือการอ่าน</span>
+            <h4 class="reader-help-title">วิธีเลื่อนอ่านและควบคุม</h4>
+          </div>
+          <button id="btnCloseReaderHelp" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.85rem;" title="ปิด">✕</button>
+        </div>
+        <div class="reader-help-body">
+          <div class="gesture-guide-item">
+            <div class="gesture-guide-icon-box">👈 👉</div>
+            <div class="gesture-guide-desc">
+              <strong>ปัดซ้าย - ปัดขวา</strong>
+              <p>ปัดไปทางซ้ายเพื่อไปหน้าถัดไป หรือปัดไปทางขวาเพื่อย้อนกลับ</p>
+            </div>
+          </div>
+          <div class="gesture-guide-item">
+            <div class="gesture-guide-icon-box">👆 👇</div>
+            <div class="gesture-guide-desc">
+              <strong>เลื่อนขึ้น - เลื่อนลง</strong>
+              <p>ปัดเลื่อนขึ้นเพื่ออ่านท่อนถัดไป หรือเลื่อนลงเพื่อย้อนกลับ</p>
+            </div>
+          </div>
+          <div class="gesture-guide-item">
+            <div class="gesture-guide-icon-box">👆</div>
+            <div class="gesture-guide-desc">
+              <strong>แตะที่ว่างบนหน้าจอ</strong>
+              <p>แตะ 1 ครั้งเพื่อเปิดหรือซ่อนแผงควบคุม (เมื่อเริ่มปัดหรือเลื่อน แผงควบคุมจะซ่อนอัตโนมัติ)</p>
+            </div>
+          </div>
+          <div class="gesture-guide-item">
+            <div class="gesture-guide-icon-box">🖱️ ⌨️</div>
+            <div class="gesture-guide-desc">
+              <strong>เมาส์และแป้นพิมพ์</strong>
+              <p>ใช้ลูกกลิ้งเมาส์ (Scroll Wheel) หรือปุ่มลูกศร ◀ ▶ / Page Up / Page Down</p>
+            </div>
+          </div>
+        </div>
+        <div class="reader-help-footer">
+          <button id="btnGotReaderHelp" class="btn-primary" style="width: 100%; padding: 10px; border-radius: var(--radius-full);">
+            ✨ เข้าใจแล้ว เริ่มสวดมนต์
           </button>
         </div>
       </div>

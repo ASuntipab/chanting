@@ -232,10 +232,12 @@ class ReaderGestureTester {
     // Unified swipe handling: Horizontal or Vertical
     if (deltaX > swipeThreshold || deltaY > swipeThreshold) {
       this.currentPageIndex = Math.min(this.currentPageIndex + 1, this.totalPages - 1);
-      return { action: 'swipe', direction: 'next', page: this.currentPageIndex };
+      this.hudVisible = false; // Auto-hide HUD when swiping to read next section
+      return { action: 'swipe', direction: 'next', page: this.currentPageIndex, hudVisible: this.hudVisible };
     } else if (deltaX < -swipeThreshold || deltaY < -swipeThreshold) {
       this.currentPageIndex = Math.max(this.currentPageIndex - 1, 0);
-      return { action: 'swipe', direction: 'prev', page: this.currentPageIndex };
+      this.hudVisible = false; // Auto-hide HUD when swiping to read prev section
+      return { action: 'swipe', direction: 'prev', page: this.currentPageIndex, hudVisible: this.hudVisible };
     } else if (elapsed < 600 && Math.abs(deltaX) < 25 && Math.abs(deltaY) < 25) {
       this.toggleHUD();
       return { action: 'tap', hudVisible: this.hudVisible };
@@ -303,32 +305,46 @@ test('Instant Single-Tap: Tapping once should immediately toggle HUD state witho
   assert.equal(tap2.hudVisible, true, 'HUD should immediately appear on second tap');
 });
 
-test('Viewport Snap Swipe: Both Horizontal (Left/Right) and Vertical (Up/Down) swipes snap to next/prev section', () => {
+test('Viewport Snap Swipe: Both Horizontal (Left/Right) and Vertical (Up/Down) swipes snap to next/prev section and auto-hides HUD', () => {
   const tester = new ReaderGestureTester();
   assert.equal(tester.hudVisible, true);
   assert.equal(tester.currentPageIndex, 0);
 
-  // 1. Swipe Left (deltaX = 55px, deltaY = 0) -> Next Section
+  // 1. Swipe Left (deltaX = 55px, deltaY = 0) -> Next Section & Auto-hides HUD
   const swipeLeft = tester.handleTapOrSwipe(55, 0, 200);
   assert.equal(swipeLeft.action, 'swipe');
   assert.equal(swipeLeft.page, 1, 'Swipe left should advance to section 1');
+  assert.equal(tester.hudVisible, false, 'HUD must auto-hide when swiping left to read next section');
 
-  // 2. Swipe Up / Scroll Up gesture (deltaX = 0, deltaY = 60px) -> Next Section
+  // Re-open HUD to test vertical swipe
+  tester.toggleHUD();
+  assert.equal(tester.hudVisible, true);
+
+  // 2. Swipe Up / Scroll Up gesture (deltaX = 0, deltaY = 60px) -> Next Section & Auto-hides HUD
   const swipeUp = tester.handleTapOrSwipe(0, 60, 200);
   assert.equal(swipeUp.action, 'swipe');
   assert.equal(swipeUp.page, 2, 'Swipe up should advance to section 2');
+  assert.equal(tester.hudVisible, false, 'HUD must auto-hide when swiping up to read next section');
 
-  // 3. Swipe Down (deltaX = 0, deltaY = -60px) -> Prev Section
+  // Re-open HUD to test swipe down
+  tester.toggleHUD();
+  assert.equal(tester.hudVisible, true);
+
+  // 3. Swipe Down (deltaX = 0, deltaY = -60px) -> Prev Section & Auto-hides HUD
   const swipeDown = tester.handleTapOrSwipe(0, -60, 200);
   assert.equal(swipeDown.action, 'swipe');
   assert.equal(swipeDown.page, 1, 'Swipe down should return to section 1');
+  assert.equal(tester.hudVisible, false, 'HUD must auto-hide when swiping down');
 
-  // 4. Swipe Right (deltaX = -55px, deltaY = 0) -> Prev Section
+  // Re-open HUD to test swipe right
+  tester.toggleHUD();
+  assert.equal(tester.hudVisible, true);
+
+  // 4. Swipe Right (deltaX = -55px, deltaY = 0) -> Prev Section & Auto-hides HUD
   const swipeRight = tester.handleTapOrSwipe(-55, 0, 200);
   assert.equal(swipeRight.action, 'swipe');
   assert.equal(swipeRight.page, 0, 'Swipe right should return to section 0');
-
-  assert.equal(tester.hudVisible, true, 'HUD state should remain untouched during swipes');
+  assert.equal(tester.hudVisible, false, 'HUD must auto-hide when swiping right');
 });
 
 test('Viewport Snap Metric Calculation: Accurately calculates total viewport pages from flow height and viewport height', () => {
