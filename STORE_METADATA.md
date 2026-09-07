@@ -80,19 +80,26 @@
 | **iOS** | App Store Icon | 1024 x 1024 (ไม่มี Alpha/ความโปร่งใส) | ✅ มีพร้อมใน `AppIcon.appiconset` |
 | **iOS** | ภาพหน้าจอ iPhone 6.5" (ตามหน้าจอ App Store Connect) | 1284 x 2778 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.5_1284x2778/` (๗ รูป) |
 | **iOS** | ภาพหน้าจอ iPhone 6.5" (ขนาดทางเลือก) | 1242 x 2688 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.5_1242x2688/` (๗ รูป) |
-| **iOS** | ภาพหน้าจอ iPhone 6.7" (iPhone 14/15/16 Pro Max) | 1290 x 2796 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_6.7_1290x2796/` (๗ รูป) |
-| **iOS** | ภาพหน้าจอ iPad 12.9" (ถ้าเปิดใช้) | 2048 x 2732 | แคปจาก Simulator iPad |
+| **iOS** | ภาพหน้าจอ iPad Pro 12.9 นิ้ว (6th/5th/4th/3rd Gen) | 2048 x 2732 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_ipad_12.9_2048x2732/` (๗ รูป) |
+| **iOS** | ภาพหน้าจอ iPad Pro 11 นิ้ว / iPad Air (10.9") | 1668 x 2388 (RGB, ไม่มี Alpha) | ✅ สร้างพร้อมแล้วใน `screenshots/ios_ipad_11_1668x2388/` (๗ รูป) |
 
-### 💡 คำสั่งสร้างภาพหน้าจอชุดใหม่ทุกระบบ (iOS + Android) อัตโนมัติ:
+### 💡 คำสั่งสร้างภาพหน้าจอชุดใหม่ทุกระบบ (iOS + Android + iPad) อัตโนมัติ:
 ```bash
 npm run screenshots:generate
 ```
-- สำหรับ iOS: `npm run screenshots:generate:ios`
-- สำหรับ Android: `npm run screenshots:generate:android`
+- สำหรับ iPhone (iOS): `npm run screenshots:generate:ios`
+- สำหรับ iPad (iPadOS): `npm run screenshots:generate:ipad`
+- สำหรับ Android (โทรศัพท์ + แท็บเล็ต + Feature Graphic): `npm run screenshots:generate:android`
 
 ### 📂 โฟลเดอร์สำหรับลากไฟล์ขึ้น Store ทันที:
 - **Apple App Store Connect (iPhone 6.5"):**  
   👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_6.5_1284x2778\`
+- **Apple App Store Connect (iPhone 6.7" Pro Max):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_6.7_1290x2796\`
+- **Apple App Store Connect (iPad Pro 12.9"):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_ipad_12.9_2048x2732\`
+- **Apple App Store Connect (iPad Pro 11"):**  
+  👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\ios_ipad_11_1668x2388\`
 - **Google Play Console (Feature Graphic 1024x500):**  
   👉 `d:\Kai Soft\Program\MyAIApps\tamma\screenshots\android_feature_graphic_1024x500\`
 - **Google Play Console (Phone 1080x2400):**  
