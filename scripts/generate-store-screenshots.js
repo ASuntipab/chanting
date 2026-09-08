@@ -61,87 +61,16 @@ function startServer() {
   });
 }
 
-// Injects authentic iOS Status Bar and Home Indicator
+// Clean iOS presentation without any fake status bar or non-iOS mock overlays
 async function setupMobileDecorations(page, isDark = true) {
   await page.evaluate((isDark) => {
-    document.documentElement.style.setProperty('--safe-top', '47px');
-    document.documentElement.style.setProperty('--safe-bottom', '34px');
+    document.documentElement.style.setProperty('--safe-top', '20px');
+    document.documentElement.style.setProperty('--safe-bottom', '16px');
 
     let oldBar = document.getElementById('ios-mock-statusbar');
     if (oldBar) oldBar.remove();
     let oldHome = document.getElementById('ios-mock-homebar');
     if (oldHome) oldHome.remove();
-
-    const textColor = isDark ? '#ffffff' : '#2b1d0c';
-    const batteryBg = isDark ? '#ffffff' : '#2b1d0c';
-
-    const statusBar = document.createElement('div');
-    statusBar.id = 'ios-mock-statusbar';
-    statusBar.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 47px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 24px 0 28px;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: ${textColor};
-      z-index: 999999;
-      pointer-events: none;
-      box-sizing: border-box;
-    `;
-
-    statusBar.innerHTML = `
-      <div style="letter-spacing: -0.2px;">9:41</div>
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <!-- Signal Bars -->
-        <svg width="17" height="11" viewBox="0 0 17 11" fill="${textColor}">
-          <rect x="0" y="7.5" width="3" height="3.5" rx="0.8"/>
-          <rect x="4.5" y="5" width="3" height="6" rx="0.8"/>
-          <rect x="9" y="2.5" width="3" height="8.5" rx="0.8"/>
-          <rect x="13.5" y="0" width="3" height="11" rx="0.8"/>
-        </svg>
-        <!-- Wifi Icon -->
-        <svg width="15" height="11" viewBox="0 0 16 12" fill="${textColor}">
-          <path d="M8 9.6a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2zm0-4.4c2.2 0 4.2.9 5.7 2.4l-1.4 1.4C11.2 7.9 9.7 7.2 8 7.2s-3.2.7-4.3 1.8L2.3 7.6C3.8 6.1 5.8 5.2 8 5.2zm0-4.4c3.5 0 6.6 1.4 8.9 3.7l-1.4 1.4C13.6 4 10.9 2.8 8 2.8S2.4 4 .5 5.9L-.9 4.5C1.4 2.2 4.5.8 8 .8z"/>
-        </svg>
-        <!-- Battery Icon -->
-        <div style="display: flex; align-items: center; gap: 1px;">
-          <div style="width: 22px; height: 11px; border: 1.5px solid ${textColor}; border-radius: 3.5px; padding: 1.5px; box-sizing: border-box;">
-            <div style="width: 100%; height: 100%; background: ${batteryBg}; border-radius: 1px;"></div>
-          </div>
-          <div style="width: 1.5px; height: 4px; background: ${textColor}; border-radius: 0 1px 1px 0;"></div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(statusBar);
-
-    // Home indicator bar at bottom
-    const homeBar = document.createElement('div');
-    homeBar.id = 'ios-mock-homebar';
-    homeBar.style.cssText = `
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 34px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      padding-bottom: 8px;
-      z-index: 999999;
-      pointer-events: none;
-      box-sizing: border-box;
-    `;
-    homeBar.innerHTML = `
-      <div style="width: 136px; height: 5px; background: ${isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.35)'}; border-radius: 100px;"></div>
-    `;
-    document.body.appendChild(homeBar);
   }, isDark);
 }
 
