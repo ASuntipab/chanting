@@ -1,6 +1,21 @@
-# 🪷 ธรรมะ E-Book (Tamma OS)
+# 🪷 Chant: บทสวดมนต์ (Tamma OS)
+> แอปพลิเคชันคลังบทสวดมนต์ พระไตรปิฎก ๔๕ เล่ม พร้อมเสียงสวด คาราโอเกะ ออฟไลน์ 100%
+
+[![App Store](https://img.shields.io/badge/App_Store-Chant:_บทสวดมนต์-black?style=for-the-badge&logo=apple&logoColor=white)](https://apps.apple.com/th/app/chant-%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95/id6806598143)
+[![Google Play](https://img.shields.io/badge/Google_Play-Chant:_บทสวดมนต์-01875f?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.kaisoft.chant)
+[![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg?style=for-the-badge)](LICENSE)
 
 แอปพลิเคชัน E-Book รวบรวมบทสวดมนต์และเจริญจิตภาวนา ออกแบบในสไตล์ **Pure HTML5 / CSS3 / Vanilla JavaScript (`tamma.html`)** ตามมาตรฐานระบบนิเวศชุดแอปสัตว์ทั้ง 5 ของ Godkiller Framework พร้อมรองรับการรันบน **Web, iOS และ Android (Capacitor Cross-Platform Parity)**
+
+---
+
+## 📲 ดาวน์โหลดแอปพลิเคชัน (Download App)
+
+| แพลตฟอร์ม | ช่องทางดาวน์โหลด | สถานะ |
+| :--- | :--- | :---: |
+| 🍏 **iOS / iPadOS** | [ดาวน์โหลดบน App Store (iOS 15.0+)](https://apps.apple.com/th/app/chant-%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95/id6806598143) | 🟢 เผยแพร่แล้ว (Live) |
+| 🤖 **Android** | [ดาวน์โหลดบน Google Play](https://play.google.com/store/apps/details?id=com.kaisoft.chant) | 🟢 เผยแพร่แล้ว (Live) |
+| 🌐 **Web App (PWA)** | เปิดไฟล์ `tamma.html` หรือเปิดผ่านเว็บเบราว์เซอร์ | 🟢 พร้อมใช้งาน |
 
 ---
 

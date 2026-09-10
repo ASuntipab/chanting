@@ -1,5 +1,12 @@
-# 📦 เอกสารเตรียมข้อมูลนำแอปขึ้น Google Play Store และ Apple App Store
-> แอปพลิเคชัน: **บทสวดมนต์ (Chant)** | Package Name / Bundle ID: `com.kaisoft.chant`
+# 📦 เอกสารและข้อมูลแอปพลิเคชันบน Store (Google Play Store & Apple App Store)
+> แอปพลิเคชัน: **Chant: บทสวดมนต์** | Package Name / Bundle ID: `com.kaisoft.chant` | ผู้พัฒนา: **KAI SOFT COMPANY LIMITED**  
+> สถานะการเผยแพร่: 🟢 **อนุมัติและเผยแพร่แล้วทั้ง 2 สโตร์ (Live & Officially Available)**
+
+### 🔗 ลิงก์ดาวน์โหลดแอปพลิเคชันทางการ (Official Store URLs):
+- 🤖 **Google Play Store (Android):**  
+  👉 [https://play.google.com/store/apps/details?id=com.kaisoft.chant](https://play.google.com/store/apps/details?id=com.kaisoft.chant)
+- 🍎 **Apple App Store (iOS / iPadOS):**  
+  👉 [https://apps.apple.com/th/app/chant-%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95/id6806598143](https://apps.apple.com/th/app/chant-%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95/id6806598143) *(App ID: `6806598143`)*
 
 ---
 
@@ -25,8 +32,10 @@
   ```
 - **หมวดหมู่ (Category):** หนังสือและการอ้างอิง (Books & Reference)
 - **การจัดเรตติ้ง (Content Rating):** ทุกคน (Everyone / All Ages)
-- **อีเมลสนับสนุน (Support Email):** `admin@kaisoft.net` (หรืออีเมลของผู้พัฒนา)
-- **นโยบายความเป็นส่วนตัว (Privacy Policy URL):** ลิงก์ไปยังหน้า `privacy-policy.html`
+- **อีเมลสนับสนุน (Support Email):** `admin@kaisoft.net`
+- **เว็บไซต์ฝ่ายสนับสนุน (Support URL):** `https://kaisoftthailand.com/chant-support/`
+- **นโยบายความเป็นส่วนตัว (Privacy Policy URL):** `https://kaisoftthailand.com/privacy-policy-chant.html`
+- **ลิงก์เผยแพร่จริง (Live Play Store URL):** [https://play.google.com/store/apps/details?id=com.kaisoft.chant](https://play.google.com/store/apps/details?id=com.kaisoft.chant)
 
 ### 🛠️ ไฟล์และขั้นตอนการบิลด์สำหรับ Google Play:
 - **ไฟล์บิลด์ที่สร้างสำเร็จแล้ว:**
@@ -42,15 +51,23 @@
 
 ### 📌 ข้อมูลพื้นฐานสำหรับลงทะเบียนใน App Store Connect:
 - **ชื่อแอป (App Name - สูงสุด 30 ตัวอักษร):**
-  `บทสวดมนต์: พระไตรปิฎก`
+  `Chant: บทสวดมนต์`
+- **Apple ID (App Store ID):**
+  `6806598143`
+- **ลิงก์เผยแพร่จริง (Live App Store URL):**
+  [https://apps.apple.com/th/app/chant-%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95/id6806598143](https://apps.apple.com/th/app/chant-%E0%B8%9A%E0%B8%97%E0%B8%AA%E0%B8%A7%E0%B8%94%E0%B8%A1%E0%B8%99%E0%B8%95/id6806598143)
 - **คำบรรยายสั้น (Subtitle - สูงสุด 30 ตัวอักษร):**
   `คลังบทสวดมนต์และเสียงสวดมนต์`
 - **หมวดหมู่หลัก (Primary Category):**
-  การอ้างอิง (Reference) หรือ ไลฟ์สไตล์ (Lifestyle)
+  ไลฟ์สไตล์ (Lifestyle) / การศึกษา (Education)
 - **การจัดเรตติ้งอายุ (Age Rating):**
   4+ (ไม่มีเนื้อหาไม่เหมาะสม)
 - **คำค้นหา / คีย์เวิร์ด (Keywords - สูงสุด 100 ตัวอักษร คั่นด้วยจุลภาค):**
   `บทสวดมนต์,สวดมนต์,พระไตรปิฎก,ธรรมะ,แผ่เมตตา,ชินบัญชร,ทำวัตร,สมาธิ,เจริญภาวนา,พุทธศาสนา`
+- **เว็บไซต์ฝ่ายสนับสนุน (Support URL):**
+  `https://kaisoftthailand.com/chant-support/`
+- **นโยบายความเป็นส่วนตัว (Privacy Policy URL):**
+  `https://kaisoftthailand.com/privacy-policy-chant.html`
 - **ข้อกำหนดความปลอดภัยและการเข้ารหัส (Export Compliance):**
   กำหนด `<key>ITSAppUsesNonExemptEncryption</key><false/>` เรียบร้อยแล้ว (ไม่ติดคำถามการเข้ารหัสของรัฐบาลสหรัฐฯ)
 - **เอกสาร Privacy Manifest (iOS 17+ Requirement):**
