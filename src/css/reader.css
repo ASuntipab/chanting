@@ -281,8 +281,8 @@ body.theme-cosmic .verse-pali {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+  justify-content: flex-start;
+  align-items: stretch;
 }
 
 .page-verse-flow {
@@ -291,11 +291,9 @@ body.theme-cosmic .verse-pali {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1);
-  will-change: transform;
+  gap: 12px;
   text-align: left;
-  padding: 2px 0 16px 0;
+  padding: 2px 0 10px 0;
   font-family: var(--reader-font-family, var(--font-body));
   font-size: var(--reader-font-size, 1.15rem);
   color: var(--text-primary);

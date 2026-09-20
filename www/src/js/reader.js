@@ -48,6 +48,136 @@ export const FONT_FAMILIES = {
   }
 };
 
+/**
+ * Smart Stanza-Aligned Book Paginator:
+ * Chunks a prayer into discrete, beautifully formatted book pages.
+ * Ensures that EVERY page begins cleanly at the very top with the first line of its stanza.
+ * Dynamically adapts to font size scaling (e.g. up to 300% for elders) without breaking words or text clipping.
+ */
+export function paginatePrayerIntoBookPages(prayer, fontSizeRem = 1.15) {
+  if (!prayer) return [];
+  let rawPages = prayer.pages;
+  if (!rawPages || !Array.isArray(rawPages) || rawPages.length === 0) {
+    const rawText = prayer.content || prayer.description || '';
+    const chunks = rawText.split(/\n\s*\n+/).filter(c => c.trim().length > 0);
+    if (chunks.length > 0) {
+      rawPages = chunks.map((c, i) => ({
+        verseTitle: chunks.length > 1 ? `ตอนที่ ${i + 1}` : (prayer.title || 'บทสวด'),
+        content: c
+      }));
+    } else {
+      rawPages = [{
+        verseTitle: prayer.title || 'บทสวด',
+        content: rawText || 'ไม่มีเนื้อหา'
+      }];
+    }
+  }
+  const bookPages = [];
+
+  // Base character budget per page based on font scaling (inverse curve)
+  // At 1.15rem -> ~480 chars per page
+  // At 2.30rem (200%) -> ~240 chars per page
+  // At 3.45rem (300%) -> ~160 chars per page
+  const maxCharsPerPage = Math.max(140, Math.round(480 / (fontSizeRem / 1.15)));
+
+  rawPages.forEach((rawPage, rawIdx) => {
+    const pTitle = rawPage.verseTitle || (rawPages.length > 1 ? `ตอนที่ ${rawIdx + 1}` : '');
+    const paliRaw = rawPage.pali || '';
+    const thaiRaw = rawPage.thai || '';
+    const contentRaw = rawPage.content || '';
+
+    // Collect all semantic stanza blocks for this page
+    const stanzas = [];
+
+    if (paliRaw) {
+      const pBlocks = paliRaw.split(/\n\s*\n+/).filter(s => s.trim().length > 0);
+      const tBlocks = thaiRaw ? thaiRaw.split(/\n\s*\n+/).filter(s => s.trim().length > 0) : [];
+
+      pBlocks.forEach((pBlock, bIdx) => {
+        stanzas.push({
+          type: 'pali-thai',
+          pali: pBlock.trim(),
+          thai: tBlocks[bIdx] ? tBlocks[bIdx].trim() : (bIdx === pBlocks.length - 1 ? tBlocks.slice(bIdx).join('\n\n').trim() : '')
+        });
+      });
+
+      // Any leftover Thai text that wasn't 1:1 mapped
+      if (tBlocks.length > pBlocks.length) {
+        const remainingThai = tBlocks.slice(pBlocks.length).join('\n\n').trim();
+        if (remainingThai) {
+          stanzas.push({
+            type: 'thai-only',
+            pali: '',
+            thai: remainingThai
+          });
+        }
+      }
+    } else if (thaiRaw || contentRaw) {
+      const text = thaiRaw || contentRaw;
+      const blocks = text.split(/\n\s*\n+/).filter(s => s.trim().length > 0);
+      blocks.forEach(b => {
+        stanzas.push({
+          type: 'text-only',
+          pali: '',
+          thai: b.trim()
+        });
+      });
+    }
+
+    if (stanzas.length === 0) {
+      // Fallback for empty or raw string page
+      stanzas.push({
+        type: 'text-only',
+        pali: '',
+        thai: rawPage.content || rawPage.description || 'ไม่มีเนื้อหา'
+      });
+    }
+
+    // Chunk stanzas into sub-pages respecting maxCharsPerPage
+    let currentSubStanzas = [];
+    let currentChars = 0;
+    const subPageList = [];
+
+    stanzas.forEach((stanza) => {
+      const stanzaChars = (stanza.pali ? stanza.pali.length : 0) + (stanza.thai ? stanza.thai.length : 0);
+
+      // If adding this stanza exceeds budget and we already have at least 1 stanza in the page
+      if (currentSubStanzas.length > 0 && (currentChars + stanzaChars > maxCharsPerPage)) {
+        subPageList.push(currentSubStanzas);
+        currentSubStanzas = [stanza];
+        currentChars = stanzaChars;
+      } else {
+        currentSubStanzas.push(stanza);
+        currentChars += stanzaChars;
+      }
+    });
+
+    if (currentSubStanzas.length > 0) {
+      subPageList.push(currentSubStanzas);
+    }
+
+    const totalSub = subPageList.length;
+    subPageList.forEach((subStanzas, subIdx) => {
+      let displayTitle = pTitle;
+      if (totalSub > 1 && pTitle) {
+        displayTitle = `${pTitle} (${subIdx + 1}/${totalSub})`;
+      }
+
+      bookPages.push({
+        pageNumber: bookPages.length + 1,
+        originalPageIndex: rawIdx,
+        subPageIndex: subIdx,
+        totalSubPages: totalSub,
+        verseTitle: displayTitle,
+        stanzas: subStanzas,
+        rawPage
+      });
+    });
+  });
+
+  return bookPages;
+}
+
 export class ComicReaderEngine {
   constructor() {
     this.currentPrayer = null;
@@ -682,71 +812,81 @@ export class ComicReaderEngine {
     return this.readerView.classList.contains('active');
   }
 
+  getCurrentFontSize() {
+    if (typeof storage !== 'undefined' && storage.getSettings) {
+      return storage.getSettings().fontSize || 1.15;
+    }
+    return 1.15;
+  }
+
+  paginatePrayerIntoBookPages(prayer, fontSizeRem = 1.15) {
+    return paginatePrayerIntoBookPages(prayer, fontSizeRem);
+  }
+
   /**
-   * Viewport Snap Paging Engine:
-   * Renders the entire prayer continuously in 1 unified frame.
-   * Measures rendered height and calculates viewport snap steps without scrollbars.
+   * True Book Page Flip Reader:
+   * Renders discrete pages on horizontal comic-track.
+   * Every page strictly begins at top: 0 with the first verse of that page.
    */
   renderPages(prayer) {
     this.currentPrayer = prayer;
-    const rawPages = prayer.pages || this.autoPaginateText(prayer.content || prayer.description || '');
+    this.bookPages = this.paginatePrayerIntoBookPages(prayer, this.getCurrentFontSize());
+    this.totalPages = Math.max(1, this.bookPages.length);
+    this.totalViewportPages = this.totalPages;
     this.comicTrack.innerHTML = '';
 
-    const pageEl = document.createElement('div');
-    pageEl.className = 'comic-page active-page';
-    pageEl.dataset.pageIndex = 0;
+    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
 
-    const frame = document.createElement('div');
-    frame.className = 'page-frame';
+    this.bookPages.forEach((bPage, bIdx) => {
+      const pageEl = document.createElement('div');
+      pageEl.className = 'comic-page' + (bIdx === this.currentPageIndex ? ' active-page' : '');
+      pageEl.dataset.pageIndex = bIdx;
+      pageEl.dataset.originalPageIndex = bPage.originalPageIndex;
 
-    // Viewport Window
-    const viewport = document.createElement('div');
-    viewport.className = 'page-verse-viewport';
-    this.viewportEl = viewport;
+      const frame = document.createElement('div');
+      frame.className = 'page-frame';
 
-    // Continuous Flow Container
-    const flow = document.createElement('div');
-    const layoutClass = `layout-${this.currentLayout || 'book'}`;
-    flow.className = `page-verse-flow ${layoutClass}`;
-    this.flowEl = flow;
-
-    rawPages.forEach((page, idx) => {
-      const section = document.createElement('div');
-      section.className = 'verse-section';
-      section.dataset.pageIndex = idx;
-
-      if (page.verseTitle && rawPages.length > 1) {
-        const titleEl = document.createElement('div');
-        titleEl.className = 'verse-section-title verse-clickable';
-        titleEl.dataset.pageIndex = idx;
-        titleEl.dataset.type = 'title';
-        titleEl.dataset.text = page.verseTitle.trim();
-        titleEl.textContent = page.verseTitle;
-        titleEl.addEventListener('click', (e) => {
+      // 1. Page Header (Verse Title)
+      if (bPage.verseTitle) {
+        const headerEl = document.createElement('div');
+        headerEl.className = 'page-verse-header verse-clickable';
+        headerEl.dataset.pageIndex = bPage.originalPageIndex;
+        headerEl.dataset.type = 'title';
+        headerEl.dataset.text = bPage.verseTitle;
+        headerEl.textContent = bPage.verseTitle;
+        headerEl.addEventListener('click', (e) => {
           if (ttsEngine.isPlaying || ttsEngine.isPaused) {
             e.stopPropagation();
-            this.playFromElement(titleEl);
+            this.playFromElement(headerEl);
           }
         });
-        section.appendChild(titleEl);
+        frame.appendChild(headerEl);
       }
 
-      if (page.pali) {
-        const paliWrap = document.createElement('div');
-        paliWrap.className = 'verse-pali-wrap';
-        
-        // แยกบท/ตอนตามย่อหน้า (เว้นบรรทัดว่าง \n\s*\n)
-        const stanzas = page.pali.split(/\n\s*\n+/).filter(s => s.trim().length > 0);
-        stanzas.forEach((stanza, sIdx) => {
+      // 2. Viewport & Flow Container (Top-aligned, zero arbitrary scroll cutting)
+      const viewport = document.createElement('div');
+      viewport.className = 'page-verse-viewport';
+
+      const flow = document.createElement('div');
+      const layoutClass = `layout-${this.currentLayout || 'book'}`;
+      flow.className = `page-verse-flow ${layoutClass}`;
+
+      bPage.stanzas.forEach((stanza) => {
+        const section = document.createElement('div');
+        section.className = 'verse-section';
+
+        if (stanza.pali) {
+          const paliWrap = document.createElement('div');
+          paliWrap.className = 'verse-pali-wrap';
+
           const stanzaEl = document.createElement('div');
           stanzaEl.className = 'verse-stanza';
-          stanzaEl.dataset.stanzaIndex = sIdx;
-          
-          const lines = stanza.split('\n').filter(l => l.trim().length > 0);
+
+          const lines = stanza.pali.split('\n').filter(l => l.trim().length > 0);
           lines.forEach((line, lIdx) => {
             const paliEl = document.createElement('div');
             paliEl.className = 'verse-pali verse-clickable' + (lIdx === 0 ? ' stanza-first-line' : '');
-            paliEl.dataset.pageIndex = idx;
+            paliEl.dataset.pageIndex = bPage.originalPageIndex;
             paliEl.dataset.type = 'pali';
             paliEl.dataset.text = line.trim();
             const displayPali = (this.currentScript && this.currentScript !== 'thai-phonetic')
@@ -762,206 +902,176 @@ export class ComicReaderEngine {
             stanzaEl.appendChild(paliEl);
           });
           paliWrap.appendChild(stanzaEl);
-        });
-        section.appendChild(paliWrap);
-      }
+          section.appendChild(paliWrap);
+        }
 
-      if (page.thai) {
-        const thaiWrap = document.createElement('div');
-        thaiWrap.className = 'verse-thai-wrap';
-        
-        // แยกย่อหน้าคำแปลภาษาไทย
-        const thaiStanzas = page.thai.split(/\n+/).filter(s => s.trim().length > 0);
-        thaiStanzas.forEach((stanza, sIdx) => {
+        if (stanza.thai) {
+          const thaiWrap = document.createElement('div');
+          thaiWrap.className = 'verse-thai-wrap';
+
           const stanzaEl = document.createElement('div');
           stanzaEl.className = 'verse-thai-stanza';
-          stanzaEl.dataset.stanzaIndex = sIdx;
-          
-          const thaiEl = document.createElement('div');
-          thaiEl.className = 'verse-thai verse-clickable stanza-first-line';
-          thaiEl.dataset.pageIndex = idx;
-          thaiEl.dataset.type = 'thai';
-          thaiEl.dataset.text = stanza.trim();
-          thaiEl.innerHTML = this.escapeHtml(stanza);
-          thaiEl.addEventListener('click', (e) => {
-            if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-              e.stopPropagation();
-              this.playFromElement(thaiEl);
-            }
+
+          const thaiLines = stanza.thai.split(/\n+/).filter(l => l.trim().length > 0);
+          thaiLines.forEach((tLine, tIdx) => {
+            const thaiEl = document.createElement('div');
+            thaiEl.className = 'verse-thai verse-clickable' + (tIdx === 0 ? ' stanza-first-line' : '');
+            thaiEl.dataset.pageIndex = bPage.originalPageIndex;
+            thaiEl.dataset.type = 'thai';
+            thaiEl.dataset.text = tLine.trim();
+            thaiEl.innerHTML = this.escapeHtml(tLine);
+            thaiEl.addEventListener('click', (e) => {
+              if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+                e.stopPropagation();
+                this.playFromElement(thaiEl);
+              }
+            });
+            stanzaEl.appendChild(thaiEl);
           });
-          stanzaEl.appendChild(thaiEl);
           thaiWrap.appendChild(stanzaEl);
-        });
-        section.appendChild(thaiWrap);
-      }
+          section.appendChild(thaiWrap);
+        }
 
-      if (!page.pali && !page.thai && page.content) {
-        const contentWrap = document.createElement('div');
-        contentWrap.className = 'verse-thai-wrap';
-        const contentStanzas = page.content.split(/\n+/).filter(s => s.trim().length > 0);
-        contentStanzas.forEach((stanza, sIdx) => {
-          const stanzaEl = document.createElement('div');
-          stanzaEl.className = 'verse-thai-stanza';
-          stanzaEl.dataset.stanzaIndex = sIdx;
-          
-          const contentEl = document.createElement('div');
-          contentEl.className = 'verse-thai verse-clickable stanza-first-line';
-          contentEl.dataset.pageIndex = idx;
-          contentEl.dataset.type = 'thai';
-          contentEl.dataset.text = stanza.trim();
-          contentEl.innerHTML = this.escapeHtml(stanza);
-          contentEl.addEventListener('click', (e) => {
-            if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-              e.stopPropagation();
-              this.playFromElement(contentEl);
-            }
+        flow.appendChild(section);
+      });
+
+      // Special itipiso tally counter button check
+      const rawP = bPage.rawPage;
+      if (rawP) {
+        const pTitle = (rawP.verseTitle || '').toLowerCase();
+        const pThai = (rawP.thai || '').toLowerCase();
+        const pPali = (rawP.pali || '').toLowerCase();
+        if (pTitle.includes('เท่าอายุ') || pThai.includes('เท่าอายุ') || (pTitle.includes('อิติปิโส') && pPali.includes('อิติปิ โส'))) {
+          const launchBox = document.createElement('div');
+          launchBox.className = 'itipiso-launch-box';
+          const launchBtn = document.createElement('button');
+          launchBtn.type = 'button';
+          launchBtn.className = 'btn-launch-itipiso-modal';
+          launchBtn.innerHTML = '<span>📿</span> <span>แตะเปิดห้องสวดนับจบ (เท่าอายุ + ๑)</span>';
+          launchBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showItipisoWidget();
           });
-          stanzaEl.appendChild(contentEl);
-          contentWrap.appendChild(stanzaEl);
-        });
-        section.appendChild(contentWrap);
+          launchBox.appendChild(launchBtn);
+          flow.appendChild(launchBox);
+        }
       }
 
-      // ตรวจสอบว่าหน้านี้เป็นบทพุทธคุณเท่าอายุ + ๑ หรือไม่ เพื่อแสดงปุ่มเปิดห้องสวดนับจบ
-      const pTitle = (page.verseTitle || '').toLowerCase();
-      const pThai = (page.thai || '').toLowerCase();
-      const pPali = (page.pali || '').toLowerCase();
-      if (pTitle.includes('เท่าอายุ') || pThai.includes('เท่าอายุ') || (pTitle.includes('อิติปิโส') && pPali.includes('อิติปิ โส'))) {
-        const launchBox = document.createElement('div');
-        launchBox.className = 'itipiso-launch-box';
-        const launchBtn = document.createElement('button');
-        launchBtn.type = 'button';
-        launchBtn.className = 'btn-launch-itipiso-modal';
-        launchBtn.innerHTML = '<span>📿</span> <span>แตะเปิดห้องสวดนับจบ (เท่าอายุ + ๑)</span>';
-        launchBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.showItipisoWidget();
-        });
-        launchBox.appendChild(launchBtn);
-        section.appendChild(launchBox);
+      viewport.appendChild(flow);
+      frame.appendChild(viewport);
+
+      // 3. Footer Container with Page indicator & Next cue
+      const footer = document.createElement('div');
+      footer.className = 'page-footer-container';
+
+      const counterBadge = document.createElement('div');
+      counterBadge.className = 'page-counter-badge';
+      counterBadge.textContent = this.totalPages > 1 
+        ? `📖 หน้า ${toThai(bIdx + 1)} จาก ${toThai(this.totalPages)}`
+        : '📖 ๑ หน้าสมบูรณ์';
+
+      const moreIndicator = document.createElement('div');
+      moreIndicator.className = 'scroll-more-indicator';
+      if (bIdx < this.totalPages - 1) {
+        moreIndicator.innerHTML = '<span>หน้าถัดไป</span> <span class="more-arrow">👉</span> <span class="more-subtext">(ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง)</span>';
+        moreIndicator.title = 'ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
+      } else {
+        moreIndicator.innerHTML = '<span class="finish-star">✨</span> <span>จบการสวดมนต์สมบูรณ์ (สาธุ 🙏)</span>';
+        moreIndicator.classList.add('finish-page-indicator');
       }
 
-      flow.appendChild(section);
+      const handleMoreClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.hudVisible) this.hideHUD();
+        this.hideGestureHint();
+        if (bIdx < this.totalPages - 1) {
+          this.nextPage();
+        } else {
+          audio.playBell(648);
+          const finishOverlay = document.getElementById('finishChantOverlay');
+          if (finishOverlay) finishOverlay.classList.add('show');
+        }
+      };
+      moreIndicator.addEventListener('click', handleMoreClick);
+      moreIndicator.addEventListener('touchend', handleMoreClick);
 
-      if (idx < rawPages.length - 1) {
-        const divider = document.createElement('div');
-        divider.className = 'verse-section-divider';
-        flow.appendChild(divider);
-      }
+      footer.appendChild(moreIndicator);
+      footer.appendChild(counterBadge);
+      frame.appendChild(footer);
+
+      pageEl.appendChild(frame);
+      this.comicTrack.appendChild(pageEl);
     });
 
-    viewport.appendChild(flow);
-
-    // Prepare TTS Queue for current prayer
+    // Prepare TTS Queue for prayer
     ttsEngine.prepareQueue(prayer);
 
-    // Footer Container with Indicator and Progress
-    const footer = document.createElement('div');
-    footer.className = 'page-footer-container';
+    // Sync Scrubber & Dots
+    this.calculateViewportMetrics();
 
-    const moreIndicator = document.createElement('div');
-    moreIndicator.className = 'scroll-more-indicator';
-    moreIndicator.innerHTML = '<span>มีต่อ</span> <span class="more-arrow">▼</span> <span class="more-subtext">(ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง)</span>';
-    moreIndicator.title = 'ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
-    const handleMoreClick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      if (this.hudVisible) this.hideHUD();
-      this.hideGestureHint();
-      this.nextPage();
-    };
-    moreIndicator.addEventListener('click', handleMoreClick);
-    moreIndicator.addEventListener('touchend', handleMoreClick);
-    this.moreIndicator = moreIndicator;
-
-    const counterBadge = document.createElement('div');
-    counterBadge.className = 'page-counter-badge';
-    this.counterBadge = counterBadge;
-
-    footer.appendChild(moreIndicator);
-    footer.appendChild(counterBadge);
-
-    frame.appendChild(viewport);
-    frame.appendChild(footer);
-    pageEl.appendChild(frame);
-    this.comicTrack.appendChild(pageEl);
-
-    // Calculate dynamic viewport step & pages
-    requestAnimationFrame(() => {
-      this.calculateViewportMetrics();
-      this.goToViewport(this.viewportIndex || 0, false);
-    });
+    // Ensure we are on the current valid page
+    const safePage = Math.min(this.currentPageIndex || 0, this.totalPages - 1);
+    this.goToPage(safePage, false);
   }
 
   calculateViewportMetrics() {
-    if (!this.viewportEl || !this.flowEl) {
-      this.totalViewportPages = 1;
-      this.totalPages = 1;
-      return;
+    this.totalPages = Math.max(1, this.bookPages ? this.bookPages.length : 1);
+    this.totalViewportPages = this.totalPages;
+
+    if (this.currentPageIndex >= this.totalPages) {
+      this.currentPageIndex = this.totalPages - 1;
     }
-
-    const viewportHeight = this.viewportEl.clientHeight || 450;
-    const flowHeight = this.flowEl.scrollHeight || 450;
-
-    // Overlap slightly (24px) for reading continuity
-    this.viewportStepPx = Math.max(viewportHeight - 24, 120);
-    this.totalViewportPages = Math.max(1, Math.ceil((flowHeight - 24) / this.viewportStepPx));
-    this.totalPages = this.totalViewportPages;
-
-    if (this.viewportIndex >= this.totalViewportPages) {
-      this.viewportIndex = this.totalViewportPages - 1;
-    }
+    this.viewportIndex = this.currentPageIndex;
 
     // Sync Scrubber Controls
     if (this.readerScrubber) {
       this.readerScrubber.min = 1;
-      this.readerScrubber.max = this.totalViewportPages;
-      this.readerScrubber.value = (this.viewportIndex || 0) + 1;
+      this.readerScrubber.max = this.totalPages;
+      this.readerScrubber.value = (this.currentPageIndex || 0) + 1;
     }
     if (this.readerPageBadge) {
-      this.readerPageBadge.textContent = `${(this.viewportIndex || 0) + 1} / ${this.totalViewportPages}`;
+      this.readerPageBadge.textContent = `${(this.currentPageIndex || 0) + 1} / ${this.totalPages}`;
     }
 
     this.renderPageDots();
   }
 
-  goToViewport(index, animate = true) {
+  goToPage(index, animate = true) {
     if (index < 0) index = 0;
-    if (index >= this.totalViewportPages) index = this.totalViewportPages - 1;
+    if (index >= this.totalPages) index = this.totalPages - 1;
 
-    this.viewportIndex = index;
     this.currentPageIndex = index;
+    this.viewportIndex = index;
 
-    if (this.flowEl && this.viewportStepPx) {
-      const offsetY = index * this.viewportStepPx;
-      this.flowEl.style.transition = animate ? 'transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1)' : 'none';
-      this.flowEl.style.transform = offsetY > 0 ? `translateY(-${offsetY}px)` : 'translateY(0px)';
+    // Horizontal Book Page Turn Transform
+    if (this.comicTrack) {
+      this.comicTrack.style.transition = animate ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
+      this.comicTrack.style.transform = `translateX(-${index * 100}%)`;
     }
 
-    // Update Counter Badge
-    if (this.counterBadge) {
-      this.counterBadge.textContent = this.totalViewportPages > 1 
-        ? `ส่วนที่ ${index + 1} จาก ${this.totalViewportPages}` 
-        : '๑ บทสมบูรณ์';
-    }
+    // Active page class
+    const pages = this.comicTrack.querySelectorAll('.comic-page');
+    pages.forEach((p, idx) => {
+      p.classList.toggle('active-page', idx === index);
+    });
 
     // Update Scrubber Badge & Slider Value
     if (this.readerScrubber) {
       this.readerScrubber.value = index + 1;
     }
     if (this.readerPageBadge) {
-      this.readerPageBadge.textContent = `${index + 1} / ${this.totalViewportPages}`;
+      this.readerPageBadge.textContent = `${index + 1} / ${this.totalPages}`;
     }
 
-    // Update "มีต่อ ▼" Indicator & Finish Button
+    // Update Finish overlay
     const finishOverlay = document.getElementById('finishChantOverlay');
-    if (index < this.totalViewportPages - 1) {
-      if (this.moreIndicator) this.moreIndicator.classList.remove('hidden');
-      if (finishOverlay) finishOverlay.classList.remove('show');
-    } else {
-      if (this.moreIndicator) this.moreIndicator.classList.add('hidden');
-      if (finishOverlay) finishOverlay.classList.add('show');
+    if (finishOverlay) {
+      if (index === this.totalPages - 1) {
+        finishOverlay.classList.add('show');
+      } else {
+        finishOverlay.classList.remove('show');
+      }
     }
 
     this.updateDots();
@@ -969,13 +1079,13 @@ export class ComicReaderEngine {
     this.checkItipisoPage();
   }
 
-  goToPage(index, animate = true) {
-    this.goToViewport(index, animate);
+  goToViewport(index, animate = true) {
+    this.goToPage(index, animate);
   }
 
   nextPage() {
-    if (this.viewportIndex < this.totalViewportPages - 1) {
-      this.goToViewport(this.viewportIndex + 1, true);
+    if (this.currentPageIndex < this.totalPages - 1) {
+      this.goToPage(this.currentPageIndex + 1, true);
     } else {
       // Reached the end of prayer! Play bell tone
       audio.playBell(648);
@@ -983,8 +1093,8 @@ export class ComicReaderEngine {
   }
 
   prevPage() {
-    if (this.viewportIndex > 0) {
-      this.goToViewport(this.viewportIndex - 1, true);
+    if (this.currentPageIndex > 0) {
+      this.goToPage(this.currentPageIndex - 1, true);
     }
   }
 
@@ -1109,22 +1219,31 @@ export class ComicReaderEngine {
     const deltaY = this.touchStartY - (e.changedTouches[0]?.clientY || this.touchCurrentY);
     const elapsed = Date.now() - this.touchStartTime;
 
-    // 1. Unified Swipe Handling: Swipe Left OR Swipe Up -> Next Viewport
+    // 1. Unified Swipe Handling: Swipe Left OR Swipe Up -> Next Page
     if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
       this.nextPage();
     } 
-    // 2. Swipe Right OR Swipe Down -> Prev Viewport
+    // 2. Swipe Right OR Swipe Down -> Prev Page
     else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
       this.prevPage();
     } 
-    // 3. Clean Tap on reading text area -> Toggle HUD
+    // 3. Clean Tap on reading text area:
+    // Right 22% -> Next Page, Left 22% -> Prev Page, Center -> Toggle HUD
     else if (elapsed < 500 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
       this.hideGestureHint();
-      this.toggleHUD();
+      const clickX = this.touchStartX;
+      const screenWidth = window.innerWidth || 360;
+      if (clickX > screenWidth * 0.78) {
+        this.nextPage();
+      } else if (clickX < screenWidth * 0.22) {
+        this.prevPage();
+      } else {
+        this.toggleHUD();
+      }
     }
   }
 
@@ -1174,22 +1293,30 @@ export class ComicReaderEngine {
     const deltaY = this.touchStartY - e.clientY;
     const elapsed = Date.now() - this.touchStartTime;
 
-    // Swipe Left or Up -> Next Viewport
+    // Swipe Left or Up -> Next Page
     if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
       this.nextPage();
     } 
-    // Swipe Right or Down -> Prev Viewport
+    // Swipe Right or Down -> Prev Page
     else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
       this.prevPage();
     } 
-    // Clean Click on reading text area -> Toggle HUD
+    // Clean Click on reading text area: Right edge -> Next, Left edge -> Prev, Center -> Toggle HUD
     else if (elapsed < 500 && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
       this.hideGestureHint();
-      this.toggleHUD();
+      const clickX = this.touchStartX;
+      const screenWidth = window.innerWidth || 360;
+      if (clickX > screenWidth * 0.78) {
+        this.nextPage();
+      } else if (clickX < screenWidth * 0.22) {
+        this.prevPage();
+      } else {
+        this.toggleHUD();
+      }
     }
   }
 
@@ -1265,13 +1392,13 @@ export class ComicReaderEngine {
     storage.saveSettings(settings);
     this.applyFontSize(settings.fontSize);
 
-    // Recalculate viewports with new font size and preserve reading progress
+    // Dynamic Re-Pagination with new font size and preserve reading progress
     if (this.currentPrayer && this.isOpen()) {
-      const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+      const currentOriginalPage = this.bookPages?.[this.currentPageIndex]?.originalPageIndex ?? 0;
       requestAnimationFrame(() => {
-        this.calculateViewportMetrics();
-        const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
-        this.goToViewport(newIndex, false);
+        this.renderPages(this.currentPrayer);
+        const newIndex = this.bookPages.findIndex(bp => bp.originalPageIndex === currentOriginalPage);
+        this.goToPage(newIndex >= 0 ? newIndex : 0, false);
       });
     }
   }
@@ -1306,13 +1433,13 @@ export class ComicReaderEngine {
       storage.saveSettings({ fontFamily: validKey });
     }
 
-    // Recalculate viewports with new font metrics
+    // Dynamic Re-Pagination with new font metrics
     if (this.currentPrayer && this.isOpen()) {
-      const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+      const currentOriginalPage = this.bookPages?.[this.currentPageIndex]?.originalPageIndex ?? 0;
       requestAnimationFrame(() => {
-        this.calculateViewportMetrics();
-        const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
-        this.goToViewport(newIndex, false);
+        this.renderPages(this.currentPrayer);
+        const newIndex = this.bookPages.findIndex(bp => bp.originalPageIndex === currentOriginalPage);
+        this.goToPage(newIndex >= 0 ? newIndex : 0, false);
       });
     }
   }
@@ -1329,6 +1456,7 @@ export class ComicReaderEngine {
         // ignore quota errors
       }
     }
+
     if (save && typeof storage !== 'undefined' && storage.saveSettings) {
       storage.saveSettings({ readerLayout: validLayout });
     }
@@ -1350,13 +1478,13 @@ export class ComicReaderEngine {
       this.readerLayoutSelect.value = validLayout;
     }
 
-    // Recalculate viewports with new layout metrics
+    // Dynamic Re-Pagination with new layout
     if (this.currentPrayer && this.isOpen()) {
-      const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
+      const currentOriginalPage = this.bookPages?.[this.currentPageIndex]?.originalPageIndex ?? 0;
       requestAnimationFrame(() => {
-        this.calculateViewportMetrics();
-        const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
-        this.goToViewport(newIndex, false);
+        this.renderPages(this.currentPrayer);
+        const newIndex = this.bookPages.findIndex(bp => bp.originalPageIndex === currentOriginalPage);
+        this.goToPage(newIndex >= 0 ? newIndex : 0, false);
       });
     }
   }
@@ -1460,20 +1588,19 @@ export class ComicReaderEngine {
   }
 
   findFirstVisibleChunkIndex() {
-    if (!this.flowEl || ttsEngine.queue.length === 0 || !this.viewportStepPx) return 0;
-    const currentViewportTop = (this.viewportIndex || 0) * this.viewportStepPx;
-    
-    const clickables = this.flowEl.querySelectorAll('.verse-clickable');
-    for (const el of clickables) {
-      if (el.offsetTop >= currentViewportTop - 40) {
-        const pageIndex = parseInt(el.dataset.pageIndex, 10);
-        const type = el.dataset.type;
-        const text = (el.dataset.text || el.textContent || '').trim();
-        const idx = ttsEngine.queue.findIndex(c => 
-          c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
-        );
-        if (idx >= 0) return idx;
-      }
+    if (!this.comicTrack || ttsEngine.queue.length === 0) return 0;
+    const activePage = this.comicTrack.querySelector(`.comic-page[data-page-index="${this.currentPageIndex}"]`);
+    if (!activePage) return 0;
+
+    const firstClickable = activePage.querySelector('.verse-clickable');
+    if (firstClickable) {
+      const pageIndex = parseInt(firstClickable.dataset.pageIndex, 10);
+      const type = firstClickable.dataset.type;
+      const text = (firstClickable.dataset.text || firstClickable.textContent || '').trim();
+      const idx = ttsEngine.queue.findIndex(c => 
+        c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+      );
+      if (idx >= 0) return idx;
     }
     return 0;
   }
@@ -1496,17 +1623,17 @@ export class ComicReaderEngine {
   }
 
   handleTTSHighlight(chunkIndex, chunk) {
-    if (!this.flowEl) return;
+    if (!this.comicTrack) return;
 
     // Remove active highlight from all elements
-    const actives = this.flowEl.querySelectorAll('.verse-reading-active');
+    const actives = this.comicTrack.querySelectorAll('.verse-reading-active');
     actives.forEach(el => el.classList.remove('verse-reading-active'));
 
     if (!chunk || chunkIndex < 0) return;
 
-    // Find the exact matching DOM node
+    // Find the exact matching DOM node across all rendered book pages
     let target = null;
-    const candidates = this.flowEl.querySelectorAll(`[data-page-index="${chunk.pageIndex}"][data-type="${chunk.type}"]`);
+    const candidates = this.comicTrack.querySelectorAll(`[data-page-index="${chunk.pageIndex}"][data-type="${chunk.type}"]`);
     for (const el of candidates) {
       if (el.dataset.text && el.dataset.text.trim() === chunk.rawText.trim()) {
         target = el;
@@ -1520,12 +1647,12 @@ export class ComicReaderEngine {
     if (target) {
       target.classList.add('verse-reading-active');
 
-      // Auto-scroll / Jump Viewport if target is outside current view
-      if (this.viewportStepPx) {
-        const elOffsetTop = target.offsetTop;
-        const targetViewport = Math.floor(elOffsetTop / this.viewportStepPx);
-        if (targetViewport !== this.viewportIndex && targetViewport >= 0 && targetViewport < this.totalViewportPages) {
-          this.goToViewport(targetViewport, true);
+      // Auto-flip book page if target element is located on another book page!
+      const targetPageEl = target.closest('.comic-page');
+      if (targetPageEl && targetPageEl.dataset.pageIndex !== undefined) {
+        const targetPageIndex = parseInt(targetPageEl.dataset.pageIndex, 10);
+        if (targetPageIndex !== this.currentPageIndex && targetPageIndex >= 0 && targetPageIndex < this.totalPages) {
+          this.goToPage(targetPageIndex, true);
         }
       }
     }
