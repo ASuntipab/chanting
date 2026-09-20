@@ -606,6 +606,14 @@ class TammaApp {
     // Filter by Category
     if (this.currentCategory === 'has-audio') {
       prayers = prayers.filter(p => !!mp3Player.getTrackForPrayer(p));
+    } else if (this.currentCategory === 'สุขภาพ') {
+      prayers = prayers.filter(p => 
+        p.category === 'สุขภาพ' || 
+        p.id === 'bojjhanga-paritta' || 
+        p.id === 'ratana-sutta' || 
+        p.id === 'girimananda-sutta' ||
+        (p.title && (p.title.includes('รักษาโรค') || p.title.includes('โรคระบาด')))
+      );
     } else if (this.currentCategory !== 'all') {
       prayers = prayers.filter(p => p.category === this.currentCategory);
     }
@@ -653,6 +661,7 @@ class TammaApp {
     const categoryIcons = {
       'all': '✨',
       'has-audio': '🎵',
+      'สุขภาพ': '🩺',
       'หลวงพ่อจรัญ': '🪷',
       'หลวงปู่มั่น': '⛰️',
       'หลวงตามหาบัว': '🪷',
@@ -673,6 +682,16 @@ class TammaApp {
         opt.textContent = `${icon} ทุกหมวดหมู่ (${toThai(allPrayers.length)} บท)`;
       } else if (val === 'has-audio') {
         opt.textContent = `${icon} มีเสียงพระสวดจริง (${toThai(withAudioCount)} บท)`;
+      } else if (val === 'สุขภาพ') {
+        const healthCount = allPrayers.filter(p => 
+          p.category === 'สุขภาพ' || 
+          p.id === 'bojjhanga-paritta' || 
+          p.id === 'ratana-sutta' || 
+          p.id === 'girimananda-sutta' ||
+          (p.title && (p.title.includes('รักษาโรค') || p.title.includes('โรคระบาด')))
+        ).length;
+        const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
+        opt.textContent = `${icon} ${baseName} (${toThai(healthCount)} บท)`;
       } else {
         const count = categoryCounts[val] || 0;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();

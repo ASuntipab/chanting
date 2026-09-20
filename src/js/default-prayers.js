@@ -12,6 +12,7 @@ import { PARITTA_DAILY_PRAYERS } from './prayers-paritta-daily.js';
 import { BIRTHDAY_PROTECTION_PRAYERS } from './prayers-birthday-protection.js';
 import { MONASTIC_RITUAL_PRAYERS } from './prayers-monastic-rituals.js';
 import { WEALTH_DEITIES_PRAYERS } from './prayers-wealth-deities.js';
+import { HEALTH_HEALING_PRAYERS } from './prayers-health-healing.js';
 
 const BASE_PRAYERS = [
   // =========================================================================
@@ -622,5 +623,6 @@ export const DEFAULT_PRAYERS = [
   ...PARITTA_DAILY_PRAYERS,
   ...BIRTHDAY_PROTECTION_PRAYERS,
   ...MONASTIC_RITUAL_PRAYERS,
-  ...WEALTH_DEITIES_PRAYERS
+  ...WEALTH_DEITIES_PRAYERS,
+  ...HEALTH_HEALING_PRAYERS
 ];
