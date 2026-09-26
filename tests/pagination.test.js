@@ -152,5 +152,59 @@ test('paginatePrayerIntoBookPages: Discrete Book Page-Flip & Top-Aligned Stanzas
     assert.ok(bookPages.length >= 1);
     assert.equal(bookPages[0].stanzas[0].thai, 'สัมปะฏิจฉามิ');
   });
+
+  await t.test('Zero-Scrollbar: Font size scaling to 230% and 300% increases page count so each page fits without scrolling', async () => {
+    const { DEFAULT_PRAYERS } = await import('../src/js/default-prayers.js');
+    const mettaPrayer = DEFAULT_PRAYERS[0]; // Includes 9. บทแผ่เมตตา (5-line multi-sentence prayer)
+
+    const pages100 = paginatePrayerIntoBookPages(mettaPrayer, 1.15); // 100%
+    const pages200 = paginatePrayerIntoBookPages(mettaPrayer, 2.30); // 200%
+    const pages230 = paginatePrayerIntoBookPages(mettaPrayer, 2.645); // 230%
+    const pages300 = paginatePrayerIntoBookPages(mettaPrayer, 3.45); // 300%
+
+    // Page count MUST strictly increase with font size
+    assert.ok(pages200.length > pages100.length, `200% should have more pages than 100% (got ${pages200.length} vs ${pages100.length})`);
+    assert.ok(pages230.length >= pages200.length, `230% should have >= 200% pages (got ${pages230.length} vs ${pages200.length})`);
+    assert.ok(pages300.length >= pages230.length, `300% should have >= 230% pages (got ${pages300.length} vs ${pages230.length})`);
+
+    // Verify Metta subpages (originalPageIndex = 8) are split into individual lines at 230%
+    const mettaSub230 = pages230.filter(p => p.originalPageIndex === 8);
+    assert.ok(mettaSub230.length >= 8, `Metta at 230% should have at least 8 subpages (got ${mettaSub230.length}) so each page has at most 1-2 lines`);
+    mettaSub230.forEach(sp => {
+      const lineCount = sp.stanzas.reduce((acc, s) => acc + (s.pali ? s.pali.split('\n').length : 0), 0);
+      assert.ok(lineCount <= 2, `Every subpage at 230% should have <= 2 lines to prevent vertical scrollbar (got ${lineCount})`);
+    });
+  });
+
+  await t.test('Traisaranagamana Zero-Truncation: Thai translation is cleanly split and not dumped into Pali couplets', async () => {
+    const { DEFAULT_PRAYERS } = await import('../src/js/default-prayers.js');
+    const somdetToh = DEFAULT_PRAYERS[0];
+
+    // Page 2 is ๒. บทไตรสรณคมน์
+    const p2_100 = paginatePrayerIntoBookPages(somdetToh, 1.15).filter(p => p.originalPageIndex === 1);
+    const p2_230 = paginatePrayerIntoBookPages(somdetToh, 2.645).filter(p => p.originalPageIndex === 1);
+    const p2_300 = paginatePrayerIntoBookPages(somdetToh, 3.45).filter(p => p.originalPageIndex === 1);
+
+    assert.ok(p2_230.length > p2_100.length, `230% should split Traisaranagamana into more subpages than 100% (got ${p2_230.length} vs ${p2_100.length})`);
+    assert.ok(p2_300.length >= p2_230.length, `300% should have >= 230% subpages (got ${p2_300.length} vs ${p2_230.length})`);
+
+    // Verify each subpage at 230% has at most 5 visual lines (never overflows the viewport)
+    p2_230.forEach((sp, idx) => {
+      assert.ok(sp.stanzas.length > 0, `Subpage ${idx + 1} must have stanzas`);
+      let totalLines = 0;
+      sp.stanzas.forEach(st => {
+        if (st.pali) totalLines += st.pali.split('\n').length;
+        if (st.thai) totalLines += Math.ceil(st.thai.length / 16);
+      });
+      assert.ok(totalLines <= 6, `Subpage ${idx + 1} at 230% must have <= 6 visual lines so text is never truncated (got ${totalLines})`);
+    });
+
+    // Verify all Thai translation text is completely preserved
+    const allThaiCollected = p2_230.map(sp => sp.stanzas.map(st => st.thai).filter(Boolean).join(' ')).filter(Boolean).join(' ');
+    assert.match(allThaiCollected, /พระพุทธเจ้า/, 'Thai translation must contain พระพุทธเจ้า');
+    assert.match(allThaiCollected, /ที่พึ่งที่ระลึก/, 'Thai translation must contain ที่พึ่งที่ระลึก');
+    assert.match(allThaiCollected, /แม้ครั้งที่สาม/, 'Thai translation must contain แม้ครั้งที่สาม');
+  });
 });
+
 

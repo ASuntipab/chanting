@@ -74,11 +74,118 @@ export function paginatePrayerIntoBookPages(prayer, fontSizeRem = 1.15) {
   }
   const bookPages = [];
 
-  // Base character budget per page based on font scaling (inverse curve)
-  // At 1.15rem -> ~480 chars per page
-  // At 2.30rem (200%) -> ~240 chars per page
-  // At 3.45rem (300%) -> ~160 chars per page
-  const maxCharsPerPage = Math.max(140, Math.round(480 / (fontSizeRem / 1.15)));
+  const scaleFactor = Math.max(0.65, fontSizeRem / 1.15);
+  const charsPerLine = Math.max(12, Math.round(38 / scaleFactor));
+  const maxLinesPerPage = Math.max(3.2, 12.0 / scaleFactor);
+  const maxCharsPerPage = Math.max(80, Math.round(440 / scaleFactor));
+
+  function estimateTextLines(text, cpl) {
+    if (!text) return 0;
+    const lines = text.split('\n').filter(l => l.trim().length > 0);
+    let count = 0;
+    lines.forEach(l => {
+      count += Math.max(1, Math.ceil(l.length / cpl));
+    });
+    return count;
+  }
+
+  function breakLongWord(word, maxChars) {
+    if (word.length <= maxChars) return [word];
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      try {
+        const seg = new Intl.Segmenter('th', { granularity: 'word' });
+        const subWords = Array.from(seg.segment(word)).map(s => s.segment);
+        const result = [];
+        let cur = '';
+        for (const sw of subWords) {
+          if (cur && (cur + sw).length > maxChars) {
+            result.push(cur);
+            cur = sw;
+          } else {
+            cur += sw;
+          }
+        }
+        if (cur) result.push(cur);
+        if (result.length > 0) return result;
+      } catch (e) {}
+    }
+    const result = [];
+    for (let i = 0; i < word.length; i += maxChars) {
+      result.push(word.slice(i, i + maxChars));
+    }
+    return result;
+  }
+
+  function chunkTextByBudget(text, cpl, maxLines, maxChars) {
+    if (!text) return [];
+    const rawLines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const chunks = [];
+    let curLines = [];
+    let curEst = 0;
+    let curLen = 0;
+
+    rawLines.forEach(line => {
+      const lineEst = Math.max(1, Math.ceil(line.length / cpl));
+      if (line.length > maxChars || lineEst > maxLines) {
+        const rawWords = line.split(/\s+/).filter(w => w.trim().length > 0);
+        const words = [];
+        rawWords.forEach(rw => {
+          if (rw.length > maxChars) {
+            words.push(...breakLongWord(rw, maxChars));
+          } else {
+            words.push(rw);
+          }
+        });
+
+        let curWordChunk = '';
+        words.forEach(w => {
+          const testChunk = curWordChunk ? (curWordChunk + ' ' + w) : w;
+          const testEst = Math.max(1, Math.ceil(testChunk.length / cpl));
+          if (curWordChunk && (testEst > maxLines || testChunk.length > maxChars)) {
+            if (curLines.length > 0) {
+              chunks.push(curLines.join('\n'));
+              curLines = [];
+              curEst = 0;
+              curLen = 0;
+            }
+            chunks.push(curWordChunk);
+            curWordChunk = w;
+          } else {
+            curWordChunk = testChunk;
+          }
+        });
+        if (curWordChunk) {
+          const wEst = Math.max(1, Math.ceil(curWordChunk.length / cpl));
+          if (curLines.length > 0 && (curEst + wEst > maxLines || curLen + curWordChunk.length > maxChars)) {
+            chunks.push(curLines.join('\n'));
+            curLines = [curWordChunk];
+            curEst = wEst;
+            curLen = curWordChunk.length;
+          } else {
+            curLines.push(curWordChunk);
+            curEst += wEst;
+            curLen += curWordChunk.length;
+          }
+        }
+      } else {
+        if (curLines.length > 0 && (curEst + lineEst > maxLines || curLen + line.length > maxChars)) {
+          chunks.push(curLines.join('\n'));
+          curLines = [line];
+          curEst = lineEst;
+          curLen = line.length;
+        } else {
+          curLines.push(line);
+          curEst += lineEst;
+          curLen += line.length;
+        }
+      }
+    });
+
+    if (curLines.length > 0) {
+      chunks.push(curLines.join('\n'));
+    }
+    return chunks;
+  }
 
   rawPages.forEach((rawPage, rawIdx) => {
     const pTitle = rawPage.verseTitle || (rawPages.length > 1 ? `ตอนที่ ${rawIdx + 1}` : '');
@@ -94,21 +201,143 @@ export function paginatePrayerIntoBookPages(prayer, fontSizeRem = 1.15) {
       const tBlocks = thaiRaw ? thaiRaw.split(/\n\s*\n+/).filter(s => s.trim().length > 0) : [];
 
       pBlocks.forEach((pBlock, bIdx) => {
-        stanzas.push({
-          type: 'pali-thai',
-          pali: pBlock.trim(),
-          thai: tBlocks[bIdx] ? tBlocks[bIdx].trim() : (bIdx === pBlocks.length - 1 ? tBlocks.slice(bIdx).join('\n\n').trim() : '')
-        });
+        const pLines = pBlock.trim().split('\n').filter(l => l.trim().length > 0);
+        const tBlock = (pBlocks.length === tBlocks.length) ? (tBlocks[bIdx] ? tBlocks[bIdx].trim() : '') : (bIdx === pBlocks.length - 1 ? tBlocks.join('\n\n').trim() : '');
+        const tLines = tBlock ? tBlock.split('\n').filter(l => l.trim().length > 0) : [];
+
+        const blockLines = estimateTextLines(pBlock, charsPerLine) + (tBlock ? estimateTextLines(tBlock, charsPerLine) + 0.3 : 0);
+        const blockChars = pBlock.length + (tBlock ? tBlock.length : 0);
+
+        if (blockLines <= maxLinesPerPage && blockChars <= maxCharsPerPage) {
+          // Fits entirely on a single page! Keep intact.
+          stanzas.push({
+            type: 'pali-thai',
+            pali: pBlock.trim(),
+            thai: tBlock
+          });
+        } else if (pLines.length === 1 && tLines.length <= 1 && pBlock.length <= 100 && tBlock.length <= 100) {
+          // Single moderate verse couplet: keep paired as 1 stanza
+          stanzas.push({
+            type: 'pali-thai',
+            pali: pBlock.trim(),
+            thai: tBlock
+          });
+        } else {
+          const is1to1Thai = tLines.length === pLines.length && pLines.length > 0;
+          if (is1to1Thai) {
+            let curPLines = [];
+            let curTLines = [];
+            let curEst = 0;
+            let curChars = 0;
+
+            pLines.forEach((pl, lIdx) => {
+              const tl = tLines[lIdx];
+              const plEst = Math.max(1, Math.ceil(pl.length / charsPerLine));
+              const tlEst = tl ? Math.max(1, Math.ceil(tl.length / charsPerLine)) : 0;
+              const pairEst = plEst + tlEst + (tl ? 0.3 : 0);
+              const pairChars = pl.length + (tl ? tl.length : 0);
+
+              if (pairEst > maxLinesPerPage || pairChars > maxCharsPerPage) {
+                // Individual line pair exceeds page budget: chunk into separate subpages
+                if (curPLines.length > 0) {
+                  stanzas.push({
+                    type: 'pali-thai',
+                    pali: curPLines.join('\n'),
+                    thai: curTLines.join('\n')
+                  });
+                  curPLines = [];
+                  curTLines = [];
+                  curEst = 0;
+                  curChars = 0;
+                }
+                const plChunks = chunkTextByBudget(pl, charsPerLine, maxLinesPerPage, maxCharsPerPage);
+                plChunks.forEach(pc => stanzas.push({ type: 'pali-only', pali: pc, thai: '' }));
+                if (tl) {
+                  const tlChunks = chunkTextByBudget(tl, charsPerLine, maxLinesPerPage, maxCharsPerPage);
+                  tlChunks.forEach(tc => stanzas.push({ type: 'thai-only', pali: '', thai: tc }));
+                }
+              } else if (curPLines.length > 0 && (curEst + pairEst > maxLinesPerPage || curChars + pairChars > maxCharsPerPage)) {
+                stanzas.push({
+                  type: 'pali-thai',
+                  pali: curPLines.join('\n'),
+                  thai: curTLines.join('\n')
+                });
+                curPLines = [pl];
+                curTLines = tl ? [tl] : [];
+                curEst = pairEst;
+                curChars = pairChars;
+              } else {
+                curPLines.push(pl);
+                if (tl) curTLines.push(tl);
+                curEst += pairEst;
+                curChars += pairChars;
+              }
+            });
+
+            if (curPLines.length > 0) {
+              stanzas.push({
+                type: 'pali-thai',
+                pali: curPLines.join('\n'),
+                thai: curTLines.join('\n')
+              });
+            }
+          } else {
+            // Not 1:1 Thai (e.g. Traisaranagamana or prose Suttas):
+            // Chunk Pali into stanzas, and chunk Thai translation into thai-only stanzas
+            let curPLines = [];
+            let curEst = 0;
+            let curChars = 0;
+
+            pLines.forEach(pl => {
+              const plEst = Math.max(1, Math.ceil(pl.length / charsPerLine));
+              if (pl.length > maxCharsPerPage || plEst > maxLinesPerPage) {
+                if (curPLines.length > 0) {
+                  stanzas.push({ type: 'pali-only', pali: curPLines.join('\n'), thai: '' });
+                  curPLines = [];
+                  curEst = 0;
+                  curChars = 0;
+                }
+                const plChunks = chunkTextByBudget(pl, charsPerLine, maxLinesPerPage, maxCharsPerPage);
+                plChunks.forEach(pc => {
+                  stanzas.push({ type: 'pali-only', pali: pc, thai: '' });
+                });
+              } else if (curPLines.length > 0 && (curEst + plEst > maxLinesPerPage || curChars + pl.length > maxCharsPerPage)) {
+                stanzas.push({ type: 'pali-only', pali: curPLines.join('\n'), thai: '' });
+                curPLines = [pl];
+                curEst = plEst;
+                curChars = pl.length;
+              } else {
+                curPLines.push(pl);
+                curEst += plEst;
+                curChars += pl.length;
+              }
+            });
+
+            if (curPLines.length > 0) {
+              stanzas.push({ type: 'pali-only', pali: curPLines.join('\n'), thai: '' });
+            }
+
+            if (tBlock) {
+              const tChunks = chunkTextByBudget(tBlock, charsPerLine, maxLinesPerPage, maxCharsPerPage);
+              tChunks.forEach(tc => {
+                stanzas.push({ type: 'thai-only', pali: '', thai: tc });
+              });
+            }
+          }
+        }
       });
 
       // Any leftover Thai text that wasn't 1:1 mapped
       if (tBlocks.length > pBlocks.length) {
         const remainingThai = tBlocks.slice(pBlocks.length).join('\n\n').trim();
         if (remainingThai) {
-          stanzas.push({
-            type: 'thai-only',
-            pali: '',
-            thai: remainingThai
+          const tChunks = chunkTextByBudget(remainingThai, charsPerLine, maxLinesPerPage, maxCharsPerPage);
+          tChunks.forEach(tc => {
+            stanzas.push({
+              type: 'thai-only',
+              pali: '',
+              thai: tc
+            });
           });
         }
       }
@@ -116,10 +345,13 @@ export function paginatePrayerIntoBookPages(prayer, fontSizeRem = 1.15) {
       const text = thaiRaw || contentRaw;
       const blocks = text.split(/\n\s*\n+/).filter(s => s.trim().length > 0);
       blocks.forEach(b => {
-        stanzas.push({
-          type: 'text-only',
-          pali: '',
-          thai: b.trim()
+        const bChunks = chunkTextByBudget(b, charsPerLine, maxLinesPerPage, maxCharsPerPage);
+        bChunks.forEach(bc => {
+          stanzas.push({
+            type: 'text-only',
+            pali: '',
+            thai: bc
+          });
         });
       });
     }
@@ -133,22 +365,34 @@ export function paginatePrayerIntoBookPages(prayer, fontSizeRem = 1.15) {
       });
     }
 
-    // Chunk stanzas into sub-pages respecting maxCharsPerPage
+    // Chunk stanzas into sub-pages respecting both line and char budgets
     let currentSubStanzas = [];
     let currentChars = 0;
+    let currentLines = 0;
     const subPageList = [];
 
     stanzas.forEach((stanza) => {
       const stanzaChars = (stanza.pali ? stanza.pali.length : 0) + (stanza.thai ? stanza.thai.length : 0);
+      const stanzaLines = (stanza.pali ? estimateTextLines(stanza.pali, charsPerLine) + 0.2 : 0) + (stanza.thai ? estimateTextLines(stanza.thai, charsPerLine) + 0.2 : 0);
 
-      // If adding this stanza exceeds budget and we already have at least 1 stanza in the page
-      if (currentSubStanzas.length > 0 && (currentChars + stanzaChars > maxCharsPerPage)) {
+      const hasPaliInCurrent = currentSubStanzas.some(s => s.pali);
+      const isThaiOnly = !stanza.pali && stanza.thai;
+
+      // If switching from Pali verses to separate Thai translation, place on fresh page
+      if (hasPaliInCurrent && isThaiOnly) {
         subPageList.push(currentSubStanzas);
         currentSubStanzas = [stanza];
         currentChars = stanzaChars;
+        currentLines = stanzaLines;
+      } else if (currentSubStanzas.length > 0 && (currentLines + stanzaLines > maxLinesPerPage || currentChars + stanzaChars > maxCharsPerPage)) {
+        subPageList.push(currentSubStanzas);
+        currentSubStanzas = [stanza];
+        currentChars = stanzaChars;
+        currentLines = stanzaLines;
       } else {
         currentSubStanzas.push(stanza);
         currentChars += stanzaChars;
+        currentLines += stanzaLines;
       }
     });
 
@@ -217,6 +461,12 @@ export class ComicReaderEngine {
     this.btnNext = document.getElementById('btnNextPage');
     this.btnClose = document.getElementById('btnCloseReader');
     
+    // Top-Right Zen & Fullscreen Exit Bar
+    this.readerZenBar = document.getElementById('readerZenBar');
+    this.btnExitZen = document.getElementById('btnExitZen');
+    this.btnZenClose = document.getElementById('btnZenClose');
+    this.btnEnterZen = document.getElementById('btnEnterZen');
+
     // Font Sizing & Typography in Bottom HUD Dock
     this.btnFontPlus = document.getElementById('btnFontPlus');
     this.btnFontMinus = document.getElementById('btnFontMinus');
@@ -296,6 +546,10 @@ export class ComicReaderEngine {
     this.itipisoCompleteRounds = document.getElementById('itipisoCompleteRounds');
     this.btnItipisoCompleteClear = document.getElementById('btnItipisoCompleteClear');
     this.btnItipisoCompleteClose = document.getElementById('btnItipisoCompleteClose');
+
+    // Recitation & Verse Focus Tracking
+    this.focusedChunkIndex = null;
+    this.focusedElement = null;
   }
 
   bindEvents() {
@@ -318,6 +572,21 @@ export class ComicReaderEngine {
       e.stopPropagation();
       this.close();
     });
+
+    // Top-Right Zen & Fullscreen Exit Bar
+    this.btnExitZen?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.showHUD();
+    });
+    this.btnZenClose?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.close();
+    });
+    this.btnEnterZen?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideHUD();
+    });
+    this.readerZenBar?.addEventListener('click', (e) => e.stopPropagation());
 
     // Gesture Help & Navigation Guide Modal Events
     this.btnReaderHelp?.addEventListener('click', (e) => {
@@ -434,8 +703,31 @@ export class ComicReaderEngine {
         window.tammaApp.refreshCurrentViews();
       }
       
+      // If reading within favorites playlist and has next chant
+      if (this.playlist && this.playlistIndex >= 0 && this.playlistIndex < this.playlist.length - 1) {
+        const nextItem = this.playlist[this.playlistIndex + 1];
+        const nextNum = this.playlistIndex + 2;
+        window.tammaApp?.showToast?.(`✨ อนุโมทนาบุญ! กำลังไปบทถัดไป (ลำดับที่ ${nextNum}: ${nextItem.title})`);
+        setTimeout(() => {
+          if (nextItem.isTipitaka && nextItem.volumeNumber) {
+            this.close();
+            window.tammaApp?.openTipitakaVolume?.(nextItem.volumeNumber);
+          } else {
+            this.open(nextItem, 0, {
+              playlist: this.playlist,
+              playlistIndex: this.playlistIndex + 1
+            });
+          }
+        }, 1100);
+        return;
+      }
+
       // Close reader or show success toast
-      window.tammaApp.showToast(`✨ อนุโมทนาบุญ! คุณสวดจบแล้ว ${count} ครั้ง`);
+      if (this.playlist && this.playlist.length > 1) {
+        window.tammaApp?.showToast?.(`🎉 สวดครบทุกบทตามลำดับรายการโปรดแล้ว! อนุโมทนาบุญ สาธุ 🙏`);
+      } else {
+        window.tammaApp?.showToast?.(`✨ อนุโมทนาบุญ! คุณสวดจบแล้ว ${count} ครั้ง`);
+      }
       
       // Auto close after short delay
       setTimeout(() => this.close(), 1500);
@@ -467,7 +759,9 @@ export class ComicReaderEngine {
         ttsEngine.setMode(mode);
         if (this.currentPrayer) {
           const wasPlaying = ttsEngine.isPlaying;
-          ttsEngine.prepareQueue(this.currentPrayer);
+          const curPage = this.currentPageIndex;
+          this.renderPages(this.currentPrayer);
+          this.goToPage(curPage, false);
           if (wasPlaying) {
             ttsEngine.play();
           }
@@ -730,10 +1024,14 @@ export class ComicReaderEngine {
     }
   }
 
-  open(prayer, startPage = 0) {
+  open(prayer, startPage = 0, options = {}) {
     if (!prayer) return;
     this.currentPrayer = prayer;
     this.currentPageIndex = startPage;
+    this.playlist = options.playlist || null;
+    this.playlistIndex = typeof options.playlistIndex === 'number' ? options.playlistIndex : -1;
+    this.focusedChunkIndex = null;
+    this.focusedElement = null;
 
     // Apply User Font, Script & Theme Preference automatically
     const settings = storage.getSettings();
@@ -751,7 +1049,14 @@ export class ComicReaderEngine {
 
     // Update Headers
     if (this.readerTitle) this.readerTitle.textContent = prayer.title;
-    if (this.readerSubtitle) this.readerSubtitle.textContent = prayer.category || 'บทสวดมนต์';
+    if (this.readerSubtitle) {
+      if (this.playlist && this.playlistIndex >= 0) {
+        const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+        this.readerSubtitle.textContent = `บทที่ ${toThai(this.playlistIndex + 1)}/${toThai(this.playlist.length)} ในรายการโปรด • ${prayer.category || 'บทสวดมนต์'}`;
+      } else {
+        this.readerSubtitle.textContent = prayer.category || 'บทสวดมนต์';
+      }
+    }
 
     // Render Comic Pages
     this.renderPages(prayer);
@@ -793,6 +1098,8 @@ export class ComicReaderEngine {
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
     this.hideGestureHint();
     this.hideReaderHelp();
+    this.focusedChunkIndex = null;
+    this.focusedElement = null;
     document.body.style.overflow = '';
     nativeBridge.setKeepAwake(false);
     nativeBridge.showStatusBar();
@@ -835,12 +1142,19 @@ export class ComicReaderEngine {
     this.totalViewportPages = this.totalPages;
     this.comicTrack.innerHTML = '';
 
+    // Prepare TTS Queue from bookPages so chunks match 1-to-1 with rendered book pages
+    ttsEngine.prepareQueue(prayer, this.bookPages);
+
     const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+
+    let chunkIdx = 0;
+    let lastOriginalPageIndex = -1;
 
     this.bookPages.forEach((bPage, bIdx) => {
       const pageEl = document.createElement('div');
       pageEl.className = 'comic-page' + (bIdx === this.currentPageIndex ? ' active-page' : '');
       pageEl.dataset.pageIndex = bIdx;
+      pageEl.dataset.bookPageIndex = bIdx;
       pageEl.dataset.originalPageIndex = bPage.originalPageIndex;
 
       const frame = document.createElement('div');
@@ -851,14 +1165,25 @@ export class ComicReaderEngine {
         const headerEl = document.createElement('div');
         headerEl.className = 'page-verse-header verse-clickable';
         headerEl.dataset.pageIndex = bPage.originalPageIndex;
+        headerEl.dataset.bookPageIndex = bIdx;
         headerEl.dataset.type = 'title';
         headerEl.dataset.text = bPage.verseTitle;
         headerEl.textContent = bPage.verseTitle;
-        headerEl.addEventListener('click', (e) => {
-          if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-            e.stopPropagation();
-            this.playFromElement(headerEl);
+
+        const isNewSection = bPage.originalPageIndex !== lastOriginalPageIndex;
+        if (isNewSection) {
+          lastOriginalPageIndex = bPage.originalPageIndex;
+          if (chunkIdx < ttsEngine.queue.length && ttsEngine.queue[chunkIdx].type === 'title') {
+            headerEl.dataset.chunkId = ttsEngine.queue[chunkIdx].id;
+            headerEl.dataset.chunkIndex = chunkIdx;
+            chunkIdx++;
           }
+        }
+
+        headerEl.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleVerseClick(headerEl);
         });
         frame.appendChild(headerEl);
       }
@@ -887,17 +1212,44 @@ export class ComicReaderEngine {
             const paliEl = document.createElement('div');
             paliEl.className = 'verse-pali verse-clickable' + (lIdx === 0 ? ' stanza-first-line' : '');
             paliEl.dataset.pageIndex = bPage.originalPageIndex;
+            paliEl.dataset.bookPageIndex = bIdx;
             paliEl.dataset.type = 'pali';
             paliEl.dataset.text = line.trim();
+
+            if (chunkIdx < ttsEngine.queue.length) {
+              let matchIdx = -1;
+              if (ttsEngine.queue[chunkIdx].type === 'pali' && ttsEngine.queue[chunkIdx].rawText.trim() === line.trim()) {
+                matchIdx = chunkIdx;
+              } else {
+                for (let si = chunkIdx; si < Math.min(chunkIdx + 15, ttsEngine.queue.length); si++) {
+                  if (ttsEngine.queue[si].type === 'pali' && ttsEngine.queue[si].rawText.trim() === line.trim()) {
+                    matchIdx = si;
+                    break;
+                  }
+                }
+              }
+              if (matchIdx >= 0) {
+                chunkIdx = matchIdx;
+                const matchingIds = [];
+                const firstIdx = chunkIdx;
+                while (chunkIdx < ttsEngine.queue.length && ttsEngine.queue[chunkIdx].type === 'pali' && ttsEngine.queue[chunkIdx].rawText.trim() === line.trim()) {
+                  matchingIds.push(ttsEngine.queue[chunkIdx].id);
+                  chunkIdx++;
+                }
+                paliEl.dataset.chunkId = matchingIds[0];
+                paliEl.dataset.chunkIds = matchingIds.join(',');
+                paliEl.dataset.chunkIndex = firstIdx;
+              }
+            }
+
             const displayPali = (this.currentScript && this.currentScript !== 'thai-phonetic')
               ? paliScript.transliterate(line, this.currentScript)
               : line;
             paliEl.innerHTML = this.escapeHtml(displayPali);
             paliEl.addEventListener('click', (e) => {
-              if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-                e.stopPropagation();
-                this.playFromElement(paliEl);
-              }
+              e.preventDefault();
+              e.stopPropagation();
+              this.handleVerseClick(paliEl);
             });
             stanzaEl.appendChild(paliEl);
           });
@@ -917,14 +1269,41 @@ export class ComicReaderEngine {
             const thaiEl = document.createElement('div');
             thaiEl.className = 'verse-thai verse-clickable' + (tIdx === 0 ? ' stanza-first-line' : '');
             thaiEl.dataset.pageIndex = bPage.originalPageIndex;
+            thaiEl.dataset.bookPageIndex = bIdx;
             thaiEl.dataset.type = 'thai';
             thaiEl.dataset.text = tLine.trim();
+
+            if (chunkIdx < ttsEngine.queue.length) {
+              let matchIdx = -1;
+              if (ttsEngine.queue[chunkIdx].type === 'thai' && ttsEngine.queue[chunkIdx].rawText.trim() === tLine.trim()) {
+                matchIdx = chunkIdx;
+              } else {
+                for (let si = chunkIdx; si < Math.min(chunkIdx + 15, ttsEngine.queue.length); si++) {
+                  if (ttsEngine.queue[si].type === 'thai' && ttsEngine.queue[si].rawText.trim() === tLine.trim()) {
+                    matchIdx = si;
+                    break;
+                  }
+                }
+              }
+              if (matchIdx >= 0) {
+                chunkIdx = matchIdx;
+                const matchingIds = [];
+                const firstIdx = chunkIdx;
+                while (chunkIdx < ttsEngine.queue.length && ttsEngine.queue[chunkIdx].type === 'thai' && ttsEngine.queue[chunkIdx].rawText.trim() === tLine.trim()) {
+                  matchingIds.push(ttsEngine.queue[chunkIdx].id);
+                  chunkIdx++;
+                }
+                thaiEl.dataset.chunkId = matchingIds[0];
+                thaiEl.dataset.chunkIds = matchingIds.join(',');
+                thaiEl.dataset.chunkIndex = firstIdx;
+              }
+            }
+
             thaiEl.innerHTML = this.escapeHtml(tLine);
             thaiEl.addEventListener('click', (e) => {
-              if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-                e.stopPropagation();
-                this.playFromElement(thaiEl);
-              }
+              e.preventDefault();
+              e.stopPropagation();
+              this.handleVerseClick(thaiEl);
             });
             stanzaEl.appendChild(thaiEl);
           });
@@ -973,8 +1352,8 @@ export class ComicReaderEngine {
       const moreIndicator = document.createElement('div');
       moreIndicator.className = 'scroll-more-indicator';
       if (bIdx < this.totalPages - 1) {
-        moreIndicator.innerHTML = '<span>หน้าถัดไป</span> <span class="more-arrow">👉</span> <span class="more-subtext">(ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง)</span>';
-        moreIndicator.title = 'ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
+        moreIndicator.innerHTML = '<span>หน้าถัดไป</span> <span class="more-arrow">👉</span> <span class="more-subtext">(ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า)</span>';
+        moreIndicator.title = 'ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
       } else {
         moreIndicator.innerHTML = '<span class="finish-star">✨</span> <span>จบการสวดมนต์สมบูรณ์ (สาธุ 🙏)</span>';
         moreIndicator.classList.add('finish-page-indicator');
@@ -1003,9 +1382,6 @@ export class ComicReaderEngine {
       pageEl.appendChild(frame);
       this.comicTrack.appendChild(pageEl);
     });
-
-    // Prepare TTS Queue for prayer
-    ttsEngine.prepareQueue(prayer);
 
     // Sync Scrubber & Dots
     this.calculateViewportMetrics();
@@ -1069,6 +1445,16 @@ export class ComicReaderEngine {
     if (finishOverlay) {
       if (index === this.totalPages - 1) {
         finishOverlay.classList.add('show');
+        if (this.btnFinishChantBig) {
+          if (this.playlist && this.playlistIndex >= 0 && this.playlistIndex < this.playlist.length - 1) {
+            const nextItem = this.playlist[this.playlistIndex + 1];
+            this.btnFinishChantBig.innerHTML = `🔔 สวดจบแล้ว • ไปบทถัดไป (ลำดับที่ ${this.playlistIndex + 2}) ⏩<div style="font-size: 0.82rem; font-weight: normal; opacity: 0.9; margin-top: 3px;">${nextItem.title}</div>`;
+          } else if (this.playlist && this.playlist.length > 1) {
+            this.btnFinishChantBig.innerHTML = `🔔 สวดจบลำดับสุดท้ายแล้ว (จบรายการโปรด) 🙏`;
+          } else {
+            this.btnFinishChantBig.innerHTML = `🔔 อ่านจบแล้ว (บันทึกการสวด)`;
+          }
+        }
       } else {
         finishOverlay.classList.remove('show');
       }
@@ -1171,12 +1557,12 @@ export class ComicReaderEngine {
     }
   }
 
-  // --- Touch Gesture Controllers (Swipe Left/Right & Up/Down to Snap Viewport) ---
+  // --- Touch Gesture Controllers (Swipe Left/Right = Flip Pages, Swipe Up/Down = Control Panel) ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
     const target = e.target;
     // Ignore interactive controls to prevent button/HUD clash
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card, .verse-focus-pill')) {
       this.isSwiping = false;
       this.touchStartTime = 0;
       return;
@@ -1198,8 +1584,8 @@ export class ComicReaderEngine {
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - this.touchCurrentY;
 
-    // เมื่อเริ่มปัดซ้าย-ขวา หรือเลื่อนขึ้น-ลง เกิน 15px ให้ซ่อนแผงควบคุมและ Hint ทันที
-    if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) {
+    // เมื่อเริ่มปัดซ้าย-ขวา เกิน 15px (เพื่อเปลี่ยนหน้า) ให้ซ่อนแผงควบคุมและ Hint ทันที
+    if (Math.abs(deltaX) > 15 && Math.abs(deltaX) > Math.abs(deltaY)) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
     }
@@ -1211,35 +1597,50 @@ export class ComicReaderEngine {
     this.lastTouchTime = Date.now();
 
     const target = e.target;
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       return;
     }
 
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - (e.changedTouches[0]?.clientY || this.touchCurrentY);
     const elapsed = Date.now() - this.touchStartTime;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-    // 1. Unified Swipe Handling: Swipe Left OR Swipe Up -> Next Page
-    if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
+    // 1. ปัดซ้าย-ขวา เป็นเปลี่ยนหน้า (Horizontal Swipe)
+    if (absX > absY && absX > this.swipeThreshold) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
-      this.nextPage();
+      if (deltaX > 0) {
+        this.nextPage();
+      } else {
+        this.prevPage();
+      }
+      return;
     } 
-    // 2. Swipe Right OR Swipe Down -> Prev Page
-    else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
-      if (this.hudVisible) this.hideHUD();
+
+    // 2. ปัดขึ้น-ลง เป็นเปิด/ซ่อนแผงควบคุม (Vertical Swipe)
+    if (absY > absX && absY > this.swipeThreshold) {
       this.hideGestureHint();
-      this.prevPage();
-    } 
-    // 3. Clean Tap on reading text area:
-    // Right 22% -> Next Page, Left 22% -> Prev Page, Center -> Toggle HUD
-    else if (elapsed < 500 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
+      this.toggleHUD();
+      return;
+    }
+
+    // If tap was on a clickable verse or focus pill, DO NOT toggle HUD or turn pages!
+    // Native click event handles verse focus and recitation cleanly.
+    if (target.closest('.verse-clickable, .verse-focus-pill')) {
+      return;
+    }
+
+    // 3. Clean Tap on empty/neutral reading stage area:
+    // Right 12% -> Next Page, Left 12% -> Prev Page, Center -> Toggle HUD
+    if (elapsed < 500 && absX < 20 && absY < 20) {
       this.hideGestureHint();
       const clickX = this.touchStartX;
       const screenWidth = window.innerWidth || 360;
-      if (clickX > screenWidth * 0.78) {
+      if (clickX > screenWidth * 0.88) {
         this.nextPage();
-      } else if (clickX < screenWidth * 0.22) {
+      } else if (clickX < screenWidth * 0.12) {
         this.prevPage();
       } else {
         this.toggleHUD();
@@ -1252,7 +1653,7 @@ export class ComicReaderEngine {
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
     const target = e.target;
     // Ignore interactive controls to prevent button/HUD clash
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card, .verse-focus-pill')) {
       this.isMouseDown = false;
       this.touchStartTime = 0;
       return;
@@ -1273,7 +1674,7 @@ export class ComicReaderEngine {
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - this.touchCurrentY;
 
-    if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) {
+    if (Math.abs(deltaX) > 15 && Math.abs(deltaX) > Math.abs(deltaY)) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
     }
@@ -1285,34 +1686,48 @@ export class ComicReaderEngine {
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
 
     const target = e.target;
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       return;
     }
 
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - e.clientY;
     const elapsed = Date.now() - this.touchStartTime;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-    // Swipe Left or Up -> Next Page
-    if (deltaX > this.swipeThreshold || deltaY > this.swipeThreshold) {
+    // 1. ปัดซ้าย-ขวา เป็นเปลี่ยนหน้า
+    if (absX > absY && absX > this.swipeThreshold) {
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
-      this.nextPage();
+      if (deltaX > 0) {
+        this.nextPage();
+      } else {
+        this.prevPage();
+      }
+      return;
     } 
-    // Swipe Right or Down -> Prev Page
-    else if (deltaX < -this.swipeThreshold || deltaY < -this.swipeThreshold) {
-      if (this.hudVisible) this.hideHUD();
+
+    // 2. ปัดขึ้น-ลง เป็นเปิด/ซ่อนแผงควบคุม
+    if (absY > absX && absY > this.swipeThreshold) {
       this.hideGestureHint();
-      this.prevPage();
-    } 
-    // Clean Click on reading text area: Right edge -> Next, Left edge -> Prev, Center -> Toggle HUD
-    else if (elapsed < 500 && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
+      this.toggleHUD();
+      return;
+    }
+
+    // If click was on a clickable verse or focus pill, DO NOT toggle HUD or turn pages!
+    if (target.closest('.verse-clickable, .verse-focus-pill')) {
+      return;
+    }
+
+    // 3. Clean Click on empty stage area: Right edge -> Next, Left edge -> Prev, Center -> Toggle HUD
+    if (elapsed < 500 && absX < 15 && absY < 15) {
       this.hideGestureHint();
       const clickX = this.touchStartX;
       const screenWidth = window.innerWidth || 360;
-      if (clickX > screenWidth * 0.78) {
+      if (clickX > screenWidth * 0.88) {
         this.nextPage();
-      } else if (clickX < screenWidth * 0.22) {
+      } else if (clickX < screenWidth * 0.12) {
         this.prevPage();
       } else {
         this.toggleHUD();
@@ -1324,22 +1739,36 @@ export class ComicReaderEngine {
   handleWheel(e) {
     if (!this.isOpen()) return;
     const target = e.target;
-    if (target.closest('select, input, .reader-toolbar, .reader-bottom-bar, .tts-settings-card, .reader-help-card, .mp3-player-deck')) {
+    if (target.closest('select, input, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .tts-settings-card, .reader-help-card, .mp3-player-deck')) {
       return;
     }
     const now = Date.now();
     if (this.lastWheelTime && now - this.lastWheelTime < 280) return;
 
-    if (Math.abs(e.deltaY) > 20 || Math.abs(e.deltaX) > 20) {
+    const absX = Math.abs(e.deltaX);
+    const absY = Math.abs(e.deltaY);
+
+    // แนวนอน (Horizontal wheel/trackpad) -> เปลี่ยนหน้า
+    if (absX > absY && absX > 20) {
       e.preventDefault();
       this.lastWheelTime = now;
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
-      if (e.deltaY > 0 || e.deltaX > 0) {
+      if (e.deltaX > 0) {
         this.nextPage();
       } else {
         this.prevPage();
       }
+      return;
+    }
+
+    // แนวตั้ง (Vertical wheel/trackpad) -> เปิด/ซ่อนแผงควบคุม
+    if (absY > absX && absY > 20) {
+      e.preventDefault();
+      this.lastWheelTime = now;
+      this.hideGestureHint();
+      this.toggleHUD();
+      return;
     }
   }
 
@@ -1538,70 +1967,205 @@ export class ComicReaderEngine {
     ttsEngine.onFinish = () => this.handleTTSFinish();
   }
 
+  // --- Recitation Focus & Manual / TTS Voice Reading ---
+  setVerseFocus(el, startSpeech = false) {
+    if (!el || !this.comicTrack) return;
+
+    // Remove active highlight & focus classes and any existing focus action pills
+    const actives = this.comicTrack.querySelectorAll('.verse-reading-active, .verse-focused');
+    actives.forEach(item => {
+      item.classList.remove('verse-reading-active', 'verse-focused');
+      const oldPill = item.querySelector('.verse-focus-pill');
+      if (oldPill) oldPill.remove();
+    });
+
+    // Add focus classes to target element
+    el.classList.add('verse-reading-active', 'verse-focused');
+    this.focusedElement = el;
+
+    // Find corresponding chunk index in ttsEngine.queue
+    if (this.currentPrayer) {
+      if (ttsEngine.queue.length === 0) {
+        ttsEngine.prepareQueue(this.currentPrayer, this.bookPages);
+      }
+      
+      let targetIdx = -1;
+      if (el.dataset.chunkIndex !== undefined && el.dataset.chunkIndex !== '') {
+        targetIdx = parseInt(el.dataset.chunkIndex, 10);
+      } else if (el.dataset.chunkId) {
+        targetIdx = ttsEngine.queue.findIndex(c => c.id === el.dataset.chunkId);
+      }
+
+      if (targetIdx < 0 || isNaN(targetIdx)) {
+        const bIdx = parseInt(el.dataset.bookPageIndex, 10);
+        const pageIndex = parseInt(el.dataset.pageIndex, 10);
+        const type = el.dataset.type;
+        const text = (el.dataset.text || el.textContent || '').trim();
+
+        // Scope to current book page first (prevents matching refrains on other pages)
+        if (!isNaN(bIdx)) {
+          targetIdx = ttsEngine.queue.findIndex(c => 
+            c.bookPageIndex === bIdx && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+          );
+        }
+        if (targetIdx < 0) {
+          targetIdx = ttsEngine.queue.findIndex(c => 
+            c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+          );
+        }
+        if (targetIdx < 0 && !isNaN(bIdx)) {
+          targetIdx = ttsEngine.queue.findIndex(c => c.bookPageIndex === bIdx && c.type === type);
+        }
+        if (targetIdx < 0) {
+          targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex && c.type === type);
+        }
+      }
+
+      if (targetIdx >= 0 && targetIdx < ttsEngine.queue.length) {
+        this.focusedChunkIndex = targetIdx;
+        ttsEngine.currentIndex = targetIdx;
+      }
+    }
+
+    if (startSpeech) {
+      this.playFromElement(el);
+      return;
+    }
+
+    // When TTS is NOT playing: add an elegant focus action button centered beneath verse
+    if (!ttsEngine.isPlaying && !ttsEngine.isPaused) {
+      const pill = document.createElement('div');
+      pill.className = 'verse-focus-pill';
+      pill.innerHTML = '<span class="pill-play-action">▶️ สวดตรงนี้</span>';
+      pill.title = 'แตะเพื่อเริ่มสวดนำตรงนี้ (หรือแตะซ้ำที่ข้อความ)';
+      pill.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.playFromElement(el);
+      });
+      el.appendChild(pill);
+    }
+  }
+
+  handleVerseClick(el) {
+    if (!el || !this.currentPrayer) return;
+
+    // If HUD was showing, hide it so the user can recite freely
+    if (this.hudVisible) {
+      this.hideHUD();
+    }
+    this.hideGestureHint();
+
+    // If TTS is already playing on THIS exact element, tap stops it immediately!
+    if (ttsEngine.isPlaying && el === this.focusedElement) {
+      ttsEngine.stop();
+      return;
+    }
+
+    const isAlreadyFocused = el.classList.contains('verse-reading-active') || el.classList.contains('verse-focused');
+
+    if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+      // If TTS is running on another element, seek to this element immediately
+      this.playFromElement(el);
+    } else if (isAlreadyFocused) {
+      // Second tap on the already focused verse -> start reciting!
+      this.playFromElement(el);
+    } else {
+      // First tap -> set visual recitation focus & prepare TTS start point
+      this.setVerseFocus(el, false);
+      nativeBridge.hapticSuccess?.();
+    }
+  }
+
   toggleTTS() {
     if (!this.currentPrayer) return;
     if (ttsEngine.queue.length === 0) {
       ttsEngine.prepareQueue(this.currentPrayer);
     }
     
-    if (ttsEngine.isPlaying) {
-      ttsEngine.pause();
-    } else if (ttsEngine.isPaused) {
-      ttsEngine.play();
+    // If playing OR paused, tap immediately STOPS speech completely!
+    if (ttsEngine.isPlaying || ttsEngine.isPaused) {
+      ttsEngine.stop();
+      if (this.focusedElement) {
+        this.focusedElement.classList.add('verse-reading-active', 'verse-focused');
+      }
     } else {
-      // Start from the currently visible verse in viewport
-      const startIdx = this.findFirstVisibleChunkIndex();
+      // Start from the currently focused verse if set, otherwise first visible chunk in viewport
+      let startIdx = (typeof this.focusedChunkIndex === 'number' && this.focusedChunkIndex >= 0)
+        ? this.focusedChunkIndex
+        : this.findFirstVisibleChunkIndex();
       ttsEngine.play(startIdx >= 0 ? startIdx : 0);
     }
   }
 
   playFromElement(el) {
     if (!el || !this.currentPrayer) return;
-    const pageIndex = parseInt(el.dataset.pageIndex, 10);
-    const type = el.dataset.type;
-    const text = (el.dataset.text || el.textContent || '').trim();
 
     if (ttsEngine.queue.length === 0) {
-      ttsEngine.prepareQueue(this.currentPrayer);
+      ttsEngine.prepareQueue(this.currentPrayer, this.bookPages);
     }
 
-    // 1. Find exact matching chunk in queue
-    let targetIdx = ttsEngine.queue.findIndex(c => 
-      c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
-    );
-
-    // 2. Fallback to matching page & type
-    if (targetIdx < 0) {
-      targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex && c.type === type);
+    let targetIdx = -1;
+    if (el.dataset.chunkIndex !== undefined && el.dataset.chunkIndex !== '') {
+      targetIdx = parseInt(el.dataset.chunkIndex, 10);
+    } else if (el.dataset.chunkId) {
+      targetIdx = ttsEngine.queue.findIndex(c => c.id === el.dataset.chunkId);
     }
 
-    // 3. Fallback to first chunk of this page
-    if (targetIdx < 0) {
-      targetIdx = ttsEngine.queue.findIndex(c => c.pageIndex === pageIndex);
+    if (targetIdx < 0 || isNaN(targetIdx)) {
+      const bIdx = parseInt(el.dataset.bookPageIndex, 10);
+      const pageIndex = parseInt(el.dataset.pageIndex, 10);
+      const type = el.dataset.type;
+      const text = (el.dataset.text || el.textContent || '').trim();
+
+      // 1. Scoped to current book page first (prevents jumping back to previous pages with identical refrains!)
+      if (!isNaN(bIdx)) {
+        targetIdx = ttsEngine.queue.findIndex(c => 
+          c.bookPageIndex === bIdx && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+        );
+      }
+      // 2. Fallback to matching raw pageIndex & type & text
+      if (targetIdx < 0) {
+        targetIdx = ttsEngine.queue.findIndex(c => 
+          c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
+        );
+      }
+      // 3. Fallback to matching book page & type
+      if (targetIdx < 0 && !isNaN(bIdx)) {
+        targetIdx = ttsEngine.queue.findIndex(c => c.bookPageIndex === bIdx && c.type === type);
+      }
+      // 4. Fallback to first chunk of this book page
+      if (targetIdx < 0 && !isNaN(bIdx)) {
+        targetIdx = ttsEngine.queue.findIndex(c => c.bookPageIndex === bIdx);
+      }
     }
 
-    if (targetIdx >= 0) {
+    if (targetIdx >= 0 && targetIdx < ttsEngine.queue.length) {
+      this.focusedChunkIndex = targetIdx;
+      this.focusedElement = el;
       ttsEngine.play(targetIdx);
       this.scheduleAutoHide(5000);
-      nativeBridge.hapticSuccess();
+      nativeBridge.hapticSuccess?.();
     }
   }
 
   findFirstVisibleChunkIndex() {
     if (!this.comicTrack || ttsEngine.queue.length === 0) return 0;
-    const activePage = this.comicTrack.querySelector(`.comic-page[data-page-index="${this.currentPageIndex}"]`);
-    if (!activePage) return 0;
+    
+    // 1. First find chunk matching currentPageIndex (book page)
+    const pageChunkIdx = ttsEngine.queue.findIndex(c => c.bookPageIndex === this.currentPageIndex);
+    if (pageChunkIdx >= 0) return pageChunkIdx;
 
-    const firstClickable = activePage.querySelector('.verse-clickable');
-    if (firstClickable) {
-      const pageIndex = parseInt(firstClickable.dataset.pageIndex, 10);
-      const type = firstClickable.dataset.type;
-      const text = (firstClickable.dataset.text || firstClickable.textContent || '').trim();
-      const idx = ttsEngine.queue.findIndex(c => 
-        c.pageIndex === pageIndex && c.type === type && (c.rawText.trim() === text || c.text.includes(text))
-      );
-      if (idx >= 0) return idx;
+    // 2. Active DOM page check
+    const activePage = this.comicTrack.querySelector(`.comic-page[data-page-index="${this.currentPageIndex}"]`);
+    if (activePage) {
+      const firstClickable = activePage.querySelector('.verse-clickable[data-chunk-index]');
+      if (firstClickable && firstClickable.dataset.chunkIndex !== undefined && firstClickable.dataset.chunkIndex !== '') {
+        const idx = parseInt(firstClickable.dataset.chunkIndex, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < ttsEngine.queue.length) return idx;
+      }
     }
+
     return 0;
   }
 
@@ -1626,26 +2190,63 @@ export class ComicReaderEngine {
     if (!this.comicTrack) return;
 
     // Remove active highlight from all elements
-    const actives = this.comicTrack.querySelectorAll('.verse-reading-active');
-    actives.forEach(el => el.classList.remove('verse-reading-active'));
+    const actives = this.comicTrack.querySelectorAll('.verse-reading-active, .verse-focused');
+    actives.forEach(el => {
+      el.classList.remove('verse-reading-active', 'verse-focused');
+      const oldPill = el.querySelector('.verse-focus-pill');
+      if (oldPill) oldPill.remove();
+    });
 
     if (!chunk || chunkIndex < 0) return;
+    this.focusedChunkIndex = chunkIndex;
 
-    // Find the exact matching DOM node across all rendered book pages
+    // 1. Find exact matching DOM node by unique chunkId or chunkIndex
     let target = null;
-    const candidates = this.comicTrack.querySelectorAll(`[data-page-index="${chunk.pageIndex}"][data-type="${chunk.type}"]`);
-    for (const el of candidates) {
-      if (el.dataset.text && el.dataset.text.trim() === chunk.rawText.trim()) {
-        target = el;
-        break;
+    if (chunk.id) {
+      target = this.comicTrack.querySelector(`[data-chunk-id="${chunk.id}"]`);
+      if (!target) {
+        target = this.comicTrack.querySelector(`[data-chunk-ids~="${chunk.id}"]`)
+          || this.comicTrack.querySelector(`[data-chunk-ids*="${chunk.id}"]`);
       }
     }
-    if (!target && candidates.length > 0) {
-      target = candidates[0];
+    if (!target && typeof chunkIndex === 'number') {
+      target = this.comicTrack.querySelector(`[data-chunk-index="${chunkIndex}"]`);
+    }
+
+    // 2. Scoped fallback: look inside the specific book page first!
+    if (!target && chunk.bookPageIndex !== undefined) {
+      const pageEl = this.comicTrack.querySelector(`.comic-page[data-page-index="${chunk.bookPageIndex}"]`);
+      if (pageEl) {
+        const candidates = pageEl.querySelectorAll(`[data-type="${chunk.type}"]`);
+        for (const el of candidates) {
+          if (el.dataset.text && (el.dataset.text.trim() === chunk.rawText?.trim() || chunk.rawText?.includes(el.dataset.text.trim()))) {
+            target = el;
+            break;
+          }
+        }
+        if (!target && candidates.length > 0) {
+          target = candidates[0];
+        }
+      }
+    }
+
+    // 3. Global fallback
+    if (!target) {
+      const candidates = this.comicTrack.querySelectorAll(`[data-page-index="${chunk.pageIndex}"][data-type="${chunk.type}"]`);
+      for (const el of candidates) {
+        if (el.dataset.text && el.dataset.text.trim() === chunk.rawText?.trim()) {
+          target = el;
+          break;
+        }
+      }
+      if (!target && candidates.length > 0) {
+        target = candidates[0];
+      }
     }
 
     if (target) {
-      target.classList.add('verse-reading-active');
+      target.classList.add('verse-reading-active', 'verse-focused');
+      this.focusedElement = target;
 
       // Auto-flip book page if target element is located on another book page!
       const targetPageEl = target.closest('.comic-page');
@@ -1654,6 +2255,11 @@ export class ComicReaderEngine {
         if (targetPageIndex !== this.currentPageIndex && targetPageIndex >= 0 && targetPageIndex < this.totalPages) {
           this.goToPage(targetPageIndex, true);
         }
+      }
+    } else if (chunk.bookPageIndex !== undefined && chunk.bookPageIndex !== this.currentPageIndex) {
+      // If no target DOM element found, advance page if chunk belongs to another page
+      if (chunk.bookPageIndex >= 0 && chunk.bookPageIndex < this.totalPages) {
+        this.goToPage(chunk.bookPageIndex, true);
       }
     }
   }
@@ -1664,19 +2270,16 @@ export class ComicReaderEngine {
     if (state === 'playing') {
       this.btnTTSPlay.classList.add('playing');
       this.readerView?.classList.add('tts-active');
-      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '⏸️';
-      if (this.ttsPlayText) this.ttsPlayText.textContent = 'พักเสียง';
+      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '⏹️';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'หยุดสวด';
+      this.btnTTSPlay.title = 'แตะเพื่อหยุดเสียงสวดนำ (AI)';
       nativeBridge.setKeepAwake(true);
-    } else if (state === 'paused') {
-      this.btnTTSPlay.classList.remove('playing');
-      this.readerView?.classList.add('tts-active');
-      if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '▶️';
-      if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดต่อ';
     } else {
       this.btnTTSPlay.classList.remove('playing');
       this.readerView?.classList.remove('tts-active');
       if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '🔊';
       if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดนำ';
+      this.btnTTSPlay.title = 'แตะเพื่อเริ่มเสียงสวดนำ (AI)';
     }
   }
 

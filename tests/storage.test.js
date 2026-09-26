@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { storage } from '../src/js/storage.js';
 
 // Mock-free in-memory storage simulator for Node test environment
 class StorageTester {
@@ -192,6 +193,34 @@ test('Favorites & Chanting Counter State', () => {
 
   const count9 = tester.incrementCount('p1', 8);
   assert.equal(count9, 9);
+});
+
+test('Favorites Reordering & Sequence Swapping: User can rearrange chants 1, 2, 3 as desired', () => {
+  // 1. Initial order
+  storage.setFavorites(['chant-1', 'chant-2', 'chant-3', 'chant-4']);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-2', 'chant-3', 'chant-4']);
+
+  // 2. Move chant-3 up (swap index 2 with index 1) -> [1, 3, 2, 4]
+  storage.swapFavorites(2, 1);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-3', 'chant-2', 'chant-4']);
+
+  // 3. Move chant-4 to the top (move index 3 to index 0) -> [4, 1, 3, 2]
+  storage.moveFavorite(3, 0);
+  assert.deepEqual(storage.getFavorites(), ['chant-4', 'chant-1', 'chant-3', 'chant-2']);
+
+  // 4. Move chant-4 back to index 2 -> [1, 3, 4, 2]
+  storage.moveFavorite(0, 2);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-3', 'chant-4', 'chant-2']);
+
+  // 5. Out of bounds index safety
+  storage.swapFavorites(-1, 0);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-3', 'chant-4', 'chant-2']);
+  storage.swapFavorites(0, 99);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-3', 'chant-4', 'chant-2']);
+  storage.moveFavorite(-1, 2);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-3', 'chant-4', 'chant-2']);
+  storage.moveFavorite(1, 99);
+  assert.deepEqual(storage.getFavorites(), ['chant-1', 'chant-3', 'chant-4', 'chant-2']);
 });
 
 test('Local Device Timezone: Date strings use local calendar date instead of UTC offset', () => {

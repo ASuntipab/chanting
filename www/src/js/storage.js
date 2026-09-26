@@ -235,6 +235,32 @@ class DhammaStorageEngine {
     return this.get(STORAGE_KEYS.FAVORITES, []);
   }
 
+  setFavorites(favIds) {
+    if (Array.isArray(favIds)) {
+      this.save(STORAGE_KEYS.FAVORITES, favIds);
+    }
+    return this.getFavorites();
+  }
+
+  swapFavorites(fromIndex, toIndex) {
+    let favs = [...this.getFavorites()];
+    if (fromIndex < 0 || fromIndex >= favs.length || toIndex < 0 || toIndex >= favs.length) return favs;
+    const temp = favs[fromIndex];
+    favs[fromIndex] = favs[toIndex];
+    favs[toIndex] = temp;
+    this.save(STORAGE_KEYS.FAVORITES, favs);
+    return favs;
+  }
+
+  moveFavorite(fromIndex, toIndex) {
+    let favs = [...this.getFavorites()];
+    if (fromIndex < 0 || fromIndex >= favs.length || toIndex < 0 || toIndex >= favs.length) return favs;
+    const [item] = favs.splice(fromIndex, 1);
+    favs.splice(toIndex, 0, item);
+    this.save(STORAGE_KEYS.FAVORITES, favs);
+    return favs;
+  }
+
   isFavorite(prayerId) {
     const favs = this.getFavorites();
     return favs.includes(prayerId);

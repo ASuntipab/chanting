@@ -161,12 +161,121 @@ export class DhammaTTSEngine {
     return this.voice;
   }
 
-  prepareQueue(prayer) {
+  prepareQueue(prayer, bookPages = null) {
     this.stop();
     this.queue = [];
     this.currentIndex = -1;
 
     if (!prayer) return;
+
+    if (bookPages && Array.isArray(bookPages) && bookPages.length > 0) {
+      let chunkSeq = 0;
+      let lastOriginalPageIndex = -1;
+
+      bookPages.forEach((bPage, bookPageIndex) => {
+        // 1. Verse Title (only once per original page section, on its first subpage)
+        const isNewSection = bPage.originalPageIndex !== lastOriginalPageIndex;
+        if (isNewSection) {
+          lastOriginalPageIndex = bPage.originalPageIndex;
+          const rawTitle = bPage.rawPage?.verseTitle || bPage.verseTitle || '';
+          if (rawTitle) {
+            const cleanText = this.cleanPaliForTTS(rawTitle);
+            if (cleanText) {
+              this.queue.push({
+                id: 'tts-chunk-' + (chunkSeq++),
+                pageIndex: bPage.originalPageIndex,
+                bookPageIndex,
+                type: 'title',
+                text: cleanText,
+                rawText: rawTitle,
+                rate: Math.min(this.rate * 1.05, 1.1)
+              });
+            }
+          }
+        }
+
+        // 2. Stanzas on this book page
+        const stanzas = bPage.stanzas || [];
+        stanzas.forEach((stanza) => {
+          if (stanza.pali && (this.mode === 'both' || this.mode === 'pali')) {
+            const paliLines = stanza.pali.split('\n').filter(l => l.trim().length > 0);
+            paliLines.forEach((line) => {
+              const repeatInfo = extractLineRepeats(line, true);
+              if (repeatInfo) {
+                const cleanText = this.cleanPaliForTTS(repeatInfo.coreText);
+                if (cleanText) {
+                  for (let r = 0; r < repeatInfo.count; r++) {
+                    this.queue.push({
+                      id: 'tts-chunk-' + (chunkSeq++),
+                      pageIndex: bPage.originalPageIndex,
+                      bookPageIndex,
+                      type: 'pali',
+                      text: cleanText,
+                      rawText: line,
+                      rate: this.rate,
+                      repeatRound: r + 1,
+                      totalRounds: repeatInfo.count
+                    });
+                  }
+                }
+              } else {
+                const cleanText = this.cleanPaliForTTS(line);
+                if (cleanText) {
+                  this.queue.push({
+                    id: 'tts-chunk-' + (chunkSeq++),
+                    pageIndex: bPage.originalPageIndex,
+                    bookPageIndex,
+                    type: 'pali',
+                    text: cleanText,
+                    rawText: line,
+                    rate: this.rate
+                  });
+                }
+              }
+            });
+          }
+
+          if (stanza.thai && (this.mode === 'both' || this.mode === 'thai')) {
+            const thaiLines = stanza.thai.split(/\n+/).filter(l => l.trim().length > 0);
+            thaiLines.forEach((line) => {
+              const repeatInfo = extractLineRepeats(line, false);
+              if (repeatInfo) {
+                const cleanText = this.cleanThaiForTTS(repeatInfo.coreText);
+                if (cleanText) {
+                  for (let r = 0; r < repeatInfo.count; r++) {
+                    this.queue.push({
+                      id: 'tts-chunk-' + (chunkSeq++),
+                      pageIndex: bPage.originalPageIndex,
+                      bookPageIndex,
+                      type: 'thai',
+                      text: cleanText,
+                      rawText: line,
+                      rate: Math.min(this.rate * 1.08, 1.15),
+                      repeatRound: r + 1,
+                      totalRounds: repeatInfo.count
+                    });
+                  }
+                }
+              } else {
+                const cleanText = this.cleanThaiForTTS(line);
+                if (cleanText) {
+                  this.queue.push({
+                    id: 'tts-chunk-' + (chunkSeq++),
+                    pageIndex: bPage.originalPageIndex,
+                    bookPageIndex,
+                    type: 'thai',
+                    text: cleanText,
+                    rawText: line,
+                    rate: Math.min(this.rate * 1.08, 1.15)
+                  });
+                }
+              }
+            });
+          }
+        });
+      });
+      return;
+    }
 
     const pages = prayer.pages || [];
     let chunkSeq = 0;
@@ -373,14 +482,6 @@ export class DhammaTTSEngine {
 
   play(startIndex = 0) {
     if (!this.synth) return;
-    
-    if (this.isPaused && this.synth.paused) {
-      this.synth.resume();
-      this.isPlaying = true;
-      this.isPaused = false;
-      this.notifyState('playing');
-      return;
-    }
 
     if (this.queue.length === 0) return;
 
@@ -411,7 +512,9 @@ export class DhammaTTSEngine {
       return;
     }
 
-    this.synth.cancel();
+    try {
+      this.synth.cancel();
+    } catch (e) {}
 
     const utterance = new SpeechSynthesisUtterance(chunk.text);
     this.currentUtterance = utterance;
@@ -425,7 +528,10 @@ export class DhammaTTSEngine {
     utterance.volume = this.volume;
 
     utterance.onstart = () => {
-      if (!this.isPlaying) return;
+      if (!this.isPlaying || this.isPaused) {
+        try { this.synth.cancel(); } catch (e) {}
+        return;
+      }
       if (this.onHighlight) {
         this.onHighlight(this.currentIndex, chunk);
       }
@@ -442,7 +548,7 @@ export class DhammaTTSEngine {
     };
 
     utterance.onerror = (e) => {
-      if (e.error === 'interrupted' || e.error === 'canceled') return;
+      if (e.error === 'interrupted' || e.error === 'canceled' || !this.isPlaying || this.isPaused) return;
       console.warn('TTS Speech error:', e);
       if (this.onError) this.onError(e);
       if (this.isPlaying && !this.isPaused) {
@@ -452,36 +558,49 @@ export class DhammaTTSEngine {
     };
 
     if (this.synth.paused) {
-      this.synth.resume();
+      try { this.synth.resume(); } catch (e) {}
     }
 
-    this.synth.speak(utterance);
+    try {
+      this.synth.speak(utterance);
+    } catch (e) {
+      console.warn('Error starting speech:', e);
+    }
   }
 
   pause() {
-    if (!this.synth || !this.isPlaying) return;
-    this.synth.pause();
     this.isPlaying = false;
     this.isPaused = true;
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch (e) {
+        console.warn('TTS cancel error on pause:', e);
+      }
+    }
     this.notifyState('paused');
   }
 
   togglePlayPause() {
-    if (this.isPlaying) {
-      this.pause();
+    if (this.isPlaying || this.isPaused) {
+      this.stop();
     } else {
       this.play(this.currentIndex >= 0 ? this.currentIndex : 0);
     }
   }
 
   stop() {
-    if (this.synth) {
-      this.synth.cancel();
-    }
     this.isPlaying = false;
     this.isPaused = false;
     this.currentIndex = -1;
     this.currentUtterance = null;
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch (e) {
+        console.warn('TTS cancel error on stop:', e);
+      }
+    }
     this.notifyState('stopped');
     if (this.onHighlight) {
       this.onHighlight(-1, null);

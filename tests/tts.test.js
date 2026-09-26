@@ -212,6 +212,40 @@ test('TTS Engine: Real Chanting Repetition (ท่อง นโม 3 รอบ a
   });
 });
 
+test('TTS Engine: Multi-Page Repeated Refrains (e.g. ตันเตชะสา) across distinct book pages', async () => {
+  const { paginatePrayerIntoBookPages } = await import('../src/js/reader.js');
+  const { DEFAULT_PRAYERS } = await import('../src/js/default-prayers.js');
+  
+  const daily = DEFAULT_PRAYERS[0];
+  const engine = new DhammaTTSEngine();
+  const bookPages = paginatePrayerIntoBookPages(daily, 1.2);
+
+  // Prepare queue with bookPages
+  engine.prepareQueue(daily, bookPages);
+
+  // Find all "ตันเตชะสา" chunks
+  const tanteChunks = engine.queue.filter(c => c.rawText && c.rawText.includes('ตันเตชะสา'));
+  assert.ok(tanteChunks.length >= 8, 'Phahung must produce at least 8 tantejasa refrain chunks');
+
+  // Verify that every single tantejasa chunk has a unique ID and a valid bookPageIndex
+  const seenIds = new Set();
+  tanteChunks.forEach(chunk => {
+    assert.ok(chunk.id, 'Chunk must have an ID');
+    assert.equal(seenIds.has(chunk.id), false, `Chunk ID ${chunk.id} must be unique`);
+    seenIds.add(chunk.id);
+    assert.ok(typeof chunk.bookPageIndex === 'number', 'Chunk must have bookPageIndex');
+  });
+
+  // Verify that refrains on distinct book pages (e.g. Book Page 12 vs Book Page 13) have distinct bookPageIndices
+  const page12Tante = tanteChunks.find(c => c.bookPageIndex === 11);
+  const page13Tante = tanteChunks.find(c => c.bookPageIndex === 12);
+  assert.ok(page12Tante, 'Page 12 (index 11) must have a tantejasa refrain chunk');
+  assert.ok(page13Tante, 'Page 13 (index 12) must have a tantejasa refrain chunk');
+  assert.notEqual(page12Tante.id, page13Tante.id, 'Page 12 and Page 13 refrains must have distinct chunk IDs');
+  assert.notEqual(page12Tante.bookPageIndex, page13Tante.bookPageIndex, 'Page 12 and Page 13 refrains must belong to different book pages');
+});
+
+
 
 
 

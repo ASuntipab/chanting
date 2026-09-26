@@ -706,7 +706,8 @@ class TammaApp {
 
     const favIds = storage.getFavorites();
     const allPrayers = storage.getPrayers();
-    let favPrayers = allPrayers.filter(p => favIds.includes(p.id));
+    const prayerMap = new Map();
+    allPrayers.forEach(p => prayerMap.set(p.id, p));
 
     // Also include favorited Tipitaka volumes
     const tipitakaFavIds = favIds.filter(id => id.startsWith('tipitaka-vol-'));
@@ -715,8 +716,8 @@ class TammaApp {
         const index = await tipitakaLoader.loadIndex();
         (index.volumes || []).forEach(vol => {
           const volId = `tipitaka-vol-${String(vol.volume).padStart(2, '0')}`;
-          if (tipitakaFavIds.includes(volId) && !favPrayers.some(p => p.id === volId)) {
-            favPrayers.push({
+          if (favIds.includes(volId)) {
+            prayerMap.set(volId, {
               id: volId,
               isTipitaka: true,
               volumeNumber: vol.volume,
@@ -734,24 +735,353 @@ class TammaApp {
       }
     }
 
-    const favCountSubtitle = document.querySelector('#viewFavorites p');
-    if (favCountSubtitle) {
-      const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
-      favCountSubtitle.textContent = `บทสวดมนต์และพระไตรปิฎกที่คุณบันทึกไว้ (${toThai(favPrayers.length)} รายการ)`;
+    const favPrayers = favIds
+      .map(id => prayerMap.get(id))
+      .filter(Boolean);
+
+    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+    const favSubtitle = document.getElementById('favSubtitle') || document.querySelector('#viewFavorites p');
+    if (favSubtitle) {
+      favSubtitle.textContent = favPrayers.length > 0
+        ? `จัดเรียงลำดับบทสวด ๑, ๒, ๓ ตามที่คุณต้องการท่อง (${toThai(favPrayers.length)} บท)`
+        : 'บทสวดมนต์และพระไตรปิฎกที่คุณบันทึกไว้เปิดสวดเป็นประจำ';
+    }
+
+    const btnStartPlaylist = document.getElementById('btnStartPlaylist');
+    if (btnStartPlaylist) {
+      btnStartPlaylist.style.display = favPrayers.length > 0 ? 'inline-flex' : 'none';
+      btnStartPlaylist.onclick = () => {
+        if (favPrayers.length === 0) return;
+        audio.playBell(528);
+        if (favPrayers[0].isTipitaka && favPrayers[0].volumeNumber) {
+          this.openTipitakaVolume(favPrayers[0].volumeNumber);
+        } else {
+          this.reader.open(favPrayers[0], 0, {
+            playlist: favPrayers,
+            playlistIndex: 0
+          });
+        }
+      };
     }
 
     if (favPrayers.length === 0) {
       container.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 48px 16px; color: var(--text-muted);">
           <div style="font-size: 3rem; margin-bottom: 10px;">💖</div>
-          <div style="font-family: var(--font-header); font-size: 1.1rem;">ยังไม่มีรายการโปรด</div>
-          <div style="font-size: 0.85rem; margin-top: 4px;">กดไอคอนหัวใจที่บทสวดหรือพระไตรปิฎกเพื่อบันทึกเป็นรายการโปรด</div>
+          <div style="font-family: var(--font-header); font-size: 1.15rem; color: var(--text-primary);">ยังไม่มีบทสวดในรายการโปรด</div>
+          <div style="font-size: 0.85rem; margin-top: 6px;">แตะไอคอนหัวใจ ❤️ ที่บทสวดมนต์เพื่อบันทึกและจัดเรียงลำดับ ๑, ๒, ๓ สำหรับสวดประจำวัน</div>
         </div>
       `;
       return;
     }
 
-    this.renderPrayerCards(container, favPrayers);
+    this.renderFavoriteCards(container, favPrayers);
+  }
+
+  renderFavoriteCards(container, favPrayers) {
+    container.innerHTML = '';
+    const trackerData = storage.getTrackerData();
+    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+
+    favPrayers.forEach((prayer, index) => {
+      const isFav = true;
+      const chantCount = trackerData.totalCounts[prayer.id] || 0;
+      const audioTrack = mp3Player.getTrackForPrayer(prayer);
+      const hasAudio = !!audioTrack;
+      const bloomProgress = Math.min(chantCount / 9, 1);
+
+      const card = document.createElement('div');
+      card.className = `prayer-card is-fav-card ${hasAudio ? 'has-monk-audio' : ''}`;
+      card.style.position = 'relative';
+      card.style.setProperty('--bloom-progress', bloomProgress);
+      card.dataset.index = index;
+      card.dataset.id = prayer.id;
+
+      card.innerHTML = `
+        ${this.getLotusBgSvgHtml()}
+        <div class="card-inner-content" style="position: relative !important; z-index: 1 !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; flex-grow: 1 !important; pointer-events: auto !important;">
+          <div>
+            <div class="card-header">
+              <div class="card-badges" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <div class="card-order-badge" title="ลำดับที่ ${index + 1}">
+                  <span class="order-num-circle">${index + 1}</span>
+                  <span class="order-label">ลำดับที่ ${toThai(index + 1)}</span>
+                </div>
+                <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
+                ${hasAudio ? `
+                  <span class="card-audio-badge" title="มีเสียงพระสงฆ์สวดจริง: ${audioTrack.title} (${audioTrack.temple})">
+                    <span class="audio-wave-dot"></span>🎵 มีเสียงพระสวด
+                  </span>
+                ` : ''}
+              </div>
+              <div style="display: flex; align-items: center;">
+                <button class="drag-handle" title="แตะลากเพื่อสลับลำดับการสวด" aria-label="ลากเพื่อสลับลำดับ">
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <circle cx="9" cy="5" r="1.6"></circle>
+                    <circle cx="15" cy="5" r="1.6"></circle>
+                    <circle cx="9" cy="12" r="1.6"></circle>
+                    <circle cx="15" cy="12" r="1.6"></circle>
+                    <circle cx="9" cy="19" r="1.6"></circle>
+                    <circle cx="15" cy="19" r="1.6"></circle>
+                  </svg>
+                </button>
+                <button class="card-fav-btn active" data-id="${prayer.id}" aria-label="นำออกจากรายการโปรด" title="นำออกจากรายการโปรด">
+                  ❤️
+                </button>
+              </div>
+            </div>
+            <div class="card-title">${prayer.title}</div>
+            ${prayer.author ? `<div class="card-author" title="${prayer.author}">🙏 ${prayer.author}</div>` : ''}
+            <div class="card-excerpt">${prayer.description || (prayer.pages?.[0]?.thai || prayer.pages?.[0]?.pali || '')}</div>
+          </div>
+          <div class="card-footer">
+            <div class="card-stats">
+              <span class="card-stat-item">🔔 ${chantCount} จบ</span>
+              ${hasAudio && audioTrack.temple ? `
+                <span class="card-stat-audio" title="บันทึกเสียงจาก: ${audioTrack.temple}">
+                  🎧 ${audioTrack.temple.split('/')[0].trim()}
+                </span>
+              ` : ''}
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-icon btn-card-share" data-id="${prayer.id}" style="width: 32px; height: 32px; font-size: 0.85rem;" title="แชร์บทสวด">
+                📤
+              </button>
+              <button class="btn-primary btn-read-card" style="padding: 4px 12px; font-size: 0.85rem;">
+                สวดบทนี้
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Click card -> open reader with playlist info
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.card-fav-btn') || e.target.closest('.btn-card-share') || e.target.closest('.drag-handle')) return;
+        if (prayer.isTipitaka && prayer.volumeNumber) {
+          this.openTipitakaVolume(prayer.volumeNumber);
+        } else {
+          this.reader.open(prayer, 0, {
+            playlist: favPrayers,
+            playlistIndex: index
+          });
+        }
+      });
+
+      // Unified Mobile Touch & Desktop Mouse Drag-to-Reorder Engine
+      const dragHandle = card.querySelector('.drag-handle');
+
+      const startReorderDrag = (initialClientY, initialClientX, isTouch) => {
+        if (favPrayers.length <= 1) return;
+
+        const startTouchY = initialClientY;
+        const startTouchX = initialClientX;
+        let isDragging = false;
+        let placeholder = null;
+        let initialCardRect = null;
+
+        const onMove = (currentY, currentX, rawEvent) => {
+          const deltaY = currentY - startTouchY;
+          const deltaX = currentX - startTouchX;
+
+          if (!isDragging && (Math.abs(deltaY) > 4 || Math.abs(deltaX) > 4)) {
+            isDragging = true;
+            initialCardRect = card.getBoundingClientRect();
+
+            placeholder = document.createElement('div');
+            placeholder.className = 'prayer-card-placeholder';
+            placeholder.style.height = `${initialCardRect.height}px`;
+            placeholder.style.width = '100%';
+            card.parentNode.insertBefore(placeholder, card);
+
+            card.classList.add('is-touch-dragging');
+            card.style.position = 'fixed';
+            card.style.top = `${initialCardRect.top}px`;
+            card.style.left = `${initialCardRect.left}px`;
+            card.style.width = `${initialCardRect.width}px`;
+            card.style.height = `${initialCardRect.height}px`;
+            card.style.transform = 'scale(1.02)';
+
+            if (window.Capacitor?.Plugins?.Haptics) {
+              window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' }).catch(() => {});
+            }
+          }
+
+          if (isDragging) {
+            if (rawEvent && rawEvent.cancelable) rawEvent.preventDefault();
+
+            // Auto-scroll when near top or bottom of viewport
+            if (currentY < 100) {
+              window.scrollBy(0, -6);
+            } else if (currentY > window.innerHeight - 100) {
+              window.scrollBy(0, 6);
+            }
+
+            card.style.top = `${initialCardRect.top + deltaY}px`;
+            card.style.left = `${initialCardRect.left + deltaX}px`;
+
+            // Realtime displacement of siblings based on finger Y position
+            const siblings = Array.from(container.querySelectorAll('.prayer-card.is-fav-card:not(.is-touch-dragging)'));
+            for (const sibling of siblings) {
+              const sibRect = sibling.getBoundingClientRect();
+              const sibMidY = sibRect.top + sibRect.height / 2;
+
+              if (currentY < sibMidY) {
+                // If placeholder is after sibling, move placeholder BEFORE sibling
+                if (placeholder.compareDocumentPosition(sibling) & Node.DOCUMENT_POSITION_PRECEDING) {
+                  container.insertBefore(placeholder, sibling);
+                  if (window.Capacitor?.Plugins?.Haptics) {
+                    window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' }).catch(() => {});
+                  }
+                  break;
+                }
+              } else if (currentY > sibMidY) {
+                // If placeholder is before sibling, move placeholder AFTER sibling
+                if (placeholder.compareDocumentPosition(sibling) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                  container.insertBefore(placeholder, sibling.nextSibling);
+                  if (window.Capacitor?.Plugins?.Haptics) {
+                    window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' }).catch(() => {});
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        };
+
+        const onEnd = () => {
+          if (isTouch) {
+            window.removeEventListener('touchmove', touchMoveHandler, { passive: false });
+            window.removeEventListener('touchend', touchEndHandler);
+            window.removeEventListener('touchcancel', touchEndHandler);
+          } else {
+            window.removeEventListener('mousemove', mouseMoveHandler);
+            window.removeEventListener('mouseup', mouseEndHandler);
+          }
+
+          if (isDragging && placeholder) {
+            placeholder.parentNode.insertBefore(card, placeholder);
+            placeholder.remove();
+
+            card.classList.remove('is-touch-dragging');
+            card.style.position = '';
+            card.style.top = '';
+            card.style.left = '';
+            card.style.width = '';
+            card.style.height = '';
+            card.style.transform = '';
+
+            const newFavIds = Array.from(container.querySelectorAll('.prayer-card.is-fav-card'))
+              .map(c => c.dataset.id)
+              .filter(Boolean);
+
+            const oldFavIds = storage.getFavorites();
+            const hasChanged = newFavIds.some((id, idx) => id !== oldFavIds[idx]);
+
+            if (hasChanged) {
+              audio.playTick();
+              if (window.Capacitor?.Plugins?.Haptics) {
+                window.Capacitor.Plugins.Haptics.notification({ type: 'SUCCESS' }).catch(() => {});
+              }
+              storage.setFavorites(newFavIds);
+              this.renderFavorites();
+            }
+          }
+        };
+
+        const touchMoveHandler = (e) => {
+          if (e.touches && e.touches.length > 0) {
+            onMove(e.touches[0].clientY, e.touches[0].clientX, e);
+          }
+        };
+        const touchEndHandler = () => onEnd();
+
+        const mouseMoveHandler = (e) => onMove(e.clientY, e.clientX, e);
+        const mouseEndHandler = () => onEnd();
+
+        if (isTouch) {
+          window.addEventListener('touchmove', touchMoveHandler, { passive: false });
+          window.addEventListener('touchend', touchEndHandler);
+          window.addEventListener('touchcancel', touchEndHandler);
+        } else {
+          window.addEventListener('mousemove', mouseMoveHandler);
+          window.addEventListener('mouseup', mouseEndHandler);
+        }
+      };
+
+      // 1. Instant drag on drag handle (Touch & Mouse)
+      dragHandle?.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          startReorderDrag(e.touches[0].clientY, e.touches[0].clientX, true);
+        }
+      }, { passive: true });
+
+      dragHandle?.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        startReorderDrag(e.clientY, e.clientX, false);
+      });
+
+      // 2. Long-press on card body to also trigger drag (350ms)
+      let longPressTimer = null;
+      let cardTouchStartY = 0;
+      let cardTouchStartX = 0;
+
+      card.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.card-fav-btn') || e.target.closest('.btn-card-share') || e.target.closest('.btn-read-card') || e.target.closest('.drag-handle')) return;
+        const touch = e.touches[0];
+        cardTouchStartY = touch.clientY;
+        cardTouchStartX = touch.clientX;
+
+        longPressTimer = setTimeout(() => {
+          if (window.Capacitor?.Plugins?.Haptics) {
+            window.Capacitor.Plugins.Haptics.impact({ style: 'MEDIUM' }).catch(() => {});
+          }
+          startReorderDrag(touch.clientY, touch.clientX, true);
+        }, 350);
+      }, { passive: true });
+
+      card.addEventListener('touchmove', (e) => {
+        if (longPressTimer) {
+          const touch = e.touches[0];
+          if (Math.abs(touch.clientY - cardTouchStartY) > 8 || Math.abs(touch.clientX - cardTouchStartX) > 8) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+        }
+      }, { passive: true });
+
+      card.addEventListener('touchend', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+      card.addEventListener('touchcancel', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // Favorite toggle (remove from favorites)
+      card.querySelector('.card-fav-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        audio.playTick();
+        storage.toggleFavorite(prayer.id);
+        this.showToast(`นำ "${prayer.title}" ออกจากรายการโปรดแล้ว`);
+        this.renderFavorites();
+        tracker.render();
+      });
+
+      // Share button
+      card.querySelector('.btn-card-share')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        audio.playTick();
+        this.openShareModal(prayer);
+      });
+
+      container.appendChild(card);
+    });
   }
 
   getLotusBgSvgHtml() {

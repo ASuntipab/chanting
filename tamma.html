@@ -62,7 +62,12 @@
       <!-- Compact 1-Line Search & Category Dropdown -->
       <div class="search-container">
         <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
           <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาบทสวดมนต์ เช่น ชินบัญชร, พาหุง...">
         </div>
         <!-- Native Styled Category Dropdown -->
@@ -135,7 +140,12 @@
       <!-- Compact 1-Line Tipitaka Search & Pitaka Dropdown -->
       <div class="search-container">
         <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
           <input type="text" id="tipitakaSearchInput" class="search-input" placeholder="ค้นหาพระไตรปิฎก เช่น ธรรมบท, มหาปรินิพพาน, ปาราชิก...">
         </div>
         <!-- Native Styled Pitaka Dropdown -->
@@ -158,9 +168,28 @@
 
     <!-- TAB 4: FAVORITES VIEW -->
     <section id="viewFavorites" class="tab-view" style="display: none;">
-      <div style="margin-bottom: 16px;">
-        <h2 style="font-family: var(--font-header); font-size: 1.3rem; color: var(--accent-lotus);">💖 รายการโปรดของฉัน</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted);">บทสวดมนต์ที่คุณบันทึกไว้เปิดสวดเป็นประจำ</p>
+      <div class="favorites-header" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-family: var(--font-header); font-size: 1.35rem; color: var(--accent-lotus); display: flex; align-items: center; gap: 8px;">
+              <span>💖</span>
+              <span>รายการโปรด & ลำดับการสวดของฉัน</span>
+            </h2>
+            <p id="favSubtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+              จัดเรียงลำดับบทที่จะสวด ๑, ๒, ๓ ตามที่คุณต้องการ สวดง่ายตามลำดับ
+            </p>
+          </div>
+          <div id="favActionsBar" style="display: flex; gap: 8px; align-items: center;">
+            <button id="btnStartPlaylist" class="btn-primary" style="padding: 8px 18px; font-size: 0.92rem; display: none; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);">
+              <span>▶️</span>
+              <span>เริ่มสวดตามลำดับ</span>
+            </button>
+          </div>
+        </div>
+        <div class="fav-reorder-hint" style="margin-top: 12px; padding: 10px 14px; background: rgba(212, 175, 55, 0.08); border: 1px dashed rgba(212, 175, 55, 0.32); border-radius: 12px; font-size: 0.83rem; color: var(--accent-gold); display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.15rem; flex-shrink: 0;">💡</span>
+          <span>แตะที่ไอคอน <b>⠿</b> แล้วลากการ์ดเพื่อสลับลำดับบทสวด ๑, ๒, ๓ ได้ตามต้องการ</span>
+        </div>
       </div>
       <div id="favoritesGrid" class="prayer-grid">
         <!-- Rendered dynamically by JS -->
@@ -193,6 +222,18 @@
        COMIC-BOOK STYLE FULLSCREEN E-BOOK READER
        ========================================================================== -->
   <div id="readerView" class="reader-view">
+    <!-- Floating Exit Fullscreen / Close Action Bar (Always visible in Zen / Fullscreen Mode) -->
+    <div id="readerZenBar" class="reader-zen-bar">
+      <button id="btnExitZen" class="btn-zen-icon" title="ออกจากโหมดเต็มจอ (เปิดแผงควบคุม)" aria-label="ออกจากโหมดเต็มจอ">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+        </svg>
+
+      </button>
+      <button id="btnZenClose" class="btn-zen-close" title="ปิดหน้าอ่านบทสวด" aria-label="ปิดโหมดอ่าน">
+        ✕
+      </button>
+    </div>
     <!-- Reader Top Toolbar (Auto-hiding HUD) - Minimalist Title & Close -->
     <div id="readerToolbar" class="reader-toolbar">
       <button id="btnCloseReader" class="btn-icon" aria-label="ปิดโหมดอ่าน">
@@ -218,6 +259,11 @@
         <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ควบคุมและปรับแต่งเสียงสวดนำ (AI)">
           🎛️
         </button>
+        <button id="btnEnterZen" class="btn-icon btn-reader-zen" title="เข้าสู่โหมดอ่านเต็มจอ (ซ่อนเมนู)" aria-label="โหมดเต็มจอ">
+          ⛶
+        </button>
+
+
       </div>
     </div>
 
@@ -314,7 +360,7 @@
       <div id="readerGestureHint" class="reader-gesture-hint" role="status" aria-live="polite">
         <div class="gesture-hint-content">
           <span class="gesture-hint-icon">👈👉</span>
-          <span class="gesture-hint-text">ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า</span>
+          <span class="gesture-hint-text">ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า • ปัดขึ้น-ลง เพื่อเปิด/ซ่อนแผงควบคุม</span>
           <span class="gesture-hint-icon">👆👇</span>
         </div>
       </div>
@@ -331,25 +377,25 @@
     <div id="readerBottomBar" class="reader-bottom-bar">
       <!-- Quick Page Scrubber Slider (Jump to any section / first / last) -->
       <div class="reader-scrubber-dock">
-        <button id="btnJumpFirst" class="btn-scrubber-nav" title="ไปหน้าแรก">⏮ หน้าแรก</button>
+        <button id="btnJumpFirst" class="btn-scrubber-nav btn-icon-nav" title="ไปหน้าแรก" aria-label="หน้าแรก">⏮</button>
         <div class="reader-scrubber-track-wrap">
           <input type="range" id="readerScrubber" min="1" max="1" value="1" class="reader-scrubber-slider" title="เลื่อนข้ามหน้า">
         </div>
         <span id="readerPageBadge" class="reader-scrubber-badge">1 / 1</span>
-        <button id="btnJumpLast" class="btn-scrubber-nav" title="ไปหน้าสุดท้าย">หน้าสุดท้าย ⏭</button>
+        <button id="btnJumpLast" class="btn-scrubber-nav btn-icon-nav" title="ไปหน้าสุดท้าย" aria-label="หน้าสุดท้าย">⏭</button>
       </div>
 
       <!-- Hint bar inside control dock -->
       <div class="reader-dock-hint">
-        <span>💡 ปัดซ้าย-ขวา หรือ เลื่อนขึ้น-ลง เพื่อเปลี่ยนหน้า (แตะเพื่อซ่อนเมนู)</span>
+        <span>💡 ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า • ปัดขึ้น-ลง เพื่อเปิด/ซ่อนแผงควบคุม • แตะปุ่มมุมขวาบนเพื่อออกจากโหมดเต็มจอ</span>
       </div>
 
       <div class="reader-dock-divider"></div>
 
       <!-- Controls Container: Clean 2-Tier Responsive Grouping (Mobile First) -->
       <div class="reader-controls-grid">
-        <!-- Group 1: Typography & Language (Font Size + Font Family + Pali Script) -->
-        <div class="reader-controls-group typography-group">
+        <!-- Tier 1: Reading Essentials (Font Size + Pali Script + Chant Counter) -->
+        <div class="reader-controls-group row-primary">
           <!-- Font Size Resizer (Up to 300% for Elders) -->
           <div class="reader-font-dock">
             <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
@@ -357,6 +403,26 @@
             <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
           </div>
 
+          <!-- Pali Script Switcher (PaliScript Engine) -->
+          <div class="reader-script-dock">
+            <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
+              <option value="thai-phonetic" selected>🇹🇭 คำอ่าน</option>
+              <option value="thai-pinthu">🇹🇭 พินทุ</option>
+              <option value="roman-iast">🌍 IAST</option>
+              <option value="devanagari">🇮🇳 เทวนาครี</option>
+              <option value="burmese">🇲🇲 พม่า</option>
+            </select>
+          </div>
+
+          <!-- Quick Chant Counter with Bell -->
+          <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
+            <span>🔔</span>
+            <span id="readerChantCount">0 จบ</span>
+          </button>
+        </div>
+
+        <!-- Tier 2: Typography & Audio (Font Family + Layout Mode + Monk Audio) -->
+        <div class="reader-controls-group row-secondary">
           <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
           <div class="reader-font-select-dock">
             <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
@@ -378,30 +444,10 @@
             </select>
           </div>
 
-          <!-- Pali Script Switcher (PaliScript Engine) -->
-          <div class="reader-script-dock">
-            <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
-              <option value="thai-phonetic" selected>🇹🇭 คำอ่าน</option>
-              <option value="thai-pinthu">🇹🇭 พินทุ</option>
-              <option value="roman-iast">🌍 IAST</option>
-              <option value="devanagari">🇮🇳 เทวนาครี</option>
-              <option value="burmese">🇲🇲 พม่า</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Group 2: Audio & Chant Counter Actions -->
-        <div class="reader-controls-group actions-group">
           <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
           <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
             <span id="mp3PlayIcon">🎵</span>
             <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
-          </button>
-
-          <!-- Quick Chant Counter with Bell -->
-          <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
-            <span>🔔</span>
-            <span id="readerChantCount">0 จบ</span>
           </button>
         </div>
       </div>
@@ -421,22 +467,29 @@
           <div class="gesture-guide-item">
             <div class="gesture-guide-icon-box">👈 👉</div>
             <div class="gesture-guide-desc">
-              <strong>ปัดซ้าย - ปัดขวา</strong>
+              <strong>ปัดซ้าย - ปัดขวา (เปลี่ยนหน้า)</strong>
               <p>ปัดไปทางซ้ายเพื่อไปหน้าถัดไป หรือปัดไปทางขวาเพื่อย้อนกลับ</p>
+            </div>
+          </div>
+          <div class="gesture-guide-item">
+            <div class="gesture-guide-icon-box">🎛️ ✕</div>
+            <div class="gesture-guide-desc">
+              <strong>ปุ่มมุมขวาบน (ออกจากโหมดเต็มจอ / ปิด)</strong>
+              <p>กดปุ่มมุมขวาบนเพื่อออกจากโหมดเต็มจอ หรือแตะปิดบทสวดได้ทันที</p>
+            </div>
+          </div>
+          <div class="gesture-guide-item">
+            <div class="gesture-guide-icon-box">📿</div>
+            <div class="gesture-guide-desc">
+              <strong>แตะที่ข้อความสวด</strong>
+              <p>แตะเพื่อเลือกท่อนที่กำลังท่อง (มีแถบโฟกัสบอกจุด) หรือแตะซ้ำ / กดปุ่มเพื่อเริ่มสวดนำตรงนี้</p>
             </div>
           </div>
           <div class="gesture-guide-item">
             <div class="gesture-guide-icon-box">👆 👇</div>
             <div class="gesture-guide-desc">
-              <strong>เลื่อนขึ้น - เลื่อนลง</strong>
-              <p>ปัดเลื่อนขึ้นเพื่ออ่านท่อนถัดไป หรือเลื่อนลงเพื่อย้อนกลับ</p>
-            </div>
-          </div>
-          <div class="gesture-guide-item">
-            <div class="gesture-guide-icon-box">👆</div>
-            <div class="gesture-guide-desc">
-              <strong>แตะที่ว่างบนหน้าจอ</strong>
-              <p>แตะ 1 ครั้งเพื่อเปิดหรือซ่อนแผงควบคุม (เมื่อเริ่มปัดหรือเลื่อน แผงควบคุมจะซ่อนอัตโนมัติ)</p>
+              <strong>แตะที่ว่าง / ปัดขึ้น-ลง (เปิด/ซ่อนเมนู)</strong>
+              <p>แตะพื้นที่ว่างหรือปัดขึ้น-ลง เพื่อเปิดหรือซ่อนแผงควบคุมตามต้องการ</p>
             </div>
           </div>
           <div class="gesture-guide-item">

@@ -46,8 +46,16 @@ export class DhammaTrackerEngine {
       }
     }
 
-    // Prioritize favorites and chanted items in the daily checklist
+    // Prioritize favorites (in exact user-defined sequence) and chanted items in the daily checklist
     let displayList = allItems.filter(p => favorites.includes(p.id) || trackerData.todayChanted[p.id] || (trackerData.totalCounts[p.id] || 0) > 0);
+    displayList.sort((a, b) => {
+      const favIdxA = favorites.indexOf(a.id);
+      const favIdxB = favorites.indexOf(b.id);
+      if (favIdxA !== -1 && favIdxB !== -1) return favIdxA - favIdxB;
+      if (favIdxA !== -1) return -1;
+      if (favIdxB !== -1) return 1;
+      return 0;
+    });
     if (displayList.length === 0) {
       displayList = prayers.slice(0, 5);
     }
