@@ -250,6 +250,49 @@
 }
 
 /* ==========================================================================
+   Minimal Clean Black Theme Tracker Overrides
+   ========================================================================== */
+body.theme-midnight .tracker-summary-card {
+  background: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+body.theme-midnight .tracker-stat-num {
+  color: #f5f5f7;
+}
+
+body.theme-midnight .tracker-stat-label {
+  color: #a1a1aa;
+}
+
+body.theme-midnight .tracker-item {
+  background: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+body.theme-midnight .tracker-item.completed {
+  border-color: rgba(52, 199, 89, 0.4);
+  background: rgba(52, 199, 89, 0.08);
+}
+
+body.theme-midnight .tracker-title {
+  color: #f5f5f7;
+}
+
+body.theme-midnight .tracker-checkbox {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+body.theme-midnight .tracker-counter-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f5f5f7;
+}
+
+/* ==========================================================================
    Parchment Theme Tracker Overrides
    ========================================================================== */
 body.theme-parchment .tracker-summary-card {

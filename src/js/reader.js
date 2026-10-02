@@ -9,6 +9,7 @@ import { nativeBridge } from './native-bridge.js';
 import { ttsEngine } from './tts-engine.js';
 import { mp3Player, CHANTING_AUDIO_TRACKS } from './mp3-player.js';
 import { paliScript } from './paliscript.js';
+import { starfield } from './starfield.js';
 
 export const FONT_FAMILIES = {
   'sarabun': {
@@ -493,12 +494,15 @@ export class ComicReaderEngine {
 
     // TTS Voice Controls
     this.btnTTSPlay = document.getElementById('btnTTSPlay');
+    this.btnTTSFloatStop = document.getElementById('btnTTSFloatStop');
     this.ttsPlayIcon = document.getElementById('ttsPlayIcon');
     this.ttsPlayText = document.getElementById('ttsPlayText');
     this.btnTTSSettings = document.getElementById('btnTTSSettings');
     this.ttsSettingsModal = document.getElementById('ttsSettingsModal');
     this.btnCloseTTSSettings = document.getElementById('btnCloseTTSSettings');
-    this.ttsModeBtns = document.querySelectorAll('.tts-mode-btn');
+    this.ttsModeBtns = document.querySelectorAll('.tts-mode-btn[data-mode]');
+    this.bellModeBtns = document.querySelectorAll('.bell-mode-btn');
+    this.voiceSourceBtns = document.querySelectorAll('.voice-source-btn');
     this.ttsSpeedBtns = document.querySelectorAll('.tts-speed-btn');
 
     // Real Monastic MP3 Controls
@@ -535,13 +539,9 @@ export class ComicReaderEngine {
     this.btnItipisoCount = document.getElementById('btnItipisoCount');
     this.btnItipisoMinus = document.getElementById('btnItipisoMinus');
     this.btnItipisoReset = document.getElementById('btnItipisoReset');
-    this.btnItipisoSettings = document.getElementById('btnItipisoSettings');
     this.btnCloseItipisoWidget = document.getElementById('btnCloseItipisoWidget');
-    this.itipisoAgeModal = document.getElementById('itipisoAgeModal');
     this.itipisoUserAgeInput = document.getElementById('itipisoUserAgeInput');
-    this.itipisoCalculatedTarget = document.getElementById('itipisoCalculatedTarget');
-    this.btnSaveItipisoAge = document.getElementById('btnSaveItipisoAge');
-    this.btnCloseItipisoAgeModal = document.getElementById('btnCloseItipisoAgeModal');
+    this.itipisoAgeHint = document.getElementById('itipisoAgeHint');
     this.itipisoCompleteModal = document.getElementById('itipisoCompleteModal');
     this.itipisoCompleteRounds = document.getElementById('itipisoCompleteRounds');
     this.btnItipisoCompleteClear = document.getElementById('btnItipisoCompleteClear');
@@ -734,6 +734,12 @@ export class ComicReaderEngine {
     });
 
     // TTS Voice Controls Binding
+    this.btnTTSFloatStop?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.stopTTS();
+    });
+
     this.btnTTSPlay?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggleTTS();
@@ -766,6 +772,34 @@ export class ComicReaderEngine {
             ttsEngine.play();
           }
         }
+      });
+    });
+
+    // Bell sound pills (saved; opening a prayer only rings in 'all')
+    const savedBell = storage.getSettings().bellMode || 'events';
+    this.bellModeBtns?.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.bell === savedBell);
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const mode = btn.dataset.bell;
+        this.bellModeBtns.forEach(b => b.classList.toggle('active', b === btn));
+        audio.setBellMode(mode);
+        storage.saveSettings({ bellMode: mode });
+        if (mode !== 'off') audio.playBell(mode === 'all' ? 528 : 648); // preview the chosen bell
+      });
+    });
+
+    // Voice source pills: pre-generated male voice pack vs device voice (saved)
+    const savedVoice = storage.getSettings().voiceSource || 'recorded';
+    ttsEngine.setVoiceSource(savedVoice);
+    this.voiceSourceBtns?.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.voice === savedVoice);
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const source = btn.dataset.voice;
+        this.voiceSourceBtns.forEach(b => b.classList.toggle('active', b === btn));
+        ttsEngine.setVoiceSource(source);
+        storage.saveSettings({ voiceSource: source });
       });
     });
 
@@ -845,7 +879,6 @@ export class ComicReaderEngine {
     this.readerBottomBar?.addEventListener('click', (e) => e.stopPropagation());
     this.ttsSettingsModal?.addEventListener('click', (e) => e.stopPropagation());
     this.mp3PlayerDeck?.addEventListener('click', (e) => e.stopPropagation());
-    this.itipisoAgeModal?.addEventListener('click', (e) => e.stopPropagation());
     this.itipisoCompleteModal?.addEventListener('click', (e) => e.stopPropagation());
 
     // Itipiso Modal Background Click to Close
@@ -881,41 +914,14 @@ export class ComicReaderEngine {
       e.stopPropagation();
       this.handleItipisoReset();
     });
-    this.btnItipisoSettings?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.showItipisoAgeModal();
-    });
-    this.btnCloseItipisoAgeModal?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.hideItipisoAgeModal();
-    });
-    this.btnSaveItipisoAge?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.saveItipisoAgeSettings();
-    });
-    this.itipisoUserAgeInput?.addEventListener('input', (e) => {
-      const age = parseInt(e.target.value, 10) || 40;
-      if (this.itipisoCalculatedTarget) {
-        this.itipisoCalculatedTarget.textContent = age + 1;
-      }
-    });
-
-    // Itipiso Preset Buttons
-    const presetBtns = this.itipisoAgeModal?.querySelectorAll('.itipiso-preset-btn');
-    presetBtns?.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        presetBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (btn.dataset.preset === 'age-plus-1') {
-          const age = parseInt(this.itipisoUserAgeInput?.value, 10) || 40;
-          if (this.itipisoCalculatedTarget) this.itipisoCalculatedTarget.textContent = age + 1;
-          this.tempCustomTarget = 0;
-        } else if (btn.dataset.target) {
-          const t = parseInt(btn.dataset.target, 10);
-          if (this.itipisoCalculatedTarget) this.itipisoCalculatedTarget.textContent = t;
-          this.tempCustomTarget = t;
-        }
+    // Inline target editing: แก้จำนวนจบตรง ๆ หรือกรอกอายุ (บันทึกทันทีที่พิมพ์)
+    this.itipisoTarget?.addEventListener('input', () => this.saveItipisoTargetInput());
+    this.itipisoUserAgeInput?.addEventListener('input', () => this.saveItipisoAgeInput());
+    [this.itipisoTarget, this.itipisoUserAgeInput].forEach((input) => {
+      input?.addEventListener('focus', () => input.select());
+      input?.addEventListener('blur', () => this.updateItipisoDisplay()); // restore a valid value if left empty
+      input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
       });
     });
 
@@ -933,6 +939,8 @@ export class ComicReaderEngine {
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
       if (!this.isOpen()) return;
+      // Typing in a field (e.g. the itipiso round/age inputs) must not flip pages
+      if (e.target.closest?.('input, textarea, select, [contenteditable="true"]')) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault();
         if (this.hudVisible) this.hideHUD();
@@ -954,7 +962,8 @@ export class ComicReaderEngine {
       stage.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
       stage.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: true });
       stage.addEventListener('touchend', (e) => this.handleTouchEnd(e));
-      
+      stage.addEventListener('touchcancel', () => this.cancelDrag());
+
       // Mouse drag & click gestures for desktop
       stage.addEventListener('mousedown', (e) => this.handleMouseDown(e));
       window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
@@ -968,12 +977,8 @@ export class ComicReaderEngine {
     window.addEventListener('resize', () => {
       if (this.isOpen() && this.currentPrayer) {
         if (this.resizeDebounce) clearTimeout(this.resizeDebounce);
-        this.resizeDebounce = setTimeout(() => {
-          const relativeProgress = this.totalViewportPages > 1 ? this.viewportIndex / (this.totalViewportPages - 1) : 0;
-          this.calculateViewportMetrics();
-          const newIndex = Math.min(Math.round(relativeProgress * (this.totalViewportPages - 1)), this.totalViewportPages - 1);
-          this.goToViewport(newIndex, false);
-        }, 150);
+        // Page height changed: re-pack pages to fill the new viewport
+        this.resizeDebounce = setTimeout(() => this.repaginatePreservingPosition(), 150);
       }
     });
   }
@@ -1026,6 +1031,7 @@ export class ComicReaderEngine {
 
   open(prayer, startPage = 0, options = {}) {
     if (!prayer) return;
+    starfield.pause();
     this.currentPrayer = prayer;
     this.currentPageIndex = startPage;
     this.playlist = options.playlist || null;
@@ -1081,9 +1087,16 @@ export class ComicReaderEngine {
     this.readerView.classList.add('active');
     document.body.style.overflow = 'hidden';
 
+    // Web fonts change line heights: re-pack pages once they have loaded
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(() => {
+        if (this.currentPrayer === prayer) this.repaginatePreservingPosition();
+      });
+    }
+
     // Go to Start Page
     this.goToPage(this.currentPageIndex, false);
-    audio.playBell(528); // Miraculous tone on open
+    audio.playOpenBell(); // rings only when the bell setting is 'all', so it doesn't cut into the chant
 
     // Show HUD briefly, then smoothly fade into zen fullscreen reading
     this.showHUD();
@@ -1093,6 +1106,7 @@ export class ComicReaderEngine {
   }
 
   close() {
+    starfield.resume();
     this.readerView.classList.remove('active');
     this.readerView.classList.remove('tts-active');
     if (this.autoHideTimer) clearTimeout(this.autoHideTimer);
@@ -1107,7 +1121,6 @@ export class ComicReaderEngine {
     mp3Player.pause();
     this.hideTTSSettings();
     this.hideMP3Deck();
-    this.hideItipisoAgeModal();
     this.hideItipisoCompleteModal();
     if (this.itipisoCounterWidget) this.itipisoCounterWidget.style.display = 'none';
     if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
@@ -1140,12 +1153,11 @@ export class ComicReaderEngine {
     this.bookPages = this.paginatePrayerIntoBookPages(prayer, this.getCurrentFontSize());
     this.totalPages = Math.max(1, this.bookPages.length);
     this.totalViewportPages = this.totalPages;
+    this.endFlip(); // the pages being turned are about to be replaced
     this.comicTrack.innerHTML = '';
 
     // Prepare TTS Queue from bookPages so chunks match 1-to-1 with rendered book pages
     ttsEngine.prepareQueue(prayer, this.bookPages);
-
-    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
 
     let chunkIdx = 0;
     let lastOriginalPageIndex = -1;
@@ -1340,48 +1352,15 @@ export class ComicReaderEngine {
       frame.appendChild(viewport);
 
       // 3. Footer Container with Page indicator & Next cue
-      const footer = document.createElement('div');
-      footer.className = 'page-footer-container';
-
-      const counterBadge = document.createElement('div');
-      counterBadge.className = 'page-counter-badge';
-      counterBadge.textContent = this.totalPages > 1 
-        ? `📖 หน้า ${toThai(bIdx + 1)} จาก ${toThai(this.totalPages)}`
-        : '📖 ๑ หน้าสมบูรณ์';
-
-      const moreIndicator = document.createElement('div');
-      moreIndicator.className = 'scroll-more-indicator';
-      if (bIdx < this.totalPages - 1) {
-        moreIndicator.innerHTML = '<span>หน้าถัดไป</span> <span class="more-arrow">👉</span> <span class="more-subtext">(ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า)</span>';
-        moreIndicator.title = 'ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
-      } else {
-        moreIndicator.innerHTML = '<span class="finish-star">✨</span> <span>จบการสวดมนต์สมบูรณ์ (สาธุ 🙏)</span>';
-        moreIndicator.classList.add('finish-page-indicator');
-      }
-
-      const handleMoreClick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (this.hudVisible) this.hideHUD();
-        this.hideGestureHint();
-        if (bIdx < this.totalPages - 1) {
-          this.nextPage();
-        } else {
-          audio.playBell(648);
-          const finishOverlay = document.getElementById('finishChantOverlay');
-          if (finishOverlay) finishOverlay.classList.add('show');
-        }
-      };
-      moreIndicator.addEventListener('click', handleMoreClick);
-      moreIndicator.addEventListener('touchend', handleMoreClick);
-
-      footer.appendChild(moreIndicator);
-      footer.appendChild(counterBadge);
-      frame.appendChild(footer);
+      frame.appendChild(this.buildPageFooter(bIdx, this.totalPages));
 
       pageEl.appendChild(frame);
       this.comicTrack.appendChild(pageEl);
     });
+
+    // Keep the estimated pages for the TTS queue, then re-pack by real measured height
+    this.logicalPages = this.bookPages;
+    this.reflowPagesToFit();
 
     // Sync Scrubber & Dots
     this.calculateViewportMetrics();
@@ -1389,6 +1368,398 @@ export class ComicReaderEngine {
     // Ensure we are on the current valid page
     const safePage = Math.min(this.currentPageIndex || 0, this.totalPages - 1);
     this.goToPage(safePage, false);
+  }
+
+  buildPageFooter(bIdx, totalPages) {
+    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
+    const footer = document.createElement('div');
+    footer.className = 'page-footer-container';
+
+    const counterBadge = document.createElement('div');
+    counterBadge.className = 'page-counter-badge';
+    counterBadge.textContent = totalPages > 1
+      ? `📖 หน้า ${toThai(bIdx + 1)} จาก ${toThai(totalPages)}`
+      : '📖 ๑ หน้าสมบูรณ์';
+
+    const moreIndicator = document.createElement('div');
+    moreIndicator.className = 'scroll-more-indicator';
+    if (bIdx < totalPages - 1) {
+      moreIndicator.innerHTML = '<span>หน้าถัดไป</span> <span class="more-arrow">👉</span> <span class="more-subtext">(ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า)</span>';
+      moreIndicator.title = 'ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
+    } else {
+      moreIndicator.innerHTML = '<span class="finish-star">✨</span> <span>จบการสวดมนต์สมบูรณ์ (สาธุ 🙏)</span>';
+      moreIndicator.classList.add('finish-page-indicator');
+    }
+
+    const handleMoreClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (this.hudVisible) this.hideHUD();
+      this.hideGestureHint();
+      if (bIdx < this.totalPages - 1) {
+        this.nextPage();
+      } else {
+        audio.playBell(648);
+        const finishOverlay = document.getElementById('finishChantOverlay');
+        if (finishOverlay) finishOverlay.classList.add('show');
+      }
+    };
+    moreIndicator.addEventListener('click', handleMoreClick);
+    moreIndicator.addEventListener('touchend', handleMoreClick);
+
+    footer.appendChild(moreIndicator);
+    footer.appendChild(counterBadge);
+    return footer;
+  }
+
+  /**
+   * Measured Book Reflow:
+   * Re-packs the rendered stanzas into pages using the real on-screen page height,
+   * so every page is filled top-to-bottom and reading flows continuously across
+   * section boundaries. A stanza that doesn't fit continues on the next page line by line.
+   * Returns false (keeping the estimated pages) when the reader isn't laid out yet.
+   */
+  reflowPagesToFit() {
+    if (!this.comicTrack || typeof document === 'undefined') return false;
+    const oldPages = Array.from(this.comicTrack.querySelectorAll('.comic-page'));
+    if (oldPages.length === 0) return false;
+    const probeViewport = oldPages[0].querySelector('.page-verse-viewport');
+    if (!probeViewport || probeViewport.clientHeight < 60) return false;
+
+    // 1. Flatten the estimated pages into an ordered stream of titles, stanzas & blocks
+    const items = [];
+    let lastOriginal = -1;
+    let pendingBlock = null;
+    oldPages.forEach((pageEl) => {
+      const logical = this.logicalPages?.[parseInt(pageEl.dataset.pageIndex, 10)];
+      const originalPageIndex = parseInt(pageEl.dataset.originalPageIndex, 10) || 0;
+      if (originalPageIndex !== lastOriginal) {
+        if (pendingBlock) items.push(pendingBlock);
+        pendingBlock = null;
+        lastOriginal = originalPageIndex;
+        const text = (logical?.verseTitle || '').replace(/\s*\(\d+\/\d+\)$/, '');
+        if (text) {
+          items.push({ kind: 'title', text, originalPageIndex, el: pageEl.querySelector('.page-verse-header') });
+        }
+      }
+      const flow = pageEl.querySelector('.page-verse-flow');
+      Array.from(flow ? flow.children : []).forEach((child) => {
+        if (child.classList.contains('verse-section')) {
+          items.push({ kind: 'section', el: child, originalPageIndex });
+        } else {
+          // One launch box per section (the estimator repeats it on every sub-page)
+          pendingBlock = { kind: 'block', el: child, originalPageIndex };
+        }
+      });
+    });
+    if (pendingBlock) items.push(pendingBlock);
+
+    // 2. Rebuild pages, filling each one until the measured viewport is full
+    this.comicTrack.innerHTML = '';
+    const layoutClass = `layout-${this.currentLayout || 'book'}`;
+    const rootFontPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const minLinePx = rootFontPx * this.getCurrentFontSize() * 2.1;
+    const pages = [];
+    let cur = null;
+    let currentTitle = '';
+    let currentOriginal = 0;
+
+    const fits = () => cur.viewport.scrollHeight <= cur.viewport.clientHeight + 1;
+
+    const setHeader = (page, titleEl, text) => {
+      let header = titleEl;
+      if (header) {
+        header.className = 'page-verse-header verse-clickable';
+      } else {
+        header = document.createElement('div');
+        header.className = 'page-verse-header';
+      }
+      header.textContent = text;
+      header.dataset.text = text;
+      if (page.header) page.header.replaceWith(header);
+      else page.frame.insertBefore(header, page.viewport);
+      page.header = header;
+    };
+
+    const openPage = () => {
+      // Only the page being filled stays attached, so each measurement lays out one page
+      if (cur) {
+        // Safety net: never clip text, let an over-full page scroll instead
+        if (!fits()) cur.viewport.classList.add('page-overflow');
+        cur.pageEl.remove();
+      }
+      const idx = pages.length;
+      const pageEl = document.createElement('div');
+      pageEl.className = 'comic-page';
+      pageEl.dataset.pageIndex = idx;
+      pageEl.dataset.bookPageIndex = idx;
+      pageEl.dataset.originalPageIndex = currentOriginal;
+
+      const frame = document.createElement('div');
+      frame.className = 'page-frame';
+      const viewport = document.createElement('div');
+      viewport.className = 'page-verse-viewport';
+      const flow = document.createElement('div');
+      flow.className = `page-verse-flow ${layoutClass}`;
+      viewport.appendChild(flow);
+      frame.appendChild(viewport);
+      // Placeholder footer so the measured height already accounts for it
+      const footer = this.buildPageFooter(idx, idx + 2);
+      frame.appendChild(footer);
+      pageEl.appendChild(frame);
+      this.comicTrack.appendChild(pageEl);
+
+      cur = { pageEl, frame, header: null, viewport, flow, footer, count: 0, originalPageIndex: currentOriginal };
+      if (currentTitle) setHeader(cur, null, currentTitle);
+      pages.push(cur);
+    };
+
+    const placeTitle = (item) => {
+      currentTitle = item.text;
+      currentOriginal = item.originalPageIndex;
+      if (cur && cur.count > 0) {
+        const titleEl = item.el || document.createElement('div');
+        titleEl.className = 'verse-section-title' + (item.el ? ' verse-clickable' : '');
+        titleEl.textContent = item.text;
+        titleEl.dataset.text = item.text;
+        cur.flow.appendChild(titleEl);
+        // Keep the title with at least one following line
+        if (fits() && cur.viewport.clientHeight - cur.flow.offsetHeight >= minLinePx) return;
+        titleEl.remove();
+      }
+      if (!cur || cur.count > 0) openPage();
+      cur.originalPageIndex = item.originalPageIndex;
+      cur.pageEl.dataset.originalPageIndex = item.originalPageIndex;
+      setHeader(cur, item.el, item.text);
+    };
+
+    const placeBlock = (el) => {
+      if (!cur) openPage();
+      cur.flow.appendChild(el);
+      if (fits() || cur.count === 0) { cur.count++; return; }
+      el.remove();
+      openPage();
+      cur.flow.appendChild(el);
+      cur.count++;
+    };
+
+    const placeSection = (section) => {
+      if (!cur) openPage();
+      cur.flow.appendChild(section);
+      if (fits()) { cur.count++; return; }
+
+      // Lines already clear of the page bottom in this layout can be placed without re-measuring
+      const safeLines = new Set();
+      const leafLines = Array.from(section.querySelectorAll('.verse-pali, .verse-thai'));
+      if (leafLines.length > 0) {
+        const lastBottom = leafLines[leafLines.length - 1].getBoundingClientRect().bottom;
+        const limit = cur.viewport.getBoundingClientRect().top + cur.viewport.clientHeight
+          - (cur.flow.getBoundingClientRect().bottom - lastBottom) - 24;
+        for (const ln of leafLines) {
+          if (ln.getBoundingClientRect().bottom > limit) break;
+          safeLines.add(ln);
+        }
+      }
+      section.remove();
+
+      // Move lines one by one (section > wrap > stanza > line) into matching shells on this page.
+      // Shells clone the source containers, so a stanza marked 'stanza-continued' stays un-indented.
+      let secShell = null;
+      let wrapShell = null;
+      for (const wrap of Array.from(section.children)) {
+        for (const stanza of Array.from(wrap.children)) {
+          let stanzaShell = null;
+          let placedInStanza = 0;
+          for (const line of Array.from(stanza.children)) {
+            if (!secShell) { secShell = section.cloneNode(false); cur.flow.appendChild(secShell); }
+            if (!wrapShell) { wrapShell = wrap.cloneNode(false); secShell.appendChild(wrapShell); }
+            if (!stanzaShell) { stanzaShell = stanza.cloneNode(false); wrapShell.appendChild(stanzaShell); }
+            stanzaShell.appendChild(line);
+            if (safeLines.has(line) || fits()) {
+              cur.count++;
+              placedInStanza++;
+              continue;
+            }
+
+            // Page is full: keep the words of this line that fit, carry the rest back into the source
+            let carry = line;
+            const rest = this.splitLineToFit(line, fits, cur.count === 0 ? 1 : 2, cur.viewport);
+            if (rest) {
+              cur.count++;
+              carry = rest;
+            } else if (cur.count === 0) {
+              // A single word taller than a whole page (extreme zoom) may scroll inside its page
+              cur.viewport.classList.add('page-overflow');
+              cur.count++;
+              carry = null;
+            } else {
+              line.remove();
+            }
+            [stanzaShell, wrapShell, secShell].forEach(el => { if (!el.hasChildNodes()) el.remove(); });
+
+            if (carry) stanza.prepend(carry);
+            if (rest || placedInStanza > 0) stanza.classList.add('stanza-continued');
+            section.querySelectorAll('.verse-stanza, .verse-thai-stanza').forEach(el => { if (!el.hasChildNodes()) el.remove(); });
+            Array.from(section.children).forEach(el => { if (!el.hasChildNodes()) el.remove(); });
+
+            // The remainder is placed like a fresh section, so it gets the whole-fit fast path again
+            if (section.hasChildNodes()) {
+              openPage();
+              placeSection(section);
+            }
+            return;
+          }
+        }
+        wrapShell = null;
+      }
+    };
+
+    items.forEach((item) => {
+      if (item.kind === 'title') placeTitle(item);
+      else if (item.kind === 'section') placeSection(item.el);
+      else placeBlock(item.el);
+    });
+    if (!cur) openPage();
+    if (!fits()) cur.viewport.classList.add('page-overflow');
+
+    // 3. Finalize footers, page indices & TTS chunk → page mapping
+    const chunkPage = new Map();
+    pages.forEach((page, idx) => {
+      this.comicTrack.appendChild(page.pageEl);
+      page.footer.replaceWith(this.buildPageFooter(idx, pages.length));
+      page.pageEl.querySelectorAll('.verse-clickable').forEach((el) => {
+        el.dataset.bookPageIndex = idx;
+        const ids = (el.dataset.chunkIds || el.dataset.chunkId || '').split(',').filter(Boolean);
+        // A split line belongs to the page where it starts
+        ids.forEach(id => { if (!chunkPage.has(id)) chunkPage.set(id, idx); });
+      });
+    });
+    ttsEngine.queue.forEach((chunk) => {
+      if (chunkPage.has(chunk.id)) chunk.bookPageIndex = chunkPage.get(chunk.id);
+    });
+
+    this.bookPages = pages.map((page, idx) => ({
+      pageNumber: idx + 1,
+      originalPageIndex: page.originalPageIndex,
+      verseTitle: page.header ? page.header.textContent : '',
+      stanzas: []
+    }));
+    this.totalPages = pages.length;
+    this.totalViewportPages = this.totalPages;
+    return true;
+  }
+
+  // Trims an overflowing line to the most words that fit and returns a clone holding the rest
+  splitLineToFit(line, fits, minWords = 1, viewport = null) {
+    const full = line.textContent;
+    // Thai often has no spaces between words, so segment by dictionary words when possible
+    let words = null;
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      try {
+        if (!this.wordSegmenter) this.wordSegmenter = new Intl.Segmenter('th', { granularity: 'word' });
+        words = Array.from(this.wordSegmenter.segment(full), seg => seg.segment);
+      } catch (e) {
+        words = null;
+      }
+    }
+    if (!words) words = full.split(/(?<= )/);
+    if (words.length < 2) return null;
+    const head = (k) => words.slice(0, k).join('').trimEnd();
+    let lo = 0;
+    let hi = words.length - 1;
+
+    // Fast path: read word positions from the current layout instead of re-measuring per guess
+    const estimate = this.estimateWordsThatFit(line, words, viewport);
+    if (estimate >= 0) {
+      if (estimate > 0) {
+        line.textContent = head(estimate);
+        if (fits()) lo = estimate;
+        else hi = estimate - 1;
+      }
+      if (lo === estimate && estimate < hi) {
+        line.textContent = head(estimate + 1);
+        if (fits()) lo = estimate + 1;
+        else hi = estimate;
+      }
+    }
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      line.textContent = head(mid);
+      if (fits()) lo = mid;
+      else hi = mid - 1;
+    }
+    if (lo < minWords || !head(lo) || !words.slice(lo).join('').trim()) {
+      line.textContent = full;
+      return null;
+    }
+    line.textContent = head(lo);
+    const rest = line.cloneNode(false);
+    rest.textContent = words.slice(lo).join('').trimStart();
+    rest.classList.remove('stanza-first-line');
+    rest.classList.add('verse-line-continued');
+    rest.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleVerseClick(rest);
+    });
+    return rest;
+  }
+
+  // Counts the leading words whose line box ends above the page bottom, using one layout pass (-1 = unknown)
+  estimateWordsThatFit(line, words, viewport) {
+    const textNode = line.firstChild;
+    const flow = viewport?.firstElementChild;
+    if (!textNode || textNode.nodeType !== 3 || line.childNodes.length !== 1 || !flow) return -1;
+    const lineRect = line.getBoundingClientRect();
+    const limit = viewport.getBoundingClientRect().top + viewport.clientHeight
+      - (flow.getBoundingClientRect().bottom - lineRect.bottom);
+    const lineHeight = parseFloat(getComputedStyle(line).lineHeight) || 0;
+    const range = document.createRange();
+    let offset = 0;
+    let keep = 0;
+    for (let i = 0; i < words.length; i++) {
+      const end = offset + words[i].length;
+      range.setStart(textNode, offset);
+      range.setEnd(textNode, end);
+      const rects = range.getClientRects();
+      const rect = rects[rects.length - 1];
+      if (rect && rect.height > 0) {
+        // Glyph boxes are shorter than line boxes: add the half-leading below the glyphs
+        const halfLeading = Math.max(0, (lineHeight - rect.height) / 2);
+        if (rect.bottom + halfLeading > limit + 0.5) break;
+      }
+      keep = i + 1;
+      offset = end;
+    }
+    return Math.min(keep, words.length - 1);
+  }
+
+  // Re-render after font/layout/viewport changes while keeping the reader on the same verse
+  repaginatePreservingPosition() {
+    if (!this.currentPrayer || !this.isOpen()) return;
+    let anchor = -1;
+    // First verse on the current page, or the closest one before it (repeated lines carry no chunk)
+    for (let p = this.currentPageIndex; p >= 0 && anchor < 0; p--) {
+      const pageEl = this.comicTrack?.querySelector(`.comic-page[data-page-index="${p}"]`);
+      const marked = pageEl ? pageEl.querySelectorAll('[data-chunk-index]') : [];
+      const el = p === this.currentPageIndex ? marked[0] : marked[marked.length - 1];
+      if (el) anchor = parseInt(el.dataset.chunkIndex, 10);
+    }
+
+    this.renderPages(this.currentPrayer);
+
+    let target = -1;
+    if (anchor >= 0) {
+      let best = -1;
+      this.comicTrack.querySelectorAll('[data-chunk-index]').forEach((el) => {
+        const ci = parseInt(el.dataset.chunkIndex, 10);
+        if (ci <= anchor && ci > best) {
+          best = ci;
+          target = parseInt(el.closest('.comic-page')?.dataset.pageIndex, 10);
+        }
+      });
+    }
+    this.goToPage(target >= 0 ? target : Math.min(this.currentPageIndex, this.totalPages - 1), false);
   }
 
   calculateViewportMetrics() {
@@ -1417,13 +1788,14 @@ export class ComicReaderEngine {
     if (index < 0) index = 0;
     if (index >= this.totalPages) index = this.totalPages - 1;
 
+    const fromIndex = Math.min(this.currentPageIndex || 0, this.totalPages - 1);
     this.currentPageIndex = index;
     this.viewportIndex = index;
 
-    // Horizontal Book Page Turn Transform
-    if (this.comicTrack) {
-      this.comicTrack.style.transition = animate ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
-      this.comicTrack.style.transform = `translateX(-${index * 100}%)`;
+    // A drag frame still queued must not overwrite the turn animation
+    if (this.dragFrame) {
+      cancelAnimationFrame(this.dragFrame);
+      this.dragFrame = null;
     }
 
     // Active page class
@@ -1431,6 +1803,9 @@ export class ComicReaderEngine {
     pages.forEach((p, idx) => {
       p.classList.toggle('active-page', idx === index);
     });
+
+    // 3D book page turn
+    this.turnToPage(fromIndex, index, animate);
 
     // Update Scrubber Badge & Slider Value
     if (this.readerScrubber) {
@@ -1463,6 +1838,87 @@ export class ComicReaderEngine {
     this.updateDots();
     this.updateNavButtons();
     this.checkItipisoPage();
+  }
+
+  // --- 3D Book Page Turn ---
+  // Pages lie stacked. Turning forward, the current leaf rotates on its spine (left edge) and lifts away,
+  // revealing the next page underneath; turning back, the previous leaf comes down over the current one.
+  // Angle of the top leaf: 0 = lying flat on the book, -90 = standing on the spine (edge-on, out of sight).
+  getPageEl(index) {
+    return this.comicTrack?.querySelector(`.comic-page[data-page-index="${index}"]`);
+  }
+
+  beginFlip(from, to) {
+    this.endFlip();
+    const forward = to > from;
+    const top = this.getPageEl(forward ? from : to);
+    const under = this.getPageEl(forward ? to : from);
+    if (!top || !under || top === under) return null;
+    if (!this.flipShade) {
+      this.flipShade = document.createElement('div');
+      this.flipShade.className = 'page-turn-shade';
+      this.underShade = document.createElement('div');
+      this.underShade.className = 'page-under-shade';
+    }
+    top.classList.add('flip-top');
+    under.classList.add('flip-under');
+    top.appendChild(this.flipShade);
+    under.appendChild(this.underShade);
+    this.flip = { from, to, forward, top, under };
+    this.setFlipAngle(forward ? 0 : -90);
+    return this.flip;
+  }
+
+  setFlipAngle(angle, durationMs = 0, easing = 'cubic-bezier(0.2, 0.8, 0.2, 1)') {
+    const f = this.flip;
+    if (!f) return;
+    const timing = durationMs ? `${Math.round(durationMs)}ms ${easing}` : '';
+    f.top.style.transition = durationMs ? `transform ${timing}` : 'none';
+    this.flipShade.style.transition = durationMs ? `opacity ${timing}` : 'none';
+    this.underShade.style.transition = durationMs ? `opacity ${timing}` : 'none';
+    f.top.style.transform = `rotateY(${angle}deg)`;
+    const lift = Math.min(1, Math.abs(angle) / 90);
+    this.flipShade.style.opacity = (lift * 0.7).toFixed(3);
+    this.underShade.style.opacity = ((1 - lift) * 0.85).toFixed(3);
+  }
+
+  endFlip() {
+    if (this.flipTimer) {
+      clearTimeout(this.flipTimer);
+      this.flipTimer = null;
+    }
+    const f = this.flip;
+    if (!f) return;
+    this.flip = null;
+    f.top.classList.remove('flip-top');
+    f.under.classList.remove('flip-under');
+    f.top.style.transform = '';
+    f.top.style.transition = '';
+    this.flipShade?.remove();
+    this.underShade?.remove();
+  }
+
+  // Show page `to`: finish a turn the finger started (or roll it back), or play a whole turn
+  turnToPage(from, to, animate) {
+    const f = this.flip;
+    if (animate && f && (f.to === to || f.from === to)) {
+      const showTarget = f.to === to;
+      const angle = showTarget === f.forward ? -90 : 0;
+      const duration = this.flipDuration || 480;
+      this.setFlipAngle(angle, duration);
+      this.flipTimer = setTimeout(() => this.endFlip(), duration + 40);
+      return;
+    }
+    if (!animate || from === to || !this.beginFlip(from, to)) {
+      this.endFlip();
+      return;
+    }
+    // Buttons, TTS auto-turn, scrubber jumps: one full, unhurried turn
+    // (force a style flush so the start angle is applied before the transition)
+    void this.flip.top.offsetWidth;
+    const duration = 560;
+    this.setFlipAngle(this.flip.forward ? -90 : 0, duration, 'cubic-bezier(0.45, 0.05, 0.25, 1)');
+    this.flipTimer = setTimeout(() => this.endFlip(), duration + 40);
   }
 
   goToViewport(index, animate = true) {
@@ -1557,12 +2013,115 @@ export class ComicReaderEngine {
     }
   }
 
+  // --- Drag-to-Flip: the page follows the finger, then settles on release ---
+  // Lock the gesture to one axis once it moves far enough, so vertical swipes never drag the track
+  lockDragAxis(deltaX, deltaY) {
+    if (!this.dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+      this.dragAxis = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y';
+      if (this.dragAxis === 'x') {
+        // Measure the drag from the lock point so the page doesn't jump by the 8px slop
+        this.dragOriginX = this.touchCurrentX;
+        this.dragSamples = [];
+        this.comicStage?.classList.add('is-dragging');
+        window.getSelection?.()?.removeAllRanges();
+      }
+    }
+    return this.dragAxis;
+  }
+
+  // Track the finger with one transform write per display frame
+  dragTo(clientX) {
+    if (!this.comicTrack) return;
+    const now = performance.now();
+    this.dragSamples.push({ x: clientX, t: now });
+    while (this.dragSamples.length > 2 && now - this.dragSamples[0].t > 100) this.dragSamples.shift();
+
+    const dx = clientX - this.dragOriginX; // < 0 turns to the next page, > 0 back to the previous one
+    const forward = dx < 0;
+    const target = this.currentPageIndex + (forward ? 1 : -1);
+    if (dx === 0 || target < 0 || target >= this.totalPages) {
+      // Nothing to turn to (first/last page): keep the book still
+      this.dragOffset = 0;
+      if (this.flip) this.endFlip();
+      return;
+    }
+    if (!this.flip || this.flip.to !== target) this.beginFlip(this.currentPageIndex, target);
+
+    // The turning edge travels exactly as far as the finger. The edge sits at width·cos(angle):
+    // forward it starts at the right edge and moves toward the spine; back it rises from the spine.
+    const width = this.comicStage?.clientWidth || window.innerWidth || 360;
+    const p = Math.min(1, Math.abs(dx) / width);
+    this.dragOffset = dx;
+    this.dragAngle = -(Math.acos(forward ? 1 - p : p) * 180) / Math.PI;
+
+    if (this.dragFrame) return;
+    this.dragFrame = requestAnimationFrame(() => {
+      this.dragFrame = null;
+      this.setFlipAngle(this.dragAngle);
+    });
+  }
+
+  // Finger speed over the last ~100ms in px/ms (> 0 = moving right)
+  dragVelocity() {
+    const s = this.dragSamples || [];
+    if (s.length < 2) return 0;
+    const first = s[0];
+    const last = s[s.length - 1];
+    if (performance.now() - last.t > 80) return 0; // finger paused before lifting: no flick
+    return (last.x - first.x) / Math.max(1, last.t - first.t);
+  }
+
+  // Flip when dragged far enough or flicked, otherwise spring back; the settle speed matches the flick
+  finishDrag(deltaX) {
+    const velocity = this.dragVelocity();
+    const offset = this.dragOffset || 0;
+    const width = this.comicStage?.clientWidth || window.innerWidth || 360;
+    const towardNext = deltaX > 0;
+    // A flick back against the drag direction cancels the flip, like a real page let go of
+    const flickedBack = towardNext ? velocity > 0.3 : velocity < -0.3;
+    const flicked = Math.abs(velocity) > 0.35 && Math.abs(deltaX) > 20;
+    const commit = !flickedBack && (Math.abs(deltaX) > this.swipeThreshold || flicked);
+
+    const before = this.currentPageIndex;
+    const remaining = commit ? width - Math.abs(offset) : Math.abs(offset);
+    const speed = Math.max(Math.abs(velocity), 1);
+    this.flipDuration = Math.min(420, Math.max(180, (2.2 * remaining) / speed));
+
+    if (commit) {
+      if (towardNext) {
+        this.nextPage();
+      } else {
+        this.prevPage();
+      }
+    }
+    if (this.currentPageIndex === before) this.goToPage(before, true);
+    // Hiding the HUD restyles the whole reader; do it here, where the settle slide runs on the GPU,
+    // instead of on the first drag frame where it caused a hitch
+    if (this.hudVisible) this.hideHUD();
+    this.blockVerseTaps();
+    this.endDragState();
+  }
+
+  endDragState() {
+    this.dragAxis = null;
+    this.dragOffset = 0;
+    this.flipDuration = null;
+    this.comicStage?.classList.remove('is-dragging');
+  }
+
+  cancelDrag() {
+    const wasDragging = this.dragAxis === 'x';
+    this.isSwiping = false;
+    if (wasDragging) this.goToPage(this.currentPageIndex, true);
+    this.endDragState();
+  }
+
   // --- Touch Gesture Controllers (Swipe Left/Right = Flip Pages, Swipe Up/Down = Control Panel) ---
   handleTouchStart(e) {
     if (e.touches.length !== 1) return;
     const target = e.target;
     // Ignore interactive controls to prevent button/HUD clash
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card, .verse-focus-pill')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       this.isSwiping = false;
       this.touchStartTime = 0;
       return;
@@ -1574,6 +2133,7 @@ export class ComicReaderEngine {
     this.touchCurrentX = this.touchStartX;
     this.touchCurrentY = this.touchStartY;
     this.isSwiping = true;
+    this.dragAxis = null;
   }
 
   handleTouchMove(e) {
@@ -1584,10 +2144,10 @@ export class ComicReaderEngine {
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - this.touchCurrentY;
 
-    // เมื่อเริ่มปัดซ้าย-ขวา เกิน 15px (เพื่อเปลี่ยนหน้า) ให้ซ่อนแผงควบคุมและ Hint ทันที
-    if (Math.abs(deltaX) > 15 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (this.hudVisible) this.hideHUD();
+    // ปัดซ้าย-ขวา: หน้ากระดาษเลื่อนตามนิ้วทันที (แผงควบคุมซ่อนตอนปล่อยนิ้ว เพื่อไม่ให้สะดุดตอนเริ่มลาก)
+    if (this.lockDragAxis(deltaX, deltaY) === 'x') {
       this.hideGestureHint();
+      this.dragTo(this.touchCurrentX);
     }
   }
 
@@ -1595,6 +2155,12 @@ export class ComicReaderEngine {
     if (!this.isSwiping || !this.touchStartTime) return;
     this.isSwiping = false;
     this.lastTouchTime = Date.now();
+
+    if (this.dragAxis === 'x') {
+      this.finishDrag(this.touchStartX - this.touchCurrentX);
+      return;
+    }
+    this.dragAxis = null;
 
     const target = e.target;
     if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
@@ -1609,6 +2175,7 @@ export class ComicReaderEngine {
 
     // 1. ปัดซ้าย-ขวา เป็นเปลี่ยนหน้า (Horizontal Swipe)
     if (absX > absY && absX > this.swipeThreshold) {
+      this.blockVerseTaps();
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
       if (deltaX > 0) {
@@ -1626,25 +2193,27 @@ export class ComicReaderEngine {
       return;
     }
 
+    const isCleanTap = elapsed < 500 && absX < 20 && absY < 20;
+    const edge = isCleanTap ? this.edgeTapDirection(this.touchStartX) : null;
+
+    // 3. Edge taps always turn the page, even over verse text or its play chip
+    if (edge) {
+      this.blockVerseTaps();
+      this.hideGestureHint();
+      if (edge === 'next') this.nextPage(); else this.prevPage();
+      return;
+    }
+
     // If tap was on a clickable verse or focus pill, DO NOT toggle HUD or turn pages!
     // Native click event handles verse focus and recitation cleanly.
     if (target.closest('.verse-clickable, .verse-focus-pill')) {
       return;
     }
 
-    // 3. Clean Tap on empty/neutral reading stage area:
-    // Right 12% -> Next Page, Left 12% -> Prev Page, Center -> Toggle HUD
-    if (elapsed < 500 && absX < 20 && absY < 20) {
+    // 4. Clean tap on the center of the reading stage -> Toggle HUD
+    if (isCleanTap) {
       this.hideGestureHint();
-      const clickX = this.touchStartX;
-      const screenWidth = window.innerWidth || 360;
-      if (clickX > screenWidth * 0.88) {
-        this.nextPage();
-      } else if (clickX < screenWidth * 0.12) {
-        this.prevPage();
-      } else {
-        this.toggleHUD();
-      }
+      this.toggleHUD();
     }
   }
 
@@ -1653,7 +2222,7 @@ export class ComicReaderEngine {
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
     const target = e.target;
     // Ignore interactive controls to prevent button/HUD clash
-    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card, .verse-focus-pill')) {
+    if (target.closest('button, input, select, a, .scroll-more-indicator, .reader-toolbar, .reader-bottom-bar, .reader-zen-bar, .comic-nav-btn, .btn-circle-add, .card-fav-btn, .reader-dot, .btn-primary, .btn-secondary, .itipiso-counter-widget, .itipiso-modal-overlay, .itipiso-modal-card')) {
       this.isMouseDown = false;
       this.touchStartTime = 0;
       return;
@@ -1664,6 +2233,7 @@ export class ComicReaderEngine {
     this.touchStartY = e.clientY;
     this.touchCurrentX = e.clientX;
     this.touchCurrentY = e.clientY;
+    this.dragAxis = null;
   }
 
   handleMouseMove(e) {
@@ -1674,15 +2244,20 @@ export class ComicReaderEngine {
     const deltaX = this.touchStartX - this.touchCurrentX;
     const deltaY = this.touchStartY - this.touchCurrentY;
 
-    if (Math.abs(deltaX) > 15 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (this.hudVisible) this.hideHUD();
+    if (this.lockDragAxis(deltaX, deltaY) === 'x') {
       this.hideGestureHint();
+      this.dragTo(this.touchCurrentX);
     }
   }
 
   handleMouseUp(e) {
     if (!this.isMouseDown || !this.touchStartTime) return;
     this.isMouseDown = false;
+    if (this.dragAxis === 'x') {
+      this.finishDrag(this.touchStartX - this.touchCurrentX);
+      return;
+    }
+    this.dragAxis = null;
     if (this.lastTouchTime && Date.now() - this.lastTouchTime < 700) return;
 
     const target = e.target;
@@ -1698,6 +2273,7 @@ export class ComicReaderEngine {
 
     // 1. ปัดซ้าย-ขวา เป็นเปลี่ยนหน้า
     if (absX > absY && absX > this.swipeThreshold) {
+      this.blockVerseTaps();
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
       if (deltaX > 0) {
@@ -1715,23 +2291,26 @@ export class ComicReaderEngine {
       return;
     }
 
+    const isCleanClick = elapsed < 500 && absX < 15 && absY < 15;
+    const edge = isCleanClick ? this.edgeTapDirection(this.touchStartX) : null;
+
+    // 3. Edge clicks always turn the page, even over verse text or its play chip
+    if (edge) {
+      this.blockVerseTaps();
+      this.hideGestureHint();
+      if (edge === 'next') this.nextPage(); else this.prevPage();
+      return;
+    }
+
     // If click was on a clickable verse or focus pill, DO NOT toggle HUD or turn pages!
     if (target.closest('.verse-clickable, .verse-focus-pill')) {
       return;
     }
 
-    // 3. Clean Click on empty stage area: Right edge -> Next, Left edge -> Prev, Center -> Toggle HUD
-    if (elapsed < 500 && absX < 15 && absY < 15) {
+    // 4. Clean click on the center of the stage -> Toggle HUD
+    if (isCleanClick) {
       this.hideGestureHint();
-      const clickX = this.touchStartX;
-      const screenWidth = window.innerWidth || 360;
-      if (clickX > screenWidth * 0.88) {
-        this.nextPage();
-      } else if (clickX < screenWidth * 0.12) {
-        this.prevPage();
-      } else {
-        this.toggleHUD();
-      }
+      this.toggleHUD();
     }
   }
 
@@ -1823,12 +2402,7 @@ export class ComicReaderEngine {
 
     // Dynamic Re-Pagination with new font size and preserve reading progress
     if (this.currentPrayer && this.isOpen()) {
-      const currentOriginalPage = this.bookPages?.[this.currentPageIndex]?.originalPageIndex ?? 0;
-      requestAnimationFrame(() => {
-        this.renderPages(this.currentPrayer);
-        const newIndex = this.bookPages.findIndex(bp => bp.originalPageIndex === currentOriginalPage);
-        this.goToPage(newIndex >= 0 ? newIndex : 0, false);
-      });
+      requestAnimationFrame(() => this.repaginatePreservingPosition());
     }
   }
 
@@ -1864,12 +2438,7 @@ export class ComicReaderEngine {
 
     // Dynamic Re-Pagination with new font metrics
     if (this.currentPrayer && this.isOpen()) {
-      const currentOriginalPage = this.bookPages?.[this.currentPageIndex]?.originalPageIndex ?? 0;
-      requestAnimationFrame(() => {
-        this.renderPages(this.currentPrayer);
-        const newIndex = this.bookPages.findIndex(bp => bp.originalPageIndex === currentOriginalPage);
-        this.goToPage(newIndex >= 0 ? newIndex : 0, false);
-      });
+      requestAnimationFrame(() => this.repaginatePreservingPosition());
     }
   }
 
@@ -1909,12 +2478,7 @@ export class ComicReaderEngine {
 
     // Dynamic Re-Pagination with new layout
     if (this.currentPrayer && this.isOpen()) {
-      const currentOriginalPage = this.bookPages?.[this.currentPageIndex]?.originalPageIndex ?? 0;
-      requestAnimationFrame(() => {
-        this.renderPages(this.currentPrayer);
-        const newIndex = this.bookPages.findIndex(bp => bp.originalPageIndex === currentOriginalPage);
-        this.goToPage(newIndex >= 0 ? newIndex : 0, false);
-      });
+      requestAnimationFrame(() => this.repaginatePreservingPosition());
     }
   }
 
@@ -1925,7 +2489,7 @@ export class ComicReaderEngine {
       'cosmic': '🌌 จักรวาล',
       'gold': '🌟 ทองอร่าม',
       'parchment': '📜 ใบลาน',
-      'midnight': '🌙 ราตรีสงบ'
+      'midnight': '⚫ ดำมินิมอล'
     };
     const settings = storage.getSettings();
     const currentTheme = settings.theme || 'cosmic';
@@ -1986,7 +2550,7 @@ export class ComicReaderEngine {
     // Find corresponding chunk index in ttsEngine.queue
     if (this.currentPrayer) {
       if (ttsEngine.queue.length === 0) {
-        ttsEngine.prepareQueue(this.currentPrayer, this.bookPages);
+        ttsEngine.prepareQueue(this.currentPrayer, this.logicalPages || this.bookPages);
       }
       
       let targetIdx = -1;
@@ -2032,23 +2596,58 @@ export class ComicReaderEngine {
       return;
     }
 
-    // When TTS is NOT playing: add an elegant focus action button centered beneath verse
+    // When TTS is NOT playing: add a compact play chip centered beneath the verse.
+    // Only the chip itself starts reading; the rest of its row swallows taps so a near-miss does nothing.
     if (!ttsEngine.isPlaying && !ttsEngine.isPaused) {
       const pill = document.createElement('div');
       pill.className = 'verse-focus-pill';
-      pill.innerHTML = '<span class="pill-play-action">▶️ สวดตรงนี้</span>';
-      pill.title = 'แตะเพื่อเริ่มสวดนำตรงนี้ (หรือแตะซ้ำที่ข้อความ)';
+      pill.innerHTML = '<span class="pill-play-action" role="button" tabindex="0">▶ สวดตรงนี้</span>';
+      pill.title = 'แตะปุ่มเพื่อเริ่มสวดนำตรงนี้';
       pill.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!e.target.closest('.pill-play-action') || this.isVerseTapBlocked()) return;
         this.playFromElement(el);
       });
       el.appendChild(pill);
     }
   }
 
+  // Stop reading but keep the line it stopped on focused, with its play chip, so one tap resumes from there
+  stopTTS() {
+    const stoppedOn = this.focusedElement;
+    ttsEngine.stop();
+    if (stoppedOn?.isConnected) this.setVerseFocus(stoppedOn, false);
+  }
+
+  clearVerseFocus() {
+    this.comicTrack?.querySelectorAll('.verse-reading-active, .verse-focused').forEach(item => {
+      item.classList.remove('verse-reading-active', 'verse-focused');
+      item.querySelector('.verse-focus-pill')?.remove();
+    });
+    this.focusedElement = null;
+    this.focusedChunkIndex = null;
+  }
+
+  // Page-turn gestures block verse taps briefly, so the click that follows a flip can't focus or start reading
+  blockVerseTaps(ms = 400) {
+    this.verseTapBlockedUntil = Date.now() + ms;
+  }
+
+  isVerseTapBlocked() {
+    return Date.now() < (this.verseTapBlockedUntil || 0);
+  }
+
+  // Outer 12% of the screen are page-turn zones, even when the tap lands on verse text or its play chip
+  edgeTapDirection(clientX) {
+    const screenWidth = window.innerWidth || 360;
+    if (clientX > screenWidth * 0.88) return 'next';
+    if (clientX < screenWidth * 0.12) return 'prev';
+    return null;
+  }
+
   handleVerseClick(el) {
-    if (!el || !this.currentPrayer) return;
+    if (!el || !this.currentPrayer || this.isVerseTapBlocked()) return;
 
     // If HUD was showing, hide it so the user can recite freely
     if (this.hudVisible) {
@@ -2058,7 +2657,7 @@ export class ComicReaderEngine {
 
     // If TTS is already playing on THIS exact element, tap stops it immediately!
     if (ttsEngine.isPlaying && el === this.focusedElement) {
-      ttsEngine.stop();
+      this.stopTTS();
       return;
     }
 
@@ -2068,8 +2667,8 @@ export class ComicReaderEngine {
       // If TTS is running on another element, seek to this element immediately
       this.playFromElement(el);
     } else if (isAlreadyFocused) {
-      // Second tap on the already focused verse -> start reciting!
-      this.playFromElement(el);
+      // Second tap on the focused verse clears the focus; reading only starts from the play chip
+      this.clearVerseFocus();
     } else {
       // First tap -> set visual recitation focus & prepare TTS start point
       this.setVerseFocus(el, false);
@@ -2085,10 +2684,7 @@ export class ComicReaderEngine {
     
     // If playing OR paused, tap immediately STOPS speech completely!
     if (ttsEngine.isPlaying || ttsEngine.isPaused) {
-      ttsEngine.stop();
-      if (this.focusedElement) {
-        this.focusedElement.classList.add('verse-reading-active', 'verse-focused');
-      }
+      this.stopTTS();
     } else {
       // Start from the currently focused verse if set, otherwise first visible chunk in viewport
       let startIdx = (typeof this.focusedChunkIndex === 'number' && this.focusedChunkIndex >= 0)
@@ -2102,7 +2698,7 @@ export class ComicReaderEngine {
     if (!el || !this.currentPrayer) return;
 
     if (ttsEngine.queue.length === 0) {
-      ttsEngine.prepareQueue(this.currentPrayer, this.bookPages);
+      ttsEngine.prepareQueue(this.currentPrayer, this.logicalPages || this.bookPages);
     }
 
     let targetIdx = -1;
@@ -2247,6 +2843,12 @@ export class ComicReaderEngine {
     if (target) {
       target.classList.add('verse-reading-active', 'verse-focused');
       this.focusedElement = target;
+      // A long line may be split across two pages: highlight its continuation too
+      if (target.dataset.chunkIds) {
+        this.comicTrack.querySelectorAll(`[data-chunk-ids="${target.dataset.chunkIds}"]`).forEach((part) => {
+          if (part !== target) part.classList.add('verse-reading-active');
+        });
+      }
 
       // Auto-flip book page if target element is located on another book page!
       const targetPageEl = target.closest('.comic-page');
@@ -2411,7 +3013,6 @@ export class ComicReaderEngine {
   hideItipisoWidget() {
     if (this.itipisoCounterWidget) {
       this.itipisoCounterWidget.style.display = 'none';
-      this.hideItipisoAgeModal();
     }
   }
 
@@ -2419,14 +3020,40 @@ export class ComicReaderEngine {
     const key = this.getPrayerKey();
     const current = storage.getItipisoRound(key);
     const target = storage.getItipisoTarget();
+    const settings = storage.getSettings();
+    const age = parseInt(settings.userAge, 10) || 40;
+    const isCustom = target !== age + 1;
 
     if (this.itipisoCurrent) this.itipisoCurrent.textContent = current;
-    if (this.itipisoTarget) this.itipisoTarget.textContent = target;
+    // Don't overwrite a field while the user is typing in it
+    if (this.itipisoTarget && document.activeElement !== this.itipisoTarget) this.itipisoTarget.value = target;
+    if (this.itipisoUserAgeInput && document.activeElement !== this.itipisoUserAgeInput) this.itipisoUserAgeInput.value = age;
+    if (this.itipisoAgeHint) {
+      this.itipisoAgeHint.textContent = isCustom ? `→ ตั้งเอง ${target} จบ (แก้อายุเพื่อใช้ อายุ + ๑)` : '→ สวดเท่าอายุ + ๑';
+    }
+    this.itipisoUserAgeInput?.closest('.itipiso-age-row')?.classList.toggle('is-custom', isCustom);
 
     if (this.itipisoProgressBar) {
       const pct = Math.min(100, Math.round((current / Math.max(1, target)) * 100));
       this.itipisoProgressBar.style.width = `${pct}%`;
     }
+  }
+
+  // Typed a round count directly (e.g. 9, 108); matching age + 1 falls back to age mode
+  saveItipisoTargetInput() {
+    const target = parseInt(this.itipisoTarget?.value, 10);
+    if (!(target >= 1 && target <= 999)) return;
+    const age = parseInt(storage.getSettings().userAge, 10) || 40;
+    storage.saveSettings({ itipisoCustomTarget: target === age + 1 ? 0 : target });
+    this.updateItipisoDisplay();
+  }
+
+  // Typed an age: target becomes age + 1 (clears any custom round count)
+  saveItipisoAgeInput() {
+    const age = parseInt(this.itipisoUserAgeInput?.value, 10);
+    if (!(age >= 1 && age <= 150)) return;
+    storage.saveSettings({ userAge: age, itipisoCustomTarget: 0 });
+    this.updateItipisoDisplay();
   }
 
   handleItipisoCount() {
@@ -2486,31 +3113,6 @@ export class ComicReaderEngine {
     this.updateItipisoDisplay();
     if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
       window.tammaApp.showToast('↺ เคลียร์ตัวนับรอบเรียบร้อยแล้ว');
-    }
-  }
-
-  showItipisoAgeModal() {
-    if (!this.itipisoAgeModal) return;
-    const settings = storage.getSettings();
-    const age = settings.userAge || 40;
-    if (this.itipisoUserAgeInput) this.itipisoUserAgeInput.value = age;
-    if (this.itipisoCalculatedTarget) this.itipisoCalculatedTarget.textContent = storage.getItipisoTarget();
-    this.itipisoAgeModal.style.display = 'flex';
-  }
-
-  hideItipisoAgeModal() {
-    if (this.itipisoAgeModal) this.itipisoAgeModal.style.display = 'none';
-  }
-
-  saveItipisoAgeSettings() {
-    const age = parseInt(this.itipisoUserAgeInput?.value, 10) || 40;
-    const customTarget = this.tempCustomTarget !== undefined ? this.tempCustomTarget : 0;
-    storage.saveSettings({ userAge: age, itipisoCustomTarget: customTarget });
-    this.hideItipisoAgeModal();
-    this.updateItipisoDisplay();
-    if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
-      const target = storage.getItipisoTarget();
-      window.tammaApp.showToast(`บันทึกเป้าหมาย: ${target} จบ เรียบร้อย`);
     }
   }
 

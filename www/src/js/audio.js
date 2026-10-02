@@ -8,6 +8,21 @@ class DhammaAudioEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.bellMode = 'events';
+  }
+
+  /**
+   * 'off'    = no bells or ticks at all
+   * 'events' = bells only for chant counts & finishing (default; quiet when opening a prayer)
+   * 'all'    = also ring when a prayer opens
+   */
+  setBellMode(mode) {
+    this.bellMode = ['off', 'events', 'all'].includes(mode) ? mode : 'events';
+    this.enabled = this.bellMode !== 'off';
+  }
+
+  playOpenBell() {
+    if (this.bellMode === 'all') this.playBell(528);
   }
 
   init() {

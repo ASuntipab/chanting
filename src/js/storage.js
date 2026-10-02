@@ -15,6 +15,26 @@ const STORAGE_KEYS = {
   ITIPISO_ROUNDS: 'tamma_itipiso_rounds_v1'
 };
 
+// บทสวดที่ถูกยุบรวมเพราะซ้ำกัน: id เดิม -> id ที่เก็บไว้
+// รายการโปรดและยอดสวดของ id เดิมจะถูกย้ายไปยัง id ที่เก็บไว้
+export const RETIRED_PRAYER_IDS = {
+  'khandha-paritta': 'khandha-sutta'
+};
+
+const resolvePrayerId = (id) => RETIRED_PRAYER_IDS[id] || id;
+
+// Merge per-prayer map entries of retired ids into their replacement
+const remapPrayerMap = (map, combine) => {
+  const out = {};
+  Object.entries(map || {}).forEach(([id, value]) => {
+    const target = resolvePrayerId(id);
+    out[target] = target in out ? combine(out[target], value) : value;
+  });
+  return out;
+};
+
+const remapPrayerIdList = (ids) => Array.from(new Set((ids || []).map(resolvePrayerId)));
+
 class DhammaStorageEngine {
   constructor() {
     this._memoryStore = new Map();
@@ -55,6 +75,35 @@ class DhammaStorageEngine {
       if (updated) {
         this.save(STORAGE_KEYS.PRAYERS, merged);
       }
+    }
+
+    this.migrateRetiredPrayers();
+  }
+
+  // Remove retired duplicate prayers and carry their favorites & chanting stats over to the kept prayer
+  migrateRetiredPrayers() {
+    const isRetired = (id) => id in RETIRED_PRAYER_IDS;
+
+    const prayers = this.getPrayers();
+    if (prayers.some(p => isRetired(p.id))) {
+      this.save(STORAGE_KEYS.PRAYERS, prayers.filter(p => !isRetired(p.id)));
+    }
+
+    const favs = this.getFavorites();
+    if (favs.some(isRetired)) {
+      this.save(STORAGE_KEYS.FAVORITES, remapPrayerIdList(favs));
+    }
+
+    const tracker = this.get(STORAGE_KEYS.TRACKER, null);
+    if (tracker && [tracker.totalCounts, tracker.todayChanted].some(m => Object.keys(m || {}).some(isRetired))) {
+      tracker.totalCounts = remapPrayerMap(tracker.totalCounts, (a, b) => a + b);
+      tracker.todayChanted = remapPrayerMap(tracker.todayChanted, (a, b) => a || b);
+      this.save(STORAGE_KEYS.TRACKER, tracker);
+    }
+
+    const rounds = this.get(STORAGE_KEYS.ITIPISO_ROUNDS, {});
+    if (Object.keys(rounds).some(isRetired)) {
+      this.save(STORAGE_KEYS.ITIPISO_ROUNDS, remapPrayerMap(rounds, Math.max));
     }
   }
 
@@ -176,7 +225,7 @@ class DhammaStorageEngine {
       const favList = data.favorites || data.favs || data.f;
       if (Array.isArray(favList)) {
         const currentFavs = new Set(this.getFavorites());
-        favList.forEach(f => currentFavs.add(f));
+        remapPrayerIdList(favList).forEach(f => currentFavs.add(f));
         this.save(STORAGE_KEYS.FAVORITES, Array.from(currentFavs));
       }
 
@@ -186,11 +235,11 @@ class DhammaStorageEngine {
         const currentTracker = this.getTrackerData();
         const totalCounts = trackerObj.totalCounts || trackerObj.tc;
         if (totalCounts && typeof totalCounts === 'object') {
-          currentTracker.totalCounts = { ...currentTracker.totalCounts, ...totalCounts };
+          currentTracker.totalCounts = { ...currentTracker.totalCounts, ...remapPrayerMap(totalCounts, (a, b) => a + b) };
         }
         const todayChanted = trackerObj.todayChanted || trackerObj.tod;
         if (todayChanted && typeof todayChanted === 'object') {
-          currentTracker.todayChanted = { ...currentTracker.todayChanted, ...todayChanted };
+          currentTracker.todayChanted = { ...currentTracker.todayChanted, ...remapPrayerMap(todayChanted, (a, b) => a || b) };
         }
         const streak = trackerObj.streakDays || trackerObj.st;
         if (streak) {
@@ -357,6 +406,7 @@ class DhammaStorageEngine {
       fontSize: 1.15,
       fontFamily: 'sarabun',
       soundEnabled: true,
+      bellMode: 'events',
       userAge: 40,
       itipisoCustomTarget: 0
     });

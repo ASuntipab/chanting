@@ -108,10 +108,42 @@ export function extractLineRepeats(line, isPali = true) {
   return null;
 }
 
+/**
+ * Pre-generated voice pack (see scripts/generate-voice.js).
+ * Clips are rendered at a calm cadence that corresponds to engine rate 0.85,
+ * so playbackRate = chunk.rate / VOICE_PACK_BASE_RATE.
+ */
+export const VOICE_PACK_BASE_URL = 'assets/voice/niwat/';
+export const VOICE_PACK_BASE_RATE = 0.85;
+
+/**
+ * Stable 53-bit hash (cyrb53) of a spoken chunk's text -> clip file name.
+ * Shared by the generator script and the runtime so both agree on file names.
+ */
+export function voiceClipKey(text) {
+  const str = String(text || '');
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
+}
+
 export class DhammaTTSEngine {
   constructor() {
     this.synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
     this.voice = null;
+
+    // 'recorded' = use the pre-generated voice pack when a clip exists, else device voice
+    // 'device'   = always use the device's built-in Web Speech voice
+    this.voiceSource = 'recorded';
+    this.voicePack = null; // { baseUrl, ext, clips: Set<string> }
+    this.clipAudio = null;
+    this.playToken = 0;
     this.rate = 0.85; // Default calm chanting cadence (0.6 - 1.5)
     this.pitch = 1.0;
     this.volume = 1.0;
@@ -132,6 +164,46 @@ export class DhammaTTSEngine {
     this.onError = null; // (err) => {}
 
     this.initVoices();
+    if (typeof window !== 'undefined' && typeof fetch === 'function') {
+      this.voicePackReady = this.loadVoicePack();
+    }
+  }
+
+  async loadVoicePack(baseUrl = VOICE_PACK_BASE_URL) {
+    try {
+      const res = await fetch(baseUrl + 'manifest.json', { cache: 'no-cache' });
+      if (!res.ok) return null;
+      const manifest = await res.json();
+      if (!Array.isArray(manifest.clips) || manifest.clips.length === 0) return null;
+      this.voicePack = {
+        baseUrl,
+        ext: manifest.ext || 'mp3',
+        voiceName: manifest.voiceName || '',
+        clips: new Set(manifest.clips)
+      };
+    } catch (e) {
+      this.voicePack = null;
+    }
+    return this.voicePack;
+  }
+
+  setVoiceSource(source) {
+    if (!['recorded', 'device'].includes(source)) return;
+    this.voiceSource = source;
+    if (this.isPlaying && this.currentIndex >= 0) {
+      this.speakCurrentChunk();
+    }
+  }
+
+  /** URL of the pre-generated clip for this chunk, or null to use the device voice. */
+  getClipUrl(chunk) {
+    if (this.voiceSource !== 'recorded' || !this.voicePack || !chunk?.text) return null;
+    const key = voiceClipKey(chunk.text);
+    return this.voicePack.clips.has(key) ? `${this.voicePack.baseUrl}${key}.${this.voicePack.ext}` : null;
+  }
+
+  hasPlayableVoice() {
+    return !!this.synth || !!this.voicePack;
   }
 
   initVoices() {
@@ -481,7 +553,7 @@ export class DhammaTTSEngine {
   }
 
   play(startIndex = 0) {
-    if (!this.synth) return;
+    if (!this.hasPlayableVoice()) return;
 
     if (this.queue.length === 0) return;
 
@@ -498,7 +570,7 @@ export class DhammaTTSEngine {
   }
 
   speakCurrentChunk() {
-    if (!this.synth || !this.isPlaying || this.currentIndex >= this.queue.length) {
+    if (!this.isPlaying || this.currentIndex >= this.queue.length) {
       if (this.currentIndex >= this.queue.length && this.isPlaying) {
         this.finish();
       }
@@ -509,6 +581,75 @@ export class DhammaTTSEngine {
     if (!chunk || !chunk.text) {
       this.currentIndex++;
       this.speakCurrentChunk();
+      return;
+    }
+
+    this.haltOutput();
+
+    const clipUrl = this.getClipUrl(chunk);
+    if (clipUrl) {
+      this.playClip(chunk, clipUrl);
+    } else {
+      this.speakWithSynth(chunk);
+    }
+  }
+
+  advanceAfterChunk(token) {
+    if (token !== this.playToken || !this.isPlaying || this.isPaused) return;
+    this.currentIndex++;
+    setTimeout(() => {
+      if (token === this.playToken && this.isPlaying && !this.isPaused) {
+        this.speakCurrentChunk();
+      }
+    }, 350);
+  }
+
+  playClip(chunk, clipUrl) {
+    const token = this.playToken;
+    const index = this.currentIndex;
+    if (!this.clipAudio) this.clipAudio = new Audio();
+    const el = this.clipAudio;
+
+    const fallback = () => {
+      if (token !== this.playToken || !this.isPlaying || this.isPaused) return;
+      console.warn('Voice clip failed, using device voice:', clipUrl);
+      this.speakWithSynth(chunk);
+    };
+
+    el.onplaying = () => {
+      if (token !== this.playToken) return;
+      if (this.onHighlight) this.onHighlight(index, chunk);
+    };
+    el.onended = () => this.advanceAfterChunk(token);
+    el.onerror = fallback;
+
+    el.src = clipUrl;
+    el.preservesPitch = true;
+    el.webkitPreservesPitch = true;
+    el.playbackRate = Math.max(0.5, Math.min(2, (chunk.rate || this.rate) / VOICE_PACK_BASE_RATE));
+    el.volume = this.volume;
+    const p = el.play();
+    if (p && typeof p.catch === 'function') p.catch(fallback);
+  }
+
+  /** Stops whatever is currently sounding and invalidates its pending callbacks. */
+  haltOutput() {
+    this.playToken++;
+    if (this.clipAudio) {
+      try {
+        this.clipAudio.onplaying = this.clipAudio.onended = this.clipAudio.onerror = null;
+        this.clipAudio.pause();
+      } catch (e) {}
+    }
+    if (this.synth) {
+      try { this.synth.cancel(); } catch (e) {}
+    }
+  }
+
+  speakWithSynth(chunk) {
+    if (!this.synth) {
+      // No device voice and no clip for this line: skip it rather than stall
+      this.advanceAfterChunk(this.playToken);
       return;
     }
 
@@ -537,24 +678,15 @@ export class DhammaTTSEngine {
       }
     };
 
-    utterance.onend = () => {
-      if (!this.isPlaying || this.isPaused) return;
-      this.currentIndex++;
-      setTimeout(() => {
-        if (this.isPlaying && !this.isPaused) {
-          this.speakCurrentChunk();
-        }
-      }, 350);
-    };
+    const token = this.playToken;
+    utterance.onend = () => this.advanceAfterChunk(token);
 
     utterance.onerror = (e) => {
-      if (e.error === 'interrupted' || e.error === 'canceled' || !this.isPlaying || this.isPaused) return;
+      if (e.error === 'interrupted' || e.error === 'canceled' || token !== this.playToken || !this.isPlaying || this.isPaused) return;
       console.warn('TTS Speech error:', e);
       if (this.onError) this.onError(e);
-      if (this.isPlaying && !this.isPaused) {
-        this.currentIndex++;
-        this.speakCurrentChunk();
-      }
+      this.currentIndex++;
+      this.speakCurrentChunk();
     };
 
     if (this.synth.paused) {
@@ -571,13 +703,7 @@ export class DhammaTTSEngine {
   pause() {
     this.isPlaying = false;
     this.isPaused = true;
-    if (this.synth) {
-      try {
-        this.synth.cancel();
-      } catch (e) {
-        console.warn('TTS cancel error on pause:', e);
-      }
-    }
+    this.haltOutput();
     this.notifyState('paused');
   }
 
@@ -594,13 +720,7 @@ export class DhammaTTSEngine {
     this.isPaused = false;
     this.currentIndex = -1;
     this.currentUtterance = null;
-    if (this.synth) {
-      try {
-        this.synth.cancel();
-      } catch (e) {
-        console.warn('TTS cancel error on stop:', e);
-      }
-    }
+    this.haltOutput();
     this.notifyState('stopped');
     if (this.onHighlight) {
       this.onHighlight(-1, null);

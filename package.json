@@ -14,6 +14,7 @@
     "screenshots:generate:android": "node scripts/generate-android-screenshots.js && python scripts/process_android_screenshots.py",
     "screenshots:generate:ipad": "node scripts/generate-ipad-screenshots.js && python scripts/process_ipad_screenshots.py",
     "test": "node --test tests/*.test.js",
+    "voice:generate": "node scripts/generate-voice.js",
     "cap:build": "npm run build && npx cap sync && node scripts/fix-ios-paths.js",
     "cap:sync": "npm run build && npx cap sync && node scripts/fix-ios-paths.js",
     "cap:open:android": "npx cap open android",

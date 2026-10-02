@@ -93,7 +93,8 @@ test('Itipiso Tally Counter Suite: Age + 1 Calculation, Tally Counts & Reset Lif
     assert.ok(html.includes('id="btnCloseItipisoWidget"'), 'btnCloseItipisoWidget must exist in modal');
     assert.ok(html.includes('itipiso-chant-pali-text'), 'itipiso-chant-pali-text must exist in popup');
     assert.ok(html.includes('อิติปิ โส ภะคะวา'), 'Pali verse text must be embedded directly in popup modal');
-    assert.ok(html.includes('id="itipisoAgeModal"'), 'itipisoAgeModal must exist');
+    assert.ok(html.includes('id="itipisoUserAgeInput"'), 'inline age input must exist in the counter popup');
+    assert.ok(!html.includes('id="itipisoAgeModal"'), 'separate age settings modal was replaced by inline inputs');
     assert.ok(html.includes('id="itipisoCompleteModal"'), 'itipisoCompleteModal must exist');
 
     assert.ok(html.includes('itipiso-stanza'), 'itipiso-stanza must format stanzas as liturgical pairs');

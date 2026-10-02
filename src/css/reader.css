@@ -6,7 +6,8 @@
 .reader-view {
   position: fixed;
   inset: 0;
-  background: var(--bg-primary);
+  --reader-bg: var(--bg-primary); /* shared with each .comic-page so the paper matches */
+  background: var(--reader-bg);
   z-index: 500;
   display: flex;
   flex-direction: column;
@@ -226,6 +227,71 @@
   transform: scale(1.06);
 }
 
+/* Floating Stop: shown only while the AI voice reads with the HUD hidden (the toolbar has its own stop otherwise) */
+.btn-tts-float-stop {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  z-index: 120;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 148px;
+  min-height: 48px;
+  padding: 0 24px;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-gold);
+  border-radius: 9999px;
+  color: var(--accent-gold);
+  font-family: var(--font-header, -apple-system, sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+.reader-view.tts-active.hud-hidden .btn-tts-float-stop {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+/* The page footer sits under the floating Stop; pages turn on their own while reading, so hide it (without reflow) */
+.reader-view.tts-active.hud-hidden .page-footer-container {
+  visibility: hidden;
+}
+
+.tts-float-stop-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.reader-view.tts-active.hud-hidden .btn-tts-float-stop:active {
+  transform: translate(-50%, 0) scale(0.95);
+  background: var(--accent-gold);
+  color: #0b1120;
+}
+
+body.theme-parchment .btn-tts-float-stop {
+  background: rgba(255, 251, 240, 0.94);
+  border-color: rgba(180, 83, 9, 0.45);
+  color: #92400e;
+  box-shadow: 0 4px 14px rgba(120, 53, 15, 0.25);
+}
+
 .btn-reader-zen {
   color: var(--accent-gold);
   font-size: 1.05rem;
@@ -241,21 +307,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 2000px;
+  /* Horizontal drags belong to the page-flip handler, not the browser */
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Pages lie stacked like a real book; the perspective gives the turning leaf its depth
+   (in vw so the tilt looks the same on phones and tablets) */
+.comic-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 300vw;
   perspective-origin: 50% 50%;
 }
 
-.comic-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: transform;
-  transform-style: preserve-3d;
+/* While a finger/mouse drags the page: no text selection or tap highlight fighting the gesture */
+.comic-stage.is-dragging,
+.comic-stage.is-dragging * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .comic-page {
-  min-width: 100%;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: flex;
@@ -263,9 +339,51 @@
   justify-content: center;
   align-items: center;
   padding: 0;
-  position: relative;
   user-select: text;
-  transform-style: preserve-3d;
+  /* Opaque paper (same backdrop as the reader) so the page underneath never shows through */
+  background: var(--reader-bg, var(--bg-primary));
+  /* The spine is the left edge: pages turn around it */
+  transform-origin: left center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Only the page on screen (and the two pages of a turn) are painted; hidden pages keep their
+     layout so pagination measurements still work */
+  visibility: hidden;
+}
+
+.comic-page.active-page,
+.comic-page.flip-under,
+.comic-page.flip-top {
+  visibility: visible;
+}
+
+/* The leaf being turned: its own GPU layer, lifted above the page it reveals */
+.comic-page.flip-top {
+  z-index: 3;
+  will-change: transform;
+  box-shadow: 0 0 36px rgba(0, 0, 0, 0.45);
+}
+
+.comic-page.flip-under {
+  z-index: 1;
+}
+
+/* Lighting: the turning leaf darkens as it rises; the revealed page brightens as the shadow lifts */
+.page-turn-shade,
+.page-under-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.page-turn-shade {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.35) 70%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.page-under-shade {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 45%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 /* 3D Realistic Fullscreen Book Leaf Frame - 100% Fullscreen on iPad, Tablets & Mobile */
@@ -274,12 +392,13 @@
   max-width: 100%;
   height: 100%;
   max-height: 100vh;
+  /* No backdrop-filter here: the reader background behind is an opaque gradient, so blurring it looked the same
+     but forced every page to re-blur on every frame of a page drag */
   background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: none;
   border-radius: 0;
-  padding: calc(var(--safe-top) + 68px) 18px max(130px, calc(var(--safe-bottom) + 120px)) 18px;
+  /* Same as hud-hidden: page size stays fixed so measured pagination never shifts; the HUD floats above */
+  padding: max(14px, calc(var(--safe-top) + 6px)) max(16px, env(safe-area-inset-right)) max(14px, calc(var(--safe-bottom) + 6px)) max(16px, env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -290,7 +409,6 @@
   box-shadow: none;
   transform-origin: left center;
   transition: padding 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: transform;
 }
 
 /* Immersive Fullscreen Zen Mode (HUD Hidden) - Maximize Reading Area Without Dead Space */
@@ -337,21 +455,11 @@
   z-index: 5;
 }
 
-/* 3D Turning Animations */
-.comic-page.turning-left .page-frame {
-  transform: rotateY(-35deg) scale(0.96) translateZ(20px);
-  box-shadow: -25px 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-gold-glow);
-}
-
-.comic-page.turning-right .page-frame {
-  transform: rotateY(35deg) scale(0.96) translateZ(20px);
-  transform-origin: right center;
-  box-shadow: 25px 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-gold-glow);
-}
 
 /* Cosmic Reader Variations */
 body.theme-cosmic .reader-view {
-  background: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0d122e 45%, #050714 100%);
+  --reader-bg: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0d122e 45%, #050714 100%);
+  background: var(--reader-bg);
 }
 
 body.theme-cosmic .page-frame {
@@ -571,6 +679,18 @@ body.theme-cosmic .verse-pali {
   text-indent: 1.2em;
 }
 
+/* A stanza continued from the previous page must not be re-indented */
+.verse-stanza.stanza-continued > .verse-pali,
+.verse-thai-stanza.stanza-continued > .verse-thai,
+.verse-line-continued {
+  text-indent: 0 !important;
+}
+
+/* Extreme zoom: a single line taller than the page may scroll inside that page */
+.page-verse-viewport.page-overflow {
+  overflow-y: auto;
+}
+
 /* 2. Modern Centered Layout (แบบกึ่งกลางสมมาตร) */
 .page-verse-flow.layout-centered,
 .reader-view.layout-centered .page-verse-flow {
@@ -615,7 +735,7 @@ body.theme-gold .reader-view:not(.layout-centered) .verse-thai-wrap {
 
 body.theme-midnight .layout-book .verse-thai-wrap,
 body.theme-midnight .reader-view:not(.layout-centered) .verse-thai-wrap {
-  border-left-color: rgba(96, 165, 250, 0.4);
+  border-left-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Page Footer & Indicators (Ultra-Compact, Space-Saving) */
@@ -686,9 +806,21 @@ body.theme-midnight .reader-view:not(.layout-centered) .verse-thai-wrap {
   transform: translateY(4px);
 }
 
+/* transform + opacity only: these run on the GPU; animating box-shadow forced a repaint every frame */
 @keyframes floatPulse {
   0%, 100% { transform: translateY(0); opacity: 0.85; }
-  50% { transform: translateY(3px); opacity: 1; box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
+  50% { transform: translateY(3px); opacity: 1; }
+}
+
+/* Every page has a "หน้าถัดไป" pill: animate only the one on screen, and hold still while a page is dragged */
+.comic-page:not(.active-page) .scroll-more-indicator,
+.comic-page:not(.active-page) .scroll-more-indicator .more-arrow {
+  animation: none;
+}
+
+.comic-stage.is-dragging .scroll-more-indicator,
+.comic-stage.is-dragging .scroll-more-indicator .more-arrow {
+  animation-play-state: paused;
 }
 
 .page-counter-badge {
@@ -1147,7 +1279,8 @@ body.theme-midnight .reader-view:not(.layout-centered) .verse-thai-wrap {
    Parchment Theme Reader Styles (คัมภีร์ใบลาน คมชัดสูง สบายตา)
    ========================================================================== */
 body.theme-parchment .reader-view {
-  background: radial-gradient(ellipse at 50% 0%, #fbf6ec 0%, #f4ead8 50%, #e8ddca 100%);
+  --reader-bg: radial-gradient(ellipse at 50% 0%, #fbf6ec 0%, #f4ead8 50%, #e8ddca 100%);
+  background: var(--reader-bg);
 }
 
 body.theme-parchment .reader-toolbar {
@@ -1257,7 +1390,8 @@ body.theme-parchment .reader-layout-select option {
    Golden Temple Theme Reader Styles (ทองอร่าม อบอุ่น สง่างาม)
    ========================================================================== */
 body.theme-gold .reader-view {
-  background: radial-gradient(ellipse at 50% 0%, #2e1c0d 0%, #1a1007 50%, #0d0804 100%);
+  --reader-bg: radial-gradient(ellipse at 50% 0%, #2e1c0d 0%, #1a1007 50%, #0d0804 100%);
+  background: var(--reader-bg);
 }
 
 body.theme-gold .reader-toolbar {
@@ -1364,113 +1498,112 @@ body.theme-gold .reader-layout-select option {
 }
 
 /* ==========================================================================
-   Midnight Theme Reader Styles (ราตรีสงบ ดำสนิท OLED ถนอมสายตา)
+   Minimal Clean Black Theme Reader Styles (ดำมินิมอล พื้นดำสนิท ตัวหนังสือขาวคลีน ไร้ลูกเล่น ไม่แสบตา)
    ========================================================================== */
 body.theme-midnight .reader-view {
-  background: #05080c;
+  --reader-bg: #121212;
+  background: #121212;
 }
 
 body.theme-midnight .reader-toolbar {
-  background: rgba(12, 16, 24, 0.95);
-  border-bottom: 1px solid rgba(88, 166, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  background: #181818;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
 }
 
 body.theme-midnight .reader-title {
-  color: #58a6ff;
-  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+  color: #f5f5f7;
+  text-shadow: none;
 }
 
 body.theme-midnight .reader-subtitle {
-  color: #8b949e;
+  color: #8e8e93;
 }
 
 body.theme-midnight .page-frame {
-  background: #090d14;
-  border: none;
+  background: #161618;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: none;
 }
 
 body.theme-midnight .page-frame::before {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(88, 166, 255, 0.05) 50%, transparent 100%);
+  display: none !important;
 }
 
 body.theme-midnight .page-frame::after {
-  content: '🌙';
-  color: #58a6ff;
-  opacity: 0.85;
+  display: none !important;
 }
 
 body.theme-midnight .page-verse-header {
-  color: #58a6ff;
-  border-bottom: 1px dashed rgba(88, 166, 255, 0.25);
+  color: #e5e5ea;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 body.theme-midnight .page-verse-flow {
-  color: #e6edf3;
+  color: #f5f5f7;
 }
 
 body.theme-midnight .verse-pali {
-  color: #79c0ff;
-  font-weight: 700;
-  text-shadow: 0 0 12px rgba(121, 192, 255, 0.35);
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: none;
 }
 
 body.theme-midnight .verse-thai {
-  color: #c9d1d9;
+  color: #d1d1d6;
 }
 
 body.theme-midnight .reader-bottom-bar {
-  background: rgba(12, 16, 24, 0.95);
-  border: 1px solid rgba(88, 166, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  background: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 body.theme-midnight .btn-scrubber-nav {
-  background: rgba(88, 166, 255, 0.12);
-  color: #58a6ff;
-  border-color: rgba(88, 166, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f5f7;
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 body.theme-midnight .reader-scrubber-badge {
-  color: #58a6ff;
-  background: rgba(88, 166, 255, 0.12);
+  color: #f5f5f7;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 body.theme-midnight .reader-font-dock {
-  background: rgba(88, 166, 255, 0.12);
-  border-color: rgba(88, 166, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 body.theme-midnight .btn-dock-font {
-  color: #58a6ff;
+  color: #f5f5f7;
 }
 
 body.theme-midnight .reader-chant-counter {
-  background: rgba(88, 166, 255, 0.15);
-  border-color: rgba(88, 166, 255, 0.4);
-  color: #58a6ff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f5f5f7;
 }
 
 body.theme-midnight .reader-font-select,
 body.theme-midnight .reader-script-select,
 body.theme-midnight .reader-layout-select {
-  background: rgba(14, 20, 38, 0.85);
-  border-color: rgba(88, 166, 255, 0.35);
-  color: #58a6ff;
+  background: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f5f7;
 }
 
 body.theme-midnight .reader-font-select-dock::after,
 body.theme-midnight .reader-script-dock::after,
 body.theme-midnight .reader-layout-dock::after {
-  color: #58a6ff;
+  color: #8e8e93;
 }
 
 body.theme-midnight .reader-font-select option,
 body.theme-midnight .reader-script-select option,
 body.theme-midnight .reader-layout-select option {
-  background: #090d18;
-  color: #f0f6fc;
+  background: #1e1e1e;
+  color: #f5f5f7;
 }
 
 /* Cosmic Theme Styles */
@@ -1522,7 +1655,7 @@ body.theme-cosmic .reader-layout-select option {
   }
 
   .page-frame {
-    padding: calc(var(--safe-top) + 78px) 32px calc(var(--safe-bottom) + 64px) 32px;
+    padding: max(20px, calc(var(--safe-top) + 10px)) 32px max(20px, calc(var(--safe-bottom) + 10px)) 32px;
   }
 
   .reader-view.hud-hidden .page-frame {
@@ -1684,9 +1817,20 @@ body.theme-cosmic .reader-layout-select option {
 
 .theme-midnight .verse-reading-active,
 .theme-midnight .verse-focused {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.12)) !important;
-  border-left-color: #60a5fa !important;
-  box-shadow: 0 0 16px rgba(96, 165, 250, 0.35), inset 0 0 8px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-left-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.theme-midnight .verse-reading-active.verse-pali,
+.theme-midnight .verse-focused.verse-pali {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+.theme-midnight .verse-reading-active.verse-thai,
+.theme-midnight .verse-focused.verse-thai {
+  color: #f5f5f7 !important;
 }
 
 .theme-gold .verse-reading-active,
@@ -1730,7 +1874,7 @@ body.theme-cosmic .reader-layout-select option {
   border: none !important;
   box-shadow: none !important;
   animation: fadeInPill 0.22s ease-out;
-  cursor: pointer;
+  cursor: default; /* only the chip itself is a play target; the rest of the row ignores taps */
   user-select: none;
   clear: both;
 }
@@ -1758,6 +1902,7 @@ body.theme-cosmic .reader-layout-select option {
   white-space: nowrap !important;
   flex-shrink: 0 !important;
   letter-spacing: 0.3px;
+  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -1790,10 +1935,10 @@ body.theme-midnight .verse-focus-pill {
 }
 
 body.theme-midnight .verse-focus-pill .pill-play-action {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5), 0 0 14px rgba(59, 130, 246, 0.4);
+  background: #f5f5f7;
+  color: #121212;
+  border-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 body.theme-gold .verse-focus-pill {
@@ -2021,45 +2166,46 @@ body.theme-gold .verse-focus-pill .pill-play-action {
 
 /* Theme Overrides for TTS Modal */
 body.theme-midnight .tts-settings-card {
-  background: rgba(9, 13, 24, 0.98);
-  border-color: rgba(88, 166, 255, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(88, 166, 255, 0.25);
+  background: #18181a;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
 }
 
 body.theme-midnight .tts-settings-header h4 {
-  color: #58a6ff;
+  color: #f5f5f7;
 }
 
 body.theme-midnight .tts-setting-row label {
-  color: #f0f6fc;
+  color: #e5e5ea;
 }
 
 body.theme-midnight .tts-mode-btn,
 body.theme-midnight .tts-speed-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(88, 166, 255, 0.3);
-  color: #f0f6fc !important;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e5e5ea !important;
 }
 
 body.theme-midnight .tts-mode-btn.active,
 body.theme-midnight .tts-speed-btn.active {
-  background: linear-gradient(135deg, #58a6ff, #1f6feb);
-  color: #090c10 !important;
-  border-color: #58a6ff;
-  box-shadow: 0 2px 10px rgba(88, 166, 255, 0.4);
+  background: #ffffff;
+  color: #121212 !important;
+  border-color: #ffffff;
+  box-shadow: none;
+  font-weight: 600;
 }
 
 body.theme-midnight .tts-disclaimer-box {
-  background: rgba(88, 166, 255, 0.12);
-  border-color: rgba(88, 166, 255, 0.35);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 body.theme-midnight .tts-disclaimer-title {
-  color: #58a6ff;
+  color: #f5f5f7;
 }
 
 body.theme-midnight .tts-disclaimer-text {
-  color: #f0f6fc !important;
+  color: #a1a1aa !important;
 }
 
 body.theme-parchment .tts-settings-card {
@@ -2179,55 +2325,112 @@ body.theme-parchment .mp3-player-deck {
 }
 
 body.theme-midnight .mp3-player-deck {
-  background: rgba(9, 13, 28, 0.98);
-  border: 1px solid rgba(88, 166, 255, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 24px rgba(88, 166, 255, 0.3);
+  background: #18181a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
 }
 
-body.theme-cosmic .mp3-player-deck {
-  background: rgba(18, 14, 38, 0.98);
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 24px rgba(251, 191, 36, 0.25);
-}
-
-.mp3-deck-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.mp3-track-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.mp3-track-badge {
-  font-size: 0.72rem;
-  color: #54a0ff;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.theme-parchment .mp3-track-badge {
-  color: #0984e3;
-}
-
-.mp3-track-title {
-  margin: 0;
-  font-family: var(--font-header);
-  font-size: 1rem;
-  color: var(--accent-gold, #fbbf24);
-  font-weight: 700;
-}
-
-body.theme-parchment .mp3-track-title {
-  color: #684105;
+body.theme-midnight .mp3-track-badge {
+  color: #a1a1aa;
 }
 
 body.theme-midnight .mp3-track-title {
-  color: #58a6ff;
+  color: #f5f5f7;
+}
+
+body.theme-midnight .mp3-track-temple {
+  color: #8e8e93;
+}
+
+body.theme-midnight .mp3-track-select {
+  background: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f5f5f7;
+}
+
+body.theme-midnight .mp3-track-select option,
+body.theme-midnight .mp3-speed-select option {
+  background: #1e1e1e;
+  color: #f5f5f7;
+}
+
+body.theme-midnight .mp3-speed-select {
+  background: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f5f5f7;
+}
+
+body.theme-midnight .mp3-time {
+  color: #8e8e93;
+}
+
+body.theme-midnight .gesture-hint-content {
+  background: #18181a;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  color: #f5f5f7;
+}
+
+body.theme-midnight .gesture-hint-text {
+  color: #f5f5f7;
+  text-shadow: none;
+}
+
+body.theme-midnight .reader-help-card {
+  background: #18181a;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+}
+
+body.theme-midnight .gesture-guide-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-midnight .gesture-guide-icon-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f5f5f7;
+}
+
+body.theme-midnight .itipiso-chant-verse-card {
+  background: #161618;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+body.theme-midnight .itipiso-chant-verse-card:hover {
+  background: #202024;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+body.theme-midnight .itipiso-chant-verse-header {
+  color: #f5f5f7;
+}
+
+body.theme-midnight .itipiso-tap-badge {
+  color: #f5f5f7;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.theme-midnight .itipiso-target-num {
+  color: #ffffff;
+  text-shadow: none;
+}
+
+body.theme-midnight .btn-launch-itipiso-modal {
+  background: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f5f5f7;
+  box-shadow: none;
+}
+
+body.theme-midnight .btn-launch-itipiso-modal:hover {
+  background: #282828;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: none;
+  transform: none;
 }
 
 .mp3-track-temple {
@@ -2781,25 +2984,6 @@ body.theme-parchment .gesture-guide-item {
   gap: 5px;
 }
 
-.btn-itipiso-gear {
-  width: 30px;
-  height: 30px;
-  font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-full, 9999px);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.btn-itipiso-gear:hover {
-  background: rgba(212, 175, 55, 0.25);
-  border-color: var(--accent-gold);
-}
-
 .itipiso-tally-row {
   display: flex;
   align-items: baseline;
@@ -2843,6 +3027,68 @@ body.theme-parchment .gesture-guide-item {
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+/* Inline editable numbers (round target & age): look like text, dashed underline hints "tap to edit" */
+.itipiso-inline-input {
+  font-family: inherit;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed rgba(212, 175, 55, 0.55);
+  border-radius: 0;
+  padding: 0 2px;
+  margin: 0;
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  cursor: text;
+  touch-action: manipulation;
+}
+
+.itipiso-inline-input::-webkit-outer-spin-button,
+.itipiso-inline-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.itipiso-inline-input:focus {
+  border-bottom-style: solid;
+  border-bottom-color: var(--accent-gold);
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.itipiso-count-target.itipiso-inline-input {
+  width: 3.2ch;
+  line-height: 1.2;
+}
+
+.itipiso-age-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: -6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: text;
+}
+
+.itipiso-age-inline {
+  width: 3.2ch;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.itipiso-age-hint {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.itipiso-age-row.is-custom .itipiso-age-inline {
+  opacity: 0.55;
 }
 
 .itipiso-count-unit {
@@ -3058,90 +3304,6 @@ body.theme-parchment .btn-itipiso-sub {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.itipiso-setting-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.itipiso-field-label {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.itipiso-age-input-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.itipiso-age-input {
-  width: 100px;
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-align: center;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid var(--accent-gold);
-  border-radius: var(--radius-md, 10px);
-  color: var(--accent-gold);
-}
-
-.itipiso-age-calc-badge {
-  font-size: 1rem;
-  color: var(--text-primary);
-  background: rgba(212, 175, 55, 0.15);
-  border: 1px dashed rgba(212, 175, 55, 0.35);
-  border-radius: var(--radius-md, 8px);
-  padding: 8px 14px;
-}
-
-.itipiso-age-calc-badge strong {
-  color: var(--accent-gold);
-  font-size: 1.25rem;
-}
-
-.itipiso-field-hint {
-  margin: 0;
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.itipiso-preset-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.itipiso-preset-btn {
-  flex: 1;
-  min-width: 80px;
-  padding: 8px 12px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-full, 9999px);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.itipiso-preset-btn.active,
-.itipiso-preset-btn:hover {
-  background: rgba(212, 175, 55, 0.25);
-  border-color: var(--accent-gold);
-  color: var(--accent-gold);
-}
-
-.itipiso-modal-footer {
-  padding: 14px 18px 18px 18px;
-  border-top: 1px solid var(--border-subtle);
 }
 
 /* Completion Celebration Card */

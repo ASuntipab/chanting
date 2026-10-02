@@ -10,6 +10,18 @@ import { renderQRCodeToCanvas } from './qrcode.js';
 import { tipitakaLoader } from './tipitaka-loader.js';
 import { mp3Player } from './mp3-player.js';
 
+// บทโชคลาภที่อยู่ในหมวดอื่นมาก่อน ให้แสดงในหมวด "โชคลาภ" ด้วย
+const LEGACY_WEALTH_IDS = new Set([
+  'katha-ngoen-lan',
+  'phra-sivali-chant',
+  'phra-upagutta-chant',
+  'thao-wessuwan-chant',
+  'phra-sangkajjai-chant',
+  'mae-thorani-chant'
+]);
+
+const isWealthPrayer = (p) => p.category === 'โชคลาภ' || LEGACY_WEALTH_IDS.has(p.id);
+
 class TammaApp {
   constructor() {
     this.reader = null;
@@ -80,6 +92,7 @@ class TammaApp {
 
   applyInitialSettings() {
     const settings = storage.getSettings();
+    audio.setBellMode(settings.bellMode);
     const currentTheme = settings.theme || 'cosmic';
     const currentFont = settings.fontFamily || 'sarabun';
     document.body.className = `theme-${currentTheme} font-${currentFont}`;
@@ -102,7 +115,7 @@ class TammaApp {
     // Theme Toggle Button
     const btnToggleTheme = document.getElementById('btnToggleTheme');
     const themes = ['cosmic', 'gold', 'parchment', 'midnight'];
-    const themeNames = ['🌌 จักรวาล', '🌟 ทองอร่าม', '📜 ใบลาน', '🌙 ราตรีสงบ'];
+    const themeNames = ['🌌 จักรวาล', '🌟 ทองอร่าม', '📜 ใบลาน', '⚫ ดำมินิมอล'];
     btnToggleTheme?.addEventListener('click', () => {
       const settings = storage.getSettings();
       const currentTheme = settings.theme || 'cosmic';
@@ -614,6 +627,20 @@ class TammaApp {
         p.id === 'girimananda-sutta' ||
         (p.title && (p.title.includes('รักษาโรค') || p.title.includes('โรคระบาด')))
       );
+    } else if (this.currentCategory === 'โชคลาภ') {
+      prayers = prayers.filter(isWealthPrayer);
+    } else if (this.currentCategory === 'บทสวดประจำวันเกิด') {
+      prayers = prayers.filter(p =>
+        p.category === 'บทสวดประจำวันเกิด' || 
+        p.id.startsWith('birthday-') ||
+        (p.title && p.title.includes('วันเกิด'))
+      );
+    } else if (this.currentCategory === 'บทสวดประจำวัน') {
+      prayers = prayers.filter(p => 
+        p.category === 'บทสวดประจำวัน' || 
+        p.category === 'บทสวดประจำวันเกิด' ||
+        p.id.startsWith('birthday-')
+      );
     } else if (this.currentCategory !== 'all') {
       prayers = prayers.filter(p => p.category === this.currentCategory);
     }
@@ -661,7 +688,10 @@ class TammaApp {
     const categoryIcons = {
       'all': '✨',
       'has-audio': '🎵',
+      'บทสวดประจำวันเกิด': '🎂',
       'สุขภาพ': '🩺',
+      'โชคลาภ': '💰',
+      'พระธาตุประจำปีเกิด': '🛕',
       'หลวงพ่อจรัญ': '🪷',
       'หลวงปู่มั่น': '⛰️',
       'หลวงตามหาบัว': '🪷',
@@ -692,6 +722,10 @@ class TammaApp {
         ).length;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
         opt.textContent = `${icon} ${baseName} (${toThai(healthCount)} บท)`;
+      } else if (val === 'โชคลาภ') {
+        const wealthCount = allPrayers.filter(isWealthPrayer).length;
+        const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
+        opt.textContent = `${icon} ${baseName} (${toThai(wealthCount)} บท)`;
       } else {
         const count = categoryCounts[val] || 0;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
@@ -752,7 +786,6 @@ class TammaApp {
       btnStartPlaylist.style.display = favPrayers.length > 0 ? 'inline-flex' : 'none';
       btnStartPlaylist.onclick = () => {
         if (favPrayers.length === 0) return;
-        audio.playBell(528);
         if (favPrayers[0].isTipitaka && favPrayers[0].volumeNumber) {
           this.openTipitakaVolume(favPrayers[0].volumeNumber);
         } else {

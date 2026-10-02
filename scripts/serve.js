@@ -1,8 +1,8 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 
-const PORT = process.env.PORT || 3000;
 const ROOT_DIR = process.cwd();
 
 const MIME_TYPES = {
@@ -55,13 +55,30 @@ const server = http.createServer((req, res) => {
   });
 });
 
-let currentPort = Number(process.env.PORT) || 8080;
+let currentPort = Number(process.env.PORT) || 8090;
+
+function getLanIps() {
+  const nets = os.networkInterfaces();
+  const results = [];
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        results.push({ name, ip: net.address });
+      }
+    }
+  }
+  return results;
+}
 
 function startServer(port) {
-  server.listen(port, () => {
+  server.listen(port, '0.0.0.0', () => {
     console.log(`\n======================================================`);
     console.log(`🌸 Tamma OS Web Server is running!`);
-    console.log(`👉 URL: http://localhost:${port}/tamma.html`);
+    console.log(`👉 Local:   http://localhost:${port}/tamma.html`);
+    const lanIps = getLanIps();
+    lanIps.forEach(item => {
+      console.log(`👉 Network (${item.name}): http://${item.ip}:${port}/tamma.html`);
+    });
     console.log(`======================================================\n`);
   });
 }

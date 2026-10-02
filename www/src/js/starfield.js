@@ -59,6 +59,17 @@ export class CosmicStarfield {
     render();
   }
 
+  // The reader covers the whole screen with an opaque page, so stop drawing unseen stars
+  // (frees the main thread and GPU for smooth page dragging)
+  pause() {
+    if (this.animId) cancelAnimationFrame(this.animId);
+    this.animId = null;
+  }
+
+  resume() {
+    if (this.ctx && !this.animId) this.start();
+  }
+
   draw() {
     if (!this.ctx) return;
     this.ctx.clearRect(0, 0, this.width, this.height);
