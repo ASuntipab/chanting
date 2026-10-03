@@ -4,6 +4,7 @@
  */
 
 import { storage } from './storage.js';
+import { toArabicDigits } from './numerals.js';
 
 export class DhammaShareEngine {
   constructor() {
@@ -49,12 +50,12 @@ export class DhammaShareEngine {
       fullPrayerText = prayer.description || '';
     }
     
-    const combinedText = `${shareData.text}\n${shareData.url}\n\n=== เนื้อหาบทสวด ===\n${fullPrayerText}`;
+    const combinedText = `${toArabicDigits(shareData.text)}\n${shareData.url}\n\n=== เนื้อหาบทสวด ===\n${toArabicDigits(fullPrayerText)}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: shareData.title,
+          title: toArabicDigits(shareData.title),
           text: combinedText,
         });
         return true;
@@ -116,7 +117,7 @@ export class DhammaShareEngine {
     ctx.fillText('❖ บทสวดมนต์ ❖', width / 2, 85);
 
     // 5. Prayer Title (Strict Auto-fitting to Max 640px Width)
-    const titleText = prayer.title || 'บทสวดมนต์อันเป็นมงคล';
+    const titleText = toArabicDigits(prayer.title || 'บทสวดมนต์อันเป็นมงคล');
     let titleFontSize = 28;
     ctx.font = `bold ${titleFontSize}px "Prompt", sans-serif`;
     while (ctx.measureText(titleText).width > 640 && titleFontSize > 17) {
@@ -133,7 +134,7 @@ export class DhammaShareEngine {
     ctx.font = '18px "Sarabun", sans-serif';
     ctx.fillStyle = '#d1c5b8';
     ctx.textAlign = 'center';
-    ctx.fillText(prayer.author || prayer.category || 'บทสวดมนต์อันเป็นมงคล', width / 2, subtitleY);
+    ctx.fillText(toArabicDigits(prayer.author || prayer.category || 'บทสวดมนต์อันเป็นมงคล'), width / 2, subtitleY);
 
     // 6. Dividing Ornament Line (Centered)
     const dividerY = subtitleY + 20;
@@ -247,6 +248,7 @@ export class DhammaShareEngine {
   }
 
   wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 5) {
+    text = toArabicDigits(text);
     if (!text) return y;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';

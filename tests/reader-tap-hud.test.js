@@ -88,6 +88,6 @@ test('Reader Gesture Hint & Auto-Hide HUD Live Verification', async (t) => {
     assert.ok(jsContent.includes('btnZenClose'), 'JS must initialize btnZenClose');
     // Ensure that handleTouchEnd and handleMouseUp call hideHUD() on horizontal page flips
     assert.ok(jsContent.includes('if (this.hudVisible) this.hideHUD();'), 'HUD must hide automatically when navigating pages or swiping');
-    assert.ok(jsContent.includes('(ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า)'), 'moreIndicator must inform user about swiping left-right');
+    assert.ok(htmlContent.includes('ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า'), 'Gesture guide must explain swiping left-right');
   });
 });

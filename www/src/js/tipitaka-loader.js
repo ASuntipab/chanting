@@ -3,6 +3,8 @@
  * Seamlessly fetches and parses 45-Volume Tipitaka datasets with automatic .br decompression support.
  */
 
+import { toArabicDigits } from './numerals.js';
+
 class TipitakaLoaderEngine {
   constructor() {
     this.basePath = './src/data/tipitaka';
@@ -61,14 +63,14 @@ class TipitakaLoaderEngine {
    */
   async search(query) {
     if (!query || !query.trim()) return [];
-    const cleanQuery = query.trim().toLowerCase();
+    const cleanQuery = toArabicDigits(query).trim().toLowerCase();
     const index = await this.loadIndex();
     
     return index.volumes.filter(vol => {
-      const matchTitle = vol.bookTitle && vol.bookTitle.toLowerCase().includes(cleanQuery);
-      const matchPali = vol.bookPali && vol.bookPali.toLowerCase().includes(cleanQuery);
-      const matchPitaka = vol.pitaka && vol.pitaka.toLowerCase().includes(cleanQuery);
-      const matchDesc = vol.description && vol.description.toLowerCase().includes(cleanQuery);
+      const matchTitle = toArabicDigits(vol.bookTitle).toLowerCase().includes(cleanQuery);
+      const matchPali = toArabicDigits(vol.bookPali).toLowerCase().includes(cleanQuery);
+      const matchPitaka = toArabicDigits(vol.pitaka).toLowerCase().includes(cleanQuery);
+      const matchDesc = toArabicDigits(vol.description).toLowerCase().includes(cleanQuery);
       const matchVolNum = String(vol.volume) === cleanQuery || `เล่ม ${vol.volume}` === cleanQuery || `เล่มที่ ${vol.volume}` === cleanQuery;
       return matchTitle || matchPali || matchPitaka || matchDesc || matchVolNum;
     });

@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>บทสวดมนต์ - คลังบทสวดมนต์ & บันทึกการสวด</title>
-  
+
   <!-- Thai Modern & Classic Buddhist Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&family=Chakra+Petch:wght@400;500;600;700&family=Charm:wght@400;700&family=Mitr:wght@400;500;600&family=Noto+Serif+Thai:wght@400;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  
+
   <!-- App Icons & Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="src/assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="src/assets/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="src/assets/apple-touch-icon.png">
-  
+
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="src/css/tamma-base.css?v=20260904_icon_lotus">
   <link rel="stylesheet" href="src/css/reader.css?v=20260904_icon_lotus">
@@ -47,8 +47,10 @@
           ℹ️
         </button>
         <!-- Add / Suggest Prayer Button (+) -->
-        <button id="btnOpenUpload" class="btn-circle-add" title="แนะนำ / ขอเพิ่มบทสวดมนต์">
-          +
+        <button id="btnOpenUpload" class="btn-circle-add" title="แนะนำ / ขอเพิ่มบทสวดมนต์" aria-label="แนะนำ / ขอเพิ่มบทสวดมนต์">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true" focusable="false" style="display: block; width: 0.7em; height: 0.7em;">
+            <path d="M12 4v16M4 12h16"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -224,21 +226,22 @@
   <div id="readerView" class="reader-view">
     <!-- Floating Exit Fullscreen / Close Action Bar (Always visible in Zen / Fullscreen Mode) -->
     <div id="readerZenBar" class="reader-zen-bar">
-      <button id="btnExitZen" class="btn-zen-icon" title="ออกจากโหมดเต็มจอ (เปิดแผงควบคุม)" aria-label="ออกจากโหมดเต็มจอ">
+      <button id="btnExitZen" class="btn-zen-icon" title="เปิดแผงควบคุม" aria-label="เปิดแผงควบคุม">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
         </svg>
 
-      </button>
-      <button id="btnZenClose" class="btn-zen-close" title="ปิดหน้าอ่านบทสวด" aria-label="ปิดโหมดอ่าน">
-        ✕
-      </button>
+      <span>แผงควบคุม</span></button>
+      <div class="reader-top-pagination" role="group" aria-label="เปลี่ยนหน้าบทสวด กดปุ่มหรือปัดซ้าย–ขวา">
+        <button id="btnPrevPage" class="btn-zen-icon" aria-label="หน้าก่อนหน้า">‹</button>
+        <span id="readerTopPageBadge" aria-live="polite" aria-atomic="true">1 / 1</span>
+        <button id="btnNextPage" class="btn-zen-icon" aria-label="หน้าถัดไป">ปัด ›</button>
+      </div>
+      <button id="btnZenClose" class="btn-zen-close" title="ปิดหน้าอ่านบทสวด" aria-label="ปิดโหมดอ่าน"><span aria-hidden="true">✕</span> กลับ</button>
     </div>
     <!-- Reader Top Toolbar (Auto-hiding HUD) - Minimalist Title & Close -->
     <div id="readerToolbar" class="reader-toolbar">
-      <button id="btnCloseReader" class="btn-icon" aria-label="ปิดโหมดอ่าน">
-        ✕
-      </button>
+      <button id="btnCloseReader" class="btn-icon" aria-label="ปิดโหมดอ่าน"><span aria-hidden="true">✕</span> กลับ</button>
       <div class="reader-title-box">
         <span id="readerTitle" class="reader-title">พระคาถาชินบัญชร</span>
         <span id="readerSubtitle" class="reader-subtitle">บทสวดมนต์</span>
@@ -246,66 +249,13 @@
 
       <!-- Top Audio Controls: AI TTS Play & Voice Control Options & Theme Switcher & Help -->
       <div class="reader-audio-dock">
-        <button id="btnReaderHelp" class="btn-icon btn-reader-help" title="คำแนะนำท่าทางและการเลื่อนอ่าน (💡)" aria-label="วิธีเลื่อนอ่าน">
-          💡
-        </button>
-        <button id="btnReaderThemeToggle" class="btn-icon btn-reader-theme" title="สลับธีมตอนอ่าน (🎨)">
-          🎨
-        </button>
-        <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงสังเคราะห์สวดนำ (AI)">
-          <span id="ttsPlayIcon">🔊</span>
-          <span id="ttsPlayText" class="tts-play-text">สวดนำ</span>
-        </button>
-        <button id="btnTTSSettings" class="btn-icon btn-tts-gear" title="ควบคุมและปรับแต่งเสียงสวดนำ (AI)">
-          🎛️
-        </button>
-        <button id="btnEnterZen" class="btn-icon btn-reader-zen" title="เข้าสู่โหมดอ่านเต็มจอ (ซ่อนเมนู)" aria-label="โหมดเต็มจอ">
-          ⛶
-        </button>
 
 
-      </div>
-    </div>
 
-    <!-- Real Monastic MP3 Chanting Audio Deck (Floating Bottom Player) -->
-    <div id="mp3PlayerDeck" class="mp3-player-deck" style="display: none;">
-      <div class="mp3-deck-header">
-        <div class="mp3-track-info">
-          <span class="mp3-track-badge">🎵 เสียงพระสวดจริง (MP3)</span>
-          <h4 id="mp3TrackTitle" class="mp3-track-title">ทำวัตรเช้า (แปลไทย-บาลี)</h4>
-          <span id="mp3TrackTemple" class="mp3-track-temple">วัดป่านานาชาติ / วัดมาบจันทร์</span>
-        </div>
-        <button id="btnCloseMP3Deck" class="btn-icon" style="width: 28px; height: 28px;" title="ปิดเครื่องเล่น">✕</button>
-      </div>
 
-      <!-- Track Selector Dropdown -->
-      <div class="mp3-select-wrap">
-        <select id="mp3TrackSelect" class="mp3-track-select">
-          <!-- Populated from CHANTING_AUDIO_TRACKS -->
-        </select>
-      </div>
+        <button id="btnEnterZen" class="btn-icon btn-reader-zen" title="ซ่อนแผงควบคุมเพื่ออ่านเต็มพื้นที่" aria-label="ซ่อนแผงควบคุม"><span aria-hidden="true">⛶</span> ซ่อนปุ่ม</button>
 
-      <!-- Scrubber & Time -->
-      <div class="mp3-scrubber-row">
-        <span id="mp3CurrentTime" class="mp3-time">00:00</span>
-        <input type="range" id="mp3ProgressBar" class="mp3-slider" min="0" max="100" value="0">
-        <span id="mp3Duration" class="mp3-time">00:00</span>
-      </div>
 
-      <!-- Controls Row -->
-      <div class="mp3-controls-row">
-        <button id="btnMP3Rewind10" class="btn-icon" style="font-size: 0.75rem; padding: 4px 8px;" title="ย้อนกลับ 10 วินาที">⏪ 10s</button>
-        <button id="btnMP3MainPlay" class="btn-mp3-main-play" title="เล่น/หยุด">▶️ เล่นเสียงพระสวด</button>
-        <button id="btnMP3Forward10" class="btn-icon" style="font-size: 0.75rem; padding: 4px 8px;" title="ข้ามไป 10 วินาที">⏩ 10s</button>
-        <button id="btnMP3Loop" class="btn-icon" style="font-size: 0.85rem;" title="เล่นวนซ้ำ">🔁</button>
-        <div class="mp3-speed-wrap">
-          <select id="mp3SpeedSelect" class="mp3-speed-select" title="ความเร็ว">
-            <option value="0.75">0.75x</option>
-            <option value="1.0" selected>1.0x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-          </select>
-        </div>
       </div>
     </div>
 
@@ -348,13 +298,11 @@
 
     <!-- Comic Book Swipe Stage & Track (Immersive Fullscreen) -->
     <div id="comicStage" class="comic-stage">
-      <button id="btnPrevPage" class="comic-nav-btn prev" aria-label="หน้าก่อนหน้า">‹</button>
-      
+
       <div id="comicTrack" class="comic-track">
         <!-- Comic Pages rendered here by reader.js -->
       </div>
-      
-      <button id="btnNextPage" class="comic-nav-btn next" aria-label="หน้าถัดไป">›</button>
+
 
       <!-- Floating Gesture Hint Pill (Visible on Open, Auto-fades smoothly) -->
       <div id="readerGestureHint" class="reader-gesture-hint" role="status" aria-live="polite">
@@ -375,57 +323,89 @@
 
     <!-- Reader Bottom Floating Bar (Auto-hiding HUD) - Fast Jump & Controls -->
     <div id="readerBottomBar" class="reader-bottom-bar">
+      <section id="mp3PlayerDeck" class="mp3-player-deck" aria-label="เครื่องเล่นเสียงพระสวด" style="display: none;">
+        <div class="mp3-deck-header">
+          <div class="mp3-track-info">
+            <span class="mp3-track-badge">🎵 เสียงพระสวด</span>
+            <h4 id="mp3TrackTitle" class="mp3-track-title"></h4>
+            <span id="mp3TrackTemple" class="mp3-track-temple"></span>
+          </div>
+          <button id="btnCloseMP3Deck" class="btn-icon" title="ซ่อนเครื่องเล่น" aria-label="ซ่อนเครื่องเล่นเสียงพระสวด">✕</button>
+        </div>
+        <div class="mp3-scrubber-row">
+          <span id="mp3CurrentTime" class="mp3-time">00:00</span>
+          <input type="range" id="mp3ProgressBar" class="mp3-slider" min="0" max="100" value="0" aria-label="ตำแหน่งเสียงพระสวด">
+          <span id="mp3Duration" class="mp3-time">--:--</span>
+        </div>
+        <div class="mp3-controls-row">
+          <button id="btnMP3Rewind10" class="btn-icon" title="ย้อน 10 วินาที" aria-label="ย้อน 10 วินาที">⏪ 10</button>
+          <button id="btnMP3MainPlay" class="btn-mp3-main-play" aria-label="เล่นเสียงพระสวด">▶️ เล่น</button>
+          <button id="btnMP3Forward10" class="btn-icon" title="ข้าม 10 วินาที" aria-label="ข้าม 10 วินาที">10 ⏩</button>
+        </div>
+        <details id="mp3Options" class="mp3-options">
+          <summary>ตัวเลือกเสียง</summary>
+          <div class="mp3-select-wrap">
+            <label for="mp3TrackSelect">เลือกเสียงสวด</label>
+            <select id="mp3TrackSelect" class="mp3-track-select"></select>
+          </div>
+          <div class="mp3-options-row">
+            <div class="mp3-speed-wrap">
+              <label for="mp3SpeedSelect">ความเร็ว</label>
+              <select id="mp3SpeedSelect" class="mp3-speed-select">
+                <option value="0.75">0.75×</option>
+                <option value="1.0" selected>ปกติ</option>
+                <option value="1.25">1.25×</option>
+                <option value="1.5">1.5×</option>
+              </select>
+            </div>
+            <button id="btnMP3Loop" class="btn-secondary" aria-pressed="false"><span aria-hidden="true">🔁</span> วนซ้ำ</button>
+          </div>
+        </details>
+      </section>
+
       <!-- Quick Page Scrubber Slider (Jump to any section / first / last) -->
       <div class="reader-scrubber-dock">
-        <button id="btnJumpFirst" class="btn-scrubber-nav btn-icon-nav" title="ไปหน้าแรก" aria-label="หน้าแรก">⏮</button>
+        <button id="btnJumpFirst" class="btn-scrubber-nav btn-icon-nav" title="ไปหน้าแรก" aria-label="หน้าแรก">หน้าแรก</button>
         <div class="reader-scrubber-track-wrap">
-          <input type="range" id="readerScrubber" min="1" max="1" value="1" class="reader-scrubber-slider" title="เลื่อนข้ามหน้า">
+          <input type="range" id="readerScrubber" min="1" max="1" value="1" class="reader-scrubber-slider" title="เลือกหน้าบทสวด" aria-label="เลือกหน้าบทสวด">
         </div>
         <span id="readerPageBadge" class="reader-scrubber-badge">1 / 1</span>
-        <button id="btnJumpLast" class="btn-scrubber-nav btn-icon-nav" title="ไปหน้าสุดท้าย" aria-label="หน้าสุดท้าย">⏭</button>
+        <button id="btnJumpLast" class="btn-scrubber-nav btn-icon-nav" title="ไปหน้าสุดท้าย" aria-label="หน้าสุดท้าย">หน้าสุดท้าย</button>
       </div>
 
-      <!-- Hint bar inside control dock -->
-      <div class="reader-dock-hint">
-        <span>💡 ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า • ปัดขึ้น-ลง เพื่อเปิด/ซ่อนแผงควบคุม • แตะปุ่มมุมขวาบนเพื่อออกจากโหมดเต็มจอ</span>
-      </div>
-
+      <div class="reader-dock-hint"><span>ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า • แตะ “ซ่อนแผงควบคุม” เพื่ออ่านเต็มพื้นที่</span></div>
       <div class="reader-dock-divider"></div>
-
-      <!-- Controls Container: Clean 2-Tier Responsive Grouping (Mobile First) -->
       <div class="reader-controls-grid">
-        <!-- Tier 1: Reading Essentials (Font Size + Pali Script + Chant Counter) -->
         <div class="reader-controls-group row-primary">
-          <!-- Font Size Resizer (Up to 300% for Elders) -->
-          <div class="reader-font-dock">
-            <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวอักษร">A-</button>
-            <span id="fontSizeDisplay" class="font-dock-badge">100%</span>
-            <button id="btnFontPlus" class="btn-dock-font" title="เพิ่มขนาดตัวอักษร">A+</button>
+          <div class="reader-font-dock" role="group" aria-label="ขนาดตัวหนังสือ">
+            <button id="btnFontMinus" class="btn-dock-font" title="ลดขนาดตัวหนังสือ" aria-label="ลดขนาดตัวหนังสือ">เล็กลง</button>
+            <span id="fontSizeDisplay" class="font-dock-badge" aria-live="polite" aria-label="ขนาดตัวหนังสือ">100%</span>
+            <button id="btnFontPlus" class="btn-dock-font" title="ขยายตัวหนังสือ" aria-label="ขยายตัวหนังสือ">ใหญ่ขึ้น</button>
           </div>
-
-          <!-- Pali Script Switcher (PaliScript Engine) -->
-          <div class="reader-script-dock">
-            <select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
-              <option value="thai-phonetic" selected>🇹🇭 คำอ่าน</option>
-              <option value="thai-pinthu">🇹🇭 พินทุ</option>
-              <option value="roman-iast">🌍 IAST</option>
-              <option value="devanagari">🇮🇳 เทวนาครี</option>
-              <option value="burmese">🇲🇲 พม่า</option>
-            </select>
-          </div>
-
-          <!-- Quick Chant Counter with Bell -->
-          <button id="btnChantInReader" class="reader-chant-counter" title="กดนับจบการสวด">
-            <span>🔔</span>
-            <span id="readerChantCount">0 จบ</span>
+          <button id="btnReaderSettings" class="btn-tts-play" aria-haspopup="dialog" aria-controls="readerSettingsModal" aria-expanded="false" aria-label="ตั้งค่าการอ่าน">ตั้งค่า</button>
+        </div>
+        <div class="reader-controls-group row-secondary">
+          <button id="btnTTSPlay" class="btn-tts-play" title="เปิด/หยุดเสียงสังเคราะห์สวดนำ (AI)">
+          <span id="ttsPlayIcon">🔊</span>
+          <span id="ttsPlayText" class="tts-play-text">ฟังคำอ่าน</span>
+        </button>
+          <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" aria-expanded="false" aria-controls="mp3PlayerDeck" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
+            <span id="mp3PlayIcon">🎵</span>
+            <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Tier 2: Typography & Audio (Font Family + Layout Mode + Monk Audio) -->
-        <div class="reader-controls-group row-secondary">
-          <!-- Font Family Switcher (Thai Modern & Classic Typography) -->
-          <div class="reader-font-select-dock">
-            <select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
+    <div id="readerSettingsModal" class="reader-help-modal-overlay" style="display: none;">
+      <div class="reader-help-card reader-settings-card" role="dialog" aria-modal="true" aria-labelledby="readerSettingsTitle" aria-describedby="readerSettingsDescription">
+        <div class="reader-help-header">
+          <h4 id="readerSettingsTitle" class="reader-help-title">ตั้งค่าการอ่าน</h4>
+          <button id="btnCloseReaderSettings" class="btn-secondary" aria-label="ปิดตั้งค่าการอ่าน">เสร็จแล้ว</button>
+        </div>
+        <div class="reader-help-body">
+          <p id="readerSettingsDescription">ปรับครั้งเดียว แอปจะจำไว้ให้ในครั้งถัดไป</p>
+          <div class="reader-setting-field"><label for="readerFontSelect">แบบตัวหนังสือ</label><div class="reader-font-select-dock"><select id="readerFontSelect" class="reader-font-select" title="เลือกแบบอักษร (Font)">
               <option value="sarabun" selected>🇹🇭 สารบรรณ</option>
               <option value="prompt">✨ พร้อมท์</option>
               <option value="noto-serif">📜 โนโตะ</option>
@@ -433,25 +413,24 @@
               <option value="charm">✍️ ชาร์ม</option>
               <option value="bai-jamjuree">💎 จามจุรี</option>
               <option value="chakra">⚡ จักรเพชร</option>
-            </select>
-          </div>
-
-          <!-- Layout Mode Switcher (📖 แบบหนังสือ vs 🎯 แบบกึ่งกลาง) -->
-          <div class="reader-layout-dock">
-            <select id="readerLayoutSelect" class="reader-layout-select" title="เลือกรูปแบบการจัดหน้า (ย่อหน้าแบบหนังสือ / กึ่งกลาง)">
-              <option value="book" selected>📖 หนังสือ</option>
-              <option value="centered">🎯 กึ่งกลาง</option>
-            </select>
-          </div>
-
-          <!-- Real Monastic MP3 Monk Chanting Toggle Button (Bottom Dock) -->
-          <button id="btnMP3Play" class="btn-tts-play btn-mp3-toggle" title="เปิดเครื่องเล่นเสียงพระสวดจริง (MP3)">
-            <span id="mp3PlayIcon">🎵</span>
-            <span id="mp3PlayText" class="tts-play-text">เสียงพระสวด</span>
-          </button>
+            </select></div></div>
+          <div class="reader-setting-field"><label for="readerLayoutSelect">การจัดข้อความ</label><div class="reader-layout-dock"><select id="readerLayoutSelect" class="reader-layout-select" title="เลือกรูปแบบการจัดหน้า (ย่อหน้าแบบหนังสือ / กึ่งกลาง)">
+              <option value="book" selected>ย่อหน้าแบบหนังสือ</option>
+              <option value="centered">จัดข้อความกึ่งกลาง</option>
+            </select></div></div>
+          <div class="reader-setting-field"><label for="paliScriptSelect">รูปแบบคำอ่านบาลี</label><div class="reader-script-dock"><select id="paliScriptSelect" class="reader-script-select" title="เลือกรูปแบบอักษรบาลี">
+              <option value="thai-phonetic" selected>คำอ่านภาษาไทย (อ่านง่าย)</option>
+              <option value="thai-pinthu">บาลีอักษรไทย (มีจุดพินทุ)</option>
+              <option value="roman-iast">อักษรโรมัน (IAST)</option>
+              <option value="devanagari">อักษรเทวนาครี</option>
+              <option value="burmese">อักษรพม่า</option>
+            </select></div></div>
+          <div class="reader-setting-actions"><button id="btnReaderThemeToggle" class="btn-secondary" aria-label="เปลี่ยนสีพื้นหลัง"><span aria-hidden="true">🎨</span> เปลี่ยนสีพื้นหลัง</button><button id="btnTTSSettings" class="btn-secondary" aria-label="ตั้งค่าเสียงอ่าน"><span aria-hidden="true">🎛️</span> ตั้งค่าเสียงอ่าน</button><button id="btnReaderHelp" class="btn-secondary" aria-label="วิธีใช้งาน"><span aria-hidden="true">💡</span> วิธีใช้งาน</button></div>
         </div>
       </div>
     </div>
+
+
 
     <!-- Reader Gesture & Navigation Guide Modal -->
     <div id="readerHelpModal" class="reader-help-modal-overlay" style="display: none;">
@@ -474,8 +453,8 @@
           <div class="gesture-guide-item">
             <div class="gesture-guide-icon-box">🎛️ ✕</div>
             <div class="gesture-guide-desc">
-              <strong>ปุ่มมุมขวาบน (ออกจากโหมดเต็มจอ / ปิด)</strong>
-              <p>กดปุ่มมุมขวาบนเพื่อออกจากโหมดเต็มจอ หรือแตะปิดบทสวดได้ทันที</p>
+              <strong>ปุ่มแผงควบคุม และ กลับ</strong>
+              <p>แตะ “แผงควบคุม” เพื่อแสดงปุ่มต่าง ๆ หรือแตะ “กลับ” เพื่อออกจากบทสวด</p>
             </div>
           </div>
           <div class="gesture-guide-item">

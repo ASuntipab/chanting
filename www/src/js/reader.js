@@ -10,6 +10,15 @@ import { ttsEngine } from './tts-engine.js';
 import { mp3Player, CHANTING_AUDIO_TRACKS } from './mp3-player.js';
 import { paliScript } from './paliscript.js';
 import { starfield } from './starfield.js';
+import { formatDisplayedNumbers, toArabicDigits } from './numerals.js';
+
+function hasRoundInstruction(text) {
+  return /เท่าอายุ|อายุ[^\n+]{0,24}\+\s*[๑1]/.test(text || '');
+}
+
+function isRoundCountingPage(page) {
+  return [page.verseTitle, page.pali, page.thai].some(hasRoundInstruction);
+}
 
 export const FONT_FAMILIES = {
   'sarabun': {
@@ -457,9 +466,9 @@ export class ComicReaderEngine {
     this.readerTitle = document.getElementById('readerTitle');
     this.readerSubtitle = document.getElementById('readerSubtitle');
     this.readerPageDots = document.getElementById('readerPageDots');
-    this.readerChantCount = document.getElementById('readerChantCount');
     this.btnPrev = document.getElementById('btnPrevPage');
     this.btnNext = document.getElementById('btnNextPage');
+    this.readerTopPageBadge = document.getElementById('readerTopPageBadge');
     this.btnClose = document.getElementById('btnCloseReader');
     
     // Top-Right Zen & Fullscreen Exit Bar
@@ -474,9 +483,11 @@ export class ComicReaderEngine {
     this.fontSizeDisplay = document.getElementById('fontSizeDisplay');
     this.readerFontSelect = document.getElementById('readerFontSelect');
     this.readerLayoutSelect = document.getElementById('readerLayoutSelect');
+    this.readerSettingsModal = document.getElementById('readerSettingsModal');
+    this.btnReaderSettings = document.getElementById('btnReaderSettings');
+    this.btnCloseReaderSettings = document.getElementById('btnCloseReaderSettings');
     this.btnReaderThemeToggle = document.getElementById('btnReaderThemeToggle');
     this.paliScriptSelect = document.getElementById('paliScriptSelect');
-    this.btnChantInReader = document.getElementById('btnChantInReader');
 
     // Layout Mode (Traditional Book Indent vs Centered)
     const savedLayout = (typeof storage !== 'undefined' && storage.getSettings) ? storage.getSettings().readerLayout : null;
@@ -555,6 +566,13 @@ export class ComicReaderEngine {
   bindEvents() {
     if (!this.readerView) return;
 
+    this.btnReaderSettings?.addEventListener('click', () => this.showReaderSettings());
+    this.btnCloseReaderSettings?.addEventListener('click', () => this.hideReaderSettings());
+    this.readerSettingsModal?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (e.target === this.readerSettingsModal) this.hideReaderSettings();
+    });
+
     // Navigation buttons
     this.btnPrev?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -566,7 +584,12 @@ export class ComicReaderEngine {
       e.stopPropagation();
       if (this.hudVisible) this.hideHUD();
       this.hideGestureHint();
-      this.nextPage();
+      if (this.currentPageIndex >= this.totalPages - 1) {
+        audio.playBell(648);
+        document.getElementById('finishChantOverlay')?.classList.add('show');
+      } else {
+        this.nextPage();
+      }
     });
     this.btnClose?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -591,6 +614,7 @@ export class ComicReaderEngine {
     // Gesture Help & Navigation Guide Modal Events
     this.btnReaderHelp?.addEventListener('click', (e) => {
       e.stopPropagation();
+      this.hideReaderSettings();
       this.toggleReaderHelp();
     });
     this.btnCloseReaderHelp?.addEventListener('click', (e) => {
@@ -621,28 +645,6 @@ export class ComicReaderEngine {
       const targetPage = parseInt(e.target.value, 10);
       this.goToViewport(targetPage - 1, false);
       this.scheduleAutoHide(6000);
-    });
-
-    // Chanting counter inside reader
-    this.btnChantInReader?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!this.currentPrayer) return;
-
-      // ถ้าเป็นชุดบทสวดที่มีบทพุทธคุณเท่าอายุ + ๑ ให้เปิดห้องสวดนับจบแบบ Popup ทันที!
-      if (this.isItipisoChantAvailable()) {
-        this.showItipisoWidget();
-        return;
-      }
-
-      audio.playBell();
-      nativeBridge.hapticSuccess();
-      const count = storage.incrementPrayerCount(this.currentPrayer.id);
-      this.updateChantDisplay(count);
-      this.animateCounterBump();
-      this.scheduleAutoHide();
-      if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
-        window.tammaApp.refreshCurrentViews();
-      }
     });
 
     // Font Sizing in Bottom HUD Dock (Up to 300% for Elders)
@@ -698,7 +700,6 @@ export class ComicReaderEngine {
       audio.playBell(648);
       nativeBridge.hapticSuccess();
       const count = storage.incrementPrayerCount(this.currentPrayer.id);
-      this.updateChantDisplay(count);
       if (window.tammaApp && typeof window.tammaApp.refreshCurrentViews === 'function') {
         window.tammaApp.refreshCurrentViews();
       }
@@ -747,6 +748,7 @@ export class ComicReaderEngine {
 
     this.btnTTSSettings?.addEventListener('click', (e) => {
       e.stopPropagation();
+      this.hideReaderSettings();
       this.toggleTTSSettings();
     });
 
@@ -862,8 +864,9 @@ export class ComicReaderEngine {
     this.mp3TrackSelect?.addEventListener('change', (e) => {
       e.stopPropagation();
       const trackId = e.target.value;
+      const wasPlaying = mp3Player.isPlaying;
       mp3Player.loadTrack(trackId);
-      if (mp3Player.isPlaying) {
+      if (wasPlaying) {
         mp3Player.play();
       }
     });
@@ -939,8 +942,43 @@ export class ComicReaderEngine {
     // Keyboard Arrow navigation
     window.addEventListener('keydown', (e) => {
       if (!this.isOpen()) return;
+      if (this.readerSettingsModal?.style.display === 'flex') {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          this.hideReaderSettings();
+        } else if (e.key === 'Tab') {
+          const controls = [...this.readerSettingsModal.querySelectorAll('button:not(:disabled), select')];
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last?.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first?.focus();
+          }
+        }
+        return;
+      }
+      if (e.key === 'Escape' && this.readerHelpModal?.style.display === 'flex') {
+        this.hideReaderHelp();
+        this.btnReaderSettings?.focus();
+        return;
+      }
+      if (e.key === 'Escape' && this.ttsSettingsModal && this.ttsSettingsModal.style.display !== 'none') {
+        this.hideTTSSettings();
+        this.btnReaderSettings?.focus();
+        return;
+      }
+      if (e.key === 'Escape' && this.mp3PlayerDeck?.style.display === 'flex') {
+        this.hideMP3Deck();
+        this.btnMP3Play?.focus();
+        return;
+      }
       // Typing in a field (e.g. the itipiso round/age inputs) must not flip pages
       if (e.target.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      // Space and arrows on a focused control retain their native behaviour.
+      if (e.key !== 'Escape' && e.target.closest?.('button')) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault();
         if (this.hudVisible) this.hideHUD();
@@ -987,6 +1025,9 @@ export class ComicReaderEngine {
   showHUD() {
     this.hudVisible = true;
     this.readerView?.classList.remove('hud-hidden');
+    if (this.readerToolbar) this.readerToolbar.inert = false;
+    if (this.readerBottomBar) this.readerBottomBar.inert = false;
+    if (this.readerZenBar) this.readerZenBar.inert = true;
     if (this.autoHideTimer) {
       clearTimeout(this.autoHideTimer);
       this.autoHideTimer = null;
@@ -994,8 +1035,15 @@ export class ComicReaderEngine {
   }
 
   hideHUD() {
+    this.hideGestureHint();
+    const returnToPanel = this.readerToolbar?.contains(document.activeElement) || this.readerBottomBar?.contains(document.activeElement);
+    this.hideReaderSettings(false);
     this.hudVisible = false;
     this.readerView?.classList.add('hud-hidden');
+    if (this.readerToolbar) this.readerToolbar.inert = true;
+    if (this.readerBottomBar) this.readerBottomBar.inert = true;
+    if (this.readerZenBar) this.readerZenBar.inert = false;
+    if (returnToPanel) this.btnExitZen?.focus();
     this.settingsDrawer?.classList.remove('open');
     this.hideTTSSettings();
     this.hideMP3Deck();
@@ -1057,8 +1105,7 @@ export class ComicReaderEngine {
     if (this.readerTitle) this.readerTitle.textContent = prayer.title;
     if (this.readerSubtitle) {
       if (this.playlist && this.playlistIndex >= 0) {
-        const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
-        this.readerSubtitle.textContent = `บทที่ ${toThai(this.playlistIndex + 1)}/${toThai(this.playlist.length)} ในรายการโปรด • ${prayer.category || 'บทสวดมนต์'}`;
+        this.readerSubtitle.textContent = `บทที่ ${toArabicDigits(this.playlistIndex + 1)}/${toArabicDigits(this.playlist.length)} ในรายการโปรด • ${prayer.category || 'บทสวดมนต์'}`;
       } else {
         this.readerSubtitle.textContent = prayer.category || 'บทสวดมนต์';
       }
@@ -1067,15 +1114,13 @@ export class ComicReaderEngine {
     // Render Comic Pages
     this.renderPages(prayer);
 
-    // Update Chant Count for this prayer
-    const trackerData = storage.getTrackerData();
-    const count = trackerData.totalCounts[prayer.id] || 0;
-    this.updateChantDisplay(count);
-
     // Prime matching MP3 track & only show MP3 button if real recording exists
     const matchedTrack = mp3Player.getTrackForPrayer(prayer);
+    this.readerBottomBar?.querySelector('.row-secondary')?.classList.toggle('has-monk-audio', !!matchedTrack);
+    if (this.btnMP3Play) this.btnMP3Play.hidden = !matchedTrack;
     if (matchedTrack) {
       if (this.btnMP3Play) this.btnMP3Play.style.display = 'inline-flex';
+      this.hideMP3Deck();
       mp3Player.loadTrack(matchedTrack);
     } else {
       if (this.btnMP3Play) this.btnMP3Play.style.display = 'none';
@@ -1106,6 +1151,7 @@ export class ComicReaderEngine {
   }
 
   close() {
+    this.hideReaderSettings(false);
     starfield.resume();
     this.readerView.classList.remove('active');
     this.readerView.classList.remove('tts-active');
@@ -1329,10 +1375,7 @@ export class ComicReaderEngine {
       // Special itipiso tally counter button check
       const rawP = bPage.rawPage;
       if (rawP) {
-        const pTitle = (rawP.verseTitle || '').toLowerCase();
-        const pThai = (rawP.thai || '').toLowerCase();
-        const pPali = (rawP.pali || '').toLowerCase();
-        if (pTitle.includes('เท่าอายุ') || pThai.includes('เท่าอายุ') || (pTitle.includes('อิติปิโส') && pPali.includes('อิติปิ โส'))) {
+        if (isRoundCountingPage(rawP)) {
           const launchBox = document.createElement('div');
           launchBox.className = 'itipiso-launch-box';
           const launchBtn = document.createElement('button');
@@ -1352,7 +1395,6 @@ export class ComicReaderEngine {
       frame.appendChild(viewport);
 
       // 3. Footer Container with Page indicator & Next cue
-      frame.appendChild(this.buildPageFooter(bIdx, this.totalPages));
 
       pageEl.appendChild(frame);
       this.comicTrack.appendChild(pageEl);
@@ -1360,6 +1402,7 @@ export class ComicReaderEngine {
 
     // Keep the estimated pages for the TTS queue, then re-pack by real measured height
     this.logicalPages = this.bookPages;
+    formatDisplayedNumbers(this.comicTrack);
     this.reflowPagesToFit();
 
     // Sync Scrubber & Dots
@@ -1370,47 +1413,6 @@ export class ComicReaderEngine {
     this.goToPage(safePage, false);
   }
 
-  buildPageFooter(bIdx, totalPages) {
-    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
-    const footer = document.createElement('div');
-    footer.className = 'page-footer-container';
-
-    const counterBadge = document.createElement('div');
-    counterBadge.className = 'page-counter-badge';
-    counterBadge.textContent = totalPages > 1
-      ? `📖 หน้า ${toThai(bIdx + 1)} จาก ${toThai(totalPages)}`
-      : '📖 ๑ หน้าสมบูรณ์';
-
-    const moreIndicator = document.createElement('div');
-    moreIndicator.className = 'scroll-more-indicator';
-    if (bIdx < totalPages - 1) {
-      moreIndicator.innerHTML = '<span>หน้าถัดไป</span> <span class="more-arrow">👉</span> <span class="more-subtext">(ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า)</span>';
-      moreIndicator.title = 'ปัดซ้าย-ขวา เพื่อเปลี่ยนหน้า (หรือแตะที่นี่)';
-    } else {
-      moreIndicator.innerHTML = '<span class="finish-star">✨</span> <span>จบการสวดมนต์สมบูรณ์ (สาธุ 🙏)</span>';
-      moreIndicator.classList.add('finish-page-indicator');
-    }
-
-    const handleMoreClick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (this.hudVisible) this.hideHUD();
-      this.hideGestureHint();
-      if (bIdx < this.totalPages - 1) {
-        this.nextPage();
-      } else {
-        audio.playBell(648);
-        const finishOverlay = document.getElementById('finishChantOverlay');
-        if (finishOverlay) finishOverlay.classList.add('show');
-      }
-    };
-    moreIndicator.addEventListener('click', handleMoreClick);
-    moreIndicator.addEventListener('touchend', handleMoreClick);
-
-    footer.appendChild(moreIndicator);
-    footer.appendChild(counterBadge);
-    return footer;
-  }
 
   /**
    * Measured Book Reflow:
@@ -1467,6 +1469,7 @@ export class ComicReaderEngine {
     const fits = () => cur.viewport.scrollHeight <= cur.viewport.clientHeight + 1;
 
     const setHeader = (page, titleEl, text) => {
+      const displayedText = toArabicDigits(text);
       let header = titleEl;
       if (header) {
         header.className = 'page-verse-header verse-clickable';
@@ -1474,7 +1477,7 @@ export class ComicReaderEngine {
         header = document.createElement('div');
         header.className = 'page-verse-header';
       }
-      header.textContent = text;
+      header.textContent = displayedText;
       header.dataset.text = text;
       if (page.header) page.header.replaceWith(header);
       else page.frame.insertBefore(header, page.viewport);
@@ -1503,13 +1506,10 @@ export class ComicReaderEngine {
       flow.className = `page-verse-flow ${layoutClass}`;
       viewport.appendChild(flow);
       frame.appendChild(viewport);
-      // Placeholder footer so the measured height already accounts for it
-      const footer = this.buildPageFooter(idx, idx + 2);
-      frame.appendChild(footer);
       pageEl.appendChild(frame);
       this.comicTrack.appendChild(pageEl);
 
-      cur = { pageEl, frame, header: null, viewport, flow, footer, count: 0, originalPageIndex: currentOriginal };
+      cur = { pageEl, frame, header: null, viewport, flow, count: 0, originalPageIndex: currentOriginal };
       if (currentTitle) setHeader(cur, null, currentTitle);
       pages.push(cur);
     };
@@ -1520,7 +1520,7 @@ export class ComicReaderEngine {
       if (cur && cur.count > 0) {
         const titleEl = item.el || document.createElement('div');
         titleEl.className = 'verse-section-title' + (item.el ? ' verse-clickable' : '');
-        titleEl.textContent = item.text;
+        titleEl.textContent = toArabicDigits(item.text);
         titleEl.dataset.text = item.text;
         cur.flow.appendChild(titleEl);
         // Keep the title with at least one following line
@@ -1622,11 +1622,10 @@ export class ComicReaderEngine {
     if (!cur) openPage();
     if (!fits()) cur.viewport.classList.add('page-overflow');
 
-    // 3. Finalize footers, page indices & TTS chunk → page mapping
+    // 3. Finalize page indices & TTS chunk → page mapping
     const chunkPage = new Map();
     pages.forEach((page, idx) => {
       this.comicTrack.appendChild(page.pageEl);
-      page.footer.replaceWith(this.buildPageFooter(idx, pages.length));
       page.pageEl.querySelectorAll('.verse-clickable').forEach((el) => {
         el.dataset.bookPageIndex = idx;
         const ids = (el.dataset.chunkIds || el.dataset.chunkId || '').split(',').filter(Boolean);
@@ -1814,6 +1813,7 @@ export class ComicReaderEngine {
     if (this.readerPageBadge) {
       this.readerPageBadge.textContent = `${index + 1} / ${this.totalPages}`;
     }
+    this.readerScrubber?.setAttribute('aria-valuetext', `หน้า ${index + 1} จาก ${this.totalPages}`);
 
     // Update Finish overlay
     const finishOverlay = document.getElementById('finishChantOverlay');
@@ -2004,12 +2004,17 @@ export class ComicReaderEngine {
   }
 
   updateNavButtons() {
+    const atEnd = this.viewportIndex === this.totalViewportPages - 1;
+    if (this.readerTopPageBadge) {
+      this.readerTopPageBadge.textContent = `${this.viewportIndex + 1} / ${this.totalViewportPages}`;
+      this.readerTopPageBadge.setAttribute('aria-label', `หน้า ${this.viewportIndex + 1} จาก ${this.totalViewportPages}`);
+    }
     if (this.btnPrev) {
-      this.btnPrev.style.opacity = this.viewportIndex === 0 ? '0.3' : '1';
-      this.btnPrev.style.pointerEvents = this.viewportIndex === 0 ? 'none' : 'auto';
+      this.btnPrev.disabled = this.viewportIndex === 0;
     }
     if (this.btnNext) {
-      this.btnNext.style.opacity = this.viewportIndex === this.totalViewportPages - 1 ? '0.3' : '1';
+      this.btnNext.textContent = atEnd ? 'จบ ✓' : 'ปัด ›';
+      this.btnNext.setAttribute('aria-label', atEnd ? 'จบการสวดมนต์' : 'หน้าถัดไป');
     }
   }
 
@@ -2380,6 +2385,31 @@ export class ComicReaderEngine {
     }
   }
 
+  showReaderSettings() {
+    if (!this.readerSettingsModal) return;
+    this.showHUD();
+    this.hideReaderHelp();
+    this.hideTTSSettings();
+    this.hideMP3Deck();
+    this.readerSettingsModal.style.display = 'flex';
+    [this.readerToolbar, this.readerBottomBar, this.comicStage, this.readerZenBar].forEach(el => {
+      if (el) el.inert = true;
+    });
+    this.btnReaderSettings?.setAttribute('aria-expanded', 'true');
+    this.btnCloseReaderSettings?.focus();
+  }
+
+  hideReaderSettings(restoreFocus = true) {
+    if (!this.readerSettingsModal || this.readerSettingsModal.style.display === 'none') return;
+    this.readerSettingsModal.style.display = 'none';
+    [this.readerToolbar, this.readerBottomBar, this.comicStage, this.readerZenBar].forEach(el => {
+      if (el) el.inert = false;
+    });
+    if (this.readerZenBar) this.readerZenBar.inert = this.hudVisible;
+    this.btnReaderSettings?.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) this.btnReaderSettings?.focus();
+  }
+
   showReaderHelp() {
     if (!this.readerHelpModal) return;
     this.readerHelpModal.style.display = 'flex';
@@ -2412,6 +2442,8 @@ export class ComicReaderEngine {
     if (this.fontSizeDisplay) {
       this.fontSizeDisplay.textContent = percentStr;
     }
+    if (this.btnFontMinus) this.btnFontMinus.disabled = sizeRem <= 0.75;
+    if (this.btnFontPlus) this.btnFontPlus.disabled = sizeRem >= 3.45;
   }
 
   // --- Font Family Management (7 Thai Typography Styles) ---
@@ -2506,21 +2538,6 @@ export class ComicReaderEngine {
 
     if (window.tammaApp && typeof window.tammaApp.showToast === 'function') {
       window.tammaApp.showToast(`เปลี่ยนธีม: ${themeNames[newTheme]}`);
-    }
-  }
-
-  updateChantDisplay(count) {
-    if (this.readerChantCount) {
-      this.readerChantCount.textContent = `${count} จบ`;
-    }
-  }
-
-  animateCounterBump() {
-    if (this.btnChantInReader) {
-      this.btnChantInReader.style.transform = 'scale(1.25)';
-      setTimeout(() => {
-        this.btnChantInReader.style.transform = 'scale(1)';
-      }, 200);
     }
   }
 
@@ -2873,14 +2890,14 @@ export class ComicReaderEngine {
       this.btnTTSPlay.classList.add('playing');
       this.readerView?.classList.add('tts-active');
       if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '⏹️';
-      if (this.ttsPlayText) this.ttsPlayText.textContent = 'หยุดสวด';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'หยุดเสียงอ่าน';
       this.btnTTSPlay.title = 'แตะเพื่อหยุดเสียงสวดนำ (AI)';
       nativeBridge.setKeepAwake(true);
     } else {
       this.btnTTSPlay.classList.remove('playing');
       this.readerView?.classList.remove('tts-active');
       if (this.ttsPlayIcon) this.ttsPlayIcon.textContent = '🔊';
-      if (this.ttsPlayText) this.ttsPlayText.textContent = 'สวดนำ';
+      if (this.ttsPlayText) this.ttsPlayText.textContent = 'ฟังคำอ่าน';
       this.btnTTSPlay.title = 'แตะเพื่อเริ่มเสียงสวดนำ (AI)';
     }
   }
@@ -2910,8 +2927,11 @@ export class ComicReaderEngine {
     // Subscribe to state updates
     mp3Player.onStateChange((state) => {
       if (this.btnMP3MainPlay) {
-        this.btnMP3MainPlay.textContent = state.isPlaying ? '⏸️ พักเสียงพระสวด' : '▶️ เล่นเสียงพระสวด';
+        this.btnMP3MainPlay.textContent = state.isPlaying ? '⏸️ พัก' : '▶️ เล่น';
+        this.btnMP3MainPlay.setAttribute('aria-label', state.isPlaying ? 'พักเสียงพระสวด' : 'เล่นเสียงพระสวด');
       }
+      this.btnMP3Loop?.setAttribute('aria-pressed', String(state.isLooping));
+      if (this.mp3SpeedSelect) this.mp3SpeedSelect.value = String(state.playbackRate === 1 ? '1.0' : state.playbackRate);
       if (this.btnMP3Play) {
         this.btnMP3Play.classList.toggle('playing', state.isPlaying);
       }
@@ -2919,6 +2939,9 @@ export class ComicReaderEngine {
         if (this.mp3TrackTitle) this.mp3TrackTitle.textContent = state.currentTrack.title;
         if (this.mp3TrackTemple) this.mp3TrackTemple.textContent = state.currentTrack.temple;
         if (this.mp3TrackSelect) this.mp3TrackSelect.value = state.currentTrack.id;
+        if (this.mp3CurrentTime) this.mp3CurrentTime.textContent = mp3Player.formatTime(mp3Player.audioElement?.currentTime || 0);
+        if (this.mp3Duration) this.mp3Duration.textContent = mp3Player.audioElement?.duration > 0 ? mp3Player.formatTime(mp3Player.audioElement.duration) : '--:--';
+        if (this.mp3ProgressBar) this.mp3ProgressBar.value = mp3Player.audioElement?.duration > 0 ? (mp3Player.audioElement.currentTime / mp3Player.audioElement.duration) * 100 : 0;
       }
     });
 
@@ -2943,15 +2966,25 @@ export class ComicReaderEngine {
 
   showMP3Deck() {
     if (this.mp3PlayerDeck) {
+      this.showHUD();
       this.mp3PlayerDeck.style.display = 'flex';
+      this.readerBottomBar?.classList.add('mp3-deck-open');
+      this.btnMP3Play?.setAttribute('aria-expanded', 'true');
       this.hideTTSSettings();
+      this.btnMP3MainPlay?.focus();
       this.scheduleAutoHide(15000);
     }
   }
 
   hideMP3Deck() {
     if (this.mp3PlayerDeck) {
+      const restoreFocus = this.mp3PlayerDeck.contains(document.activeElement);
       this.mp3PlayerDeck.style.display = 'none';
+      this.readerBottomBar?.classList.remove('mp3-deck-open');
+      this.btnMP3Play?.setAttribute('aria-expanded', 'false');
+      const options = document.getElementById('mp3Options');
+      if (options) options.open = false;
+      if (restoreFocus && this.hudVisible) this.btnMP3Play?.focus();
     }
   }
 
@@ -2966,33 +2999,16 @@ export class ComicReaderEngine {
 
   isItipisoChantAvailable() {
     if (!this.currentPrayer) return false;
-    const pTitle = (this.currentPrayer.title || '').toLowerCase();
-    if (pTitle.includes('เท่าอายุ') || pTitle.includes('อิติปิโส') || pTitle.includes('หลวงพ่อจรัญ')) {
-      return true;
-    }
+    if (hasRoundInstruction(this.currentPrayer.title)) return true;
     const pages = this.currentPrayer.pages || [];
-    return pages.some(p => {
-      const t = (p.verseTitle || '').toLowerCase();
-      const pali = (p.pali || '').toLowerCase();
-      const thai = (p.thai || '').toLowerCase();
-      return t.includes('เท่าอายุ') || thai.includes('เท่าอายุ') || (t.includes('อิติปิโส') && pali.includes('อิติปิ โส'));
-    });
+    return pages.some(isRoundCountingPage);
   }
 
   isItipisoPage(index) {
     if (!this.currentPrayer) return false;
     const rawPages = this.currentPrayer.pages;
     if (rawPages && rawPages[index]) {
-      const page = rawPages[index];
-      const title = (page.verseTitle || '').toLowerCase();
-      const pali = (page.pali || '').toLowerCase();
-      const thai = (page.thai || '').toLowerCase();
-      if (title.includes('เท่าอายุ') || title.includes('อายุ + ๑') || title.includes('อายุ+๑') || thai.includes('เท่าอายุ')) {
-        return true;
-      }
-      if (title.includes('อิติปิโส') || title.includes('พุทธคุณ') || pali.includes('อิติปิ โส') || pali.includes('อิติปิโส')) {
-        return true;
-      }
+      return isRoundCountingPage(rawPages[index]);
     }
     return false;
   }

@@ -9,6 +9,7 @@ import { nativeBridge } from './native-bridge.js';
 import { renderQRCodeToCanvas } from './qrcode.js';
 import { tipitakaLoader } from './tipitaka-loader.js';
 import { mp3Player } from './mp3-player.js';
+import { installNumericDisplay, toArabicDigits } from './numerals.js';
 
 // บทโชคลาภที่อยู่ในหมวดอื่นมาก่อน ให้แสดงในหมวด "โชคลาภ" ด้วย
 const LEGACY_WEALTH_IDS = new Set([
@@ -33,6 +34,7 @@ class TammaApp {
   }
 
   init() {
+    installNumericDisplay();
     // 0. Initialize Native Mobile Bridge (iOS & Android)
     nativeBridge.init();
 
@@ -132,7 +134,7 @@ class TammaApp {
     // Search Input
     const searchInput = document.getElementById('searchInput');
     searchInput?.addEventListener('input', (e) => {
-      this.searchQuery = e.target.value.toLowerCase().trim();
+      this.searchQuery = toArabicDigits(e.target.value).toLowerCase().trim();
       this.renderLibrary();
     });
 
@@ -146,7 +148,7 @@ class TammaApp {
     // Tipitaka Search Input
     const tipitakaSearchInput = document.getElementById('tipitakaSearchInput');
     tipitakaSearchInput?.addEventListener('input', (e) => {
-      this.tipitakaQuery = e.target.value.toLowerCase().trim();
+      this.tipitakaQuery = toArabicDigits(e.target.value).toLowerCase().trim();
       this.renderTipitaka();
     });
 
@@ -648,9 +650,9 @@ class TammaApp {
     // Filter by Search Query
     if (this.searchQuery) {
       prayers = prayers.filter(p => 
-        p.title.toLowerCase().includes(this.searchQuery) ||
-        (p.description && p.description.toLowerCase().includes(this.searchQuery)) ||
-        (p.author && p.author.toLowerCase().includes(this.searchQuery))
+        toArabicDigits(p.title).toLowerCase().includes(this.searchQuery) ||
+        toArabicDigits(p.description).toLowerCase().includes(this.searchQuery) ||
+        toArabicDigits(p.author).toLowerCase().includes(this.searchQuery)
       );
     }
 
@@ -673,7 +675,6 @@ class TammaApp {
       allPrayers = storage.getPrayers().filter(p => p.status !== 'hidden');
     }
 
-    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
 
     const categoryCounts = {};
     let withAudioCount = 0;
@@ -709,9 +710,9 @@ class TammaApp {
       const val = opt.value;
       const icon = categoryIcons[val] || '📿';
       if (val === 'all') {
-        opt.textContent = `${icon} ทุกหมวดหมู่ (${toThai(allPrayers.length)} บท)`;
+        opt.textContent = `${icon} ทุกหมวดหมู่ (${toArabicDigits(allPrayers.length)} บท)`;
       } else if (val === 'has-audio') {
-        opt.textContent = `${icon} มีเสียงพระสวดจริง (${toThai(withAudioCount)} บท)`;
+        opt.textContent = `${icon} มีเสียงพระสวดจริง (${toArabicDigits(withAudioCount)} บท)`;
       } else if (val === 'สุขภาพ') {
         const healthCount = allPrayers.filter(p => 
           p.category === 'สุขภาพ' || 
@@ -721,15 +722,15 @@ class TammaApp {
           (p.title && (p.title.includes('รักษาโรค') || p.title.includes('โรคระบาด')))
         ).length;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
-        opt.textContent = `${icon} ${baseName} (${toThai(healthCount)} บท)`;
+        opt.textContent = `${icon} ${baseName} (${toArabicDigits(healthCount)} บท)`;
       } else if (val === 'โชคลาภ') {
         const wealthCount = allPrayers.filter(isWealthPrayer).length;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
-        opt.textContent = `${icon} ${baseName} (${toThai(wealthCount)} บท)`;
+        opt.textContent = `${icon} ${baseName} (${toArabicDigits(wealthCount)} บท)`;
       } else {
         const count = categoryCounts[val] || 0;
         const baseName = opt.textContent.replace(/^[^\s]+\s+/, '').replace(/\s*\([^)]*\)$/, '').trim();
-        opt.textContent = `${icon} ${baseName} (${toThai(count)} บท)`;
+        opt.textContent = `${icon} ${baseName} (${toArabicDigits(count)} บท)`;
       }
     });
   }
@@ -773,11 +774,10 @@ class TammaApp {
       .map(id => prayerMap.get(id))
       .filter(Boolean);
 
-    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
     const favSubtitle = document.getElementById('favSubtitle') || document.querySelector('#viewFavorites p');
     if (favSubtitle) {
       favSubtitle.textContent = favPrayers.length > 0
-        ? `จัดเรียงลำดับบทสวด ๑, ๒, ๓ ตามที่คุณต้องการท่อง (${toThai(favPrayers.length)} บท)`
+        ? `จัดเรียงลำดับบทสวด ๑, ๒, ๓ ตามที่คุณต้องการท่อง (${toArabicDigits(favPrayers.length)} บท)`
         : 'บทสวดมนต์และพระไตรปิฎกที่คุณบันทึกไว้เปิดสวดเป็นประจำ';
     }
 
@@ -814,7 +814,6 @@ class TammaApp {
   renderFavoriteCards(container, favPrayers) {
     container.innerHTML = '';
     const trackerData = storage.getTrackerData();
-    const toThai = (n) => String(n).replace(/[0-9]/g, d => ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'][d]);
 
     favPrayers.forEach((prayer, index) => {
       const isFav = true;
@@ -838,7 +837,7 @@ class TammaApp {
               <div class="card-badges" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <div class="card-order-badge" title="ลำดับที่ ${index + 1}">
                   <span class="order-num-circle">${index + 1}</span>
-                  <span class="order-label">ลำดับที่ ${toThai(index + 1)}</span>
+                  <span class="order-label">ลำดับที่ ${toArabicDigits(index + 1)}</span>
                 </div>
                 <span class="card-category">${prayer.category || 'บทสวดมนต์'}</span>
                 ${hasAudio ? `
