@@ -1864,6 +1864,7 @@ body.theme-cosmic .reader-layout-select option {
 
 /* Elegant Focus Action Chip on Selected Verse - Clean Centered Pill (No Nested Frames) */
 .verse-focus-pill {
+  text-indent: 0;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
@@ -1885,6 +1886,7 @@ body.theme-cosmic .reader-layout-select option {
 }
 
 .verse-focus-pill .pill-play-action {
+  text-indent: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3563,5 +3565,23 @@ body .reader-bottom-bar .mp3-player-deck {
   }
   .reader-top-pagination { gap: 2px; }
   .reader-top-pagination .btn-zen-icon { padding: 4px 5px; font-size: 0.8rem; }
+}
+
+/* Larger tablet text can use the available width without lengthening normal-size lines. */
+@media (min-width: 768px) {
+  .reader-view .page-verse-header,
+  .reader-view .page-verse-viewport,
+  .reader-view .page-verse-flow {
+    max-width: max(920px, calc(var(--reader-font-size, 1.15rem) * 50));
+  }
+  .reader-view .page-verse-flow.layout-book,
+  .reader-view.layout-book .page-verse-flow,
+  .reader-view:not(.layout-centered) .page-verse-flow {
+    max-width: max(820px, calc(var(--reader-font-size, 1.15rem) * 44.565217));
+  }
+  .reader-view.layout-book .verse-thai-wrap,
+  .reader-view:not(.layout-centered) .verse-thai-wrap {
+    width: calc(100% - 0.3em);
+  }
 }
 

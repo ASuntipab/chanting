@@ -10,6 +10,63 @@
 
 ---
 
+## 🚀 ข้อมูลการอัปเดตเวอร์ชัน 1.0.1 (Version 1.0.1 Release Update)
+> **Version Name / Marketing Version:** `1.0.1`  
+> **Version Code / Build Number:** `4` (ตรงกันทั้ง Android และ iOS)
+
+### 🤖 1. ข้อความสำหรับ Google Play Console (Android)
+- **บันทึกประจำรุ่น (Release Notes) - ภาษาไทย (สั้น กระชับ ไม่มีไอคอน 377 ตัวอักษร):**
+```text
+มีอะไรใหม่ในเวอร์ชัน 1.0.1:
+- เพิ่มบทสวดมนต์ใหม่: สุขภาพ, เสริมโชคลาภ, ประจำวันเกิด, บูชาพระธาตุ 12 นักษัตร, คาถาแก้วสารพัดนึก
+- ปรับปรุงหน้าอ่าน: จัดหน้าแบบหนังสือจริง ชิดหัวหน้า สลับหน้าลื่นไหล
+- ปรับปรุงแถบควบคุม: ปุ่ม เล็กลง / ใหญ่ขึ้น ใช้งานง่าย จำค่าอัตโนมัติ
+- ปรับปรุงระบบเสียงสวดมนต์และรองรับชุดเสียงคุณภาพสูง
+- ปรับปรุงการแสดงผลตัวเลขอารบิก 0-9 ให้อ่านง่ายทั่วทั้งแอป
+```
+
+- **Release Notes - English (US) (399 characters):**
+```text
+What's new in version 1.0.1:
+- New prayer suites: Health & healing, wealth & fortune, birthday protection, 12 zodiac relic chants.
+- True book page-flip pagination with clean, top-aligned stanzas.
+- Intuitive reader controls with clear font scaling buttons and auto-save settings.
+- Audio enhancements and studio voice-pack support.
+- Improved numeric display and readability throughout the app.
+```
+
+---
+
+### 🍎 2. ข้อความสำหรับ Apple App Store Connect (iOS / iPadOS)
+- **ข้อความโปรโมท (Promotional Text - ไม่เกิน 170 ตัวอักษร, ไม่มีไอคอน):**
+```text
+คลังบทสวดมนต์ พระไตรปิฎก 45 เล่ม พร้อมเสียงสวดมนต์ คาราโอเกะ และระบบอ่านแบบหนังสือจริง ใช้งานออฟไลน์ 100% ไม่มีโฆษณา
+```
+
+- **มีอะไรใหม่ในรุ่นนี้ (What's New in This Version - สั้น กระชับ ไม่มีไอคอน):**
+```text
+มีอะไรใหม่ในเวอร์ชัน 1.0.1:
+- เพิ่มบทสวดมนต์ชุดใหม่: สุขภาพอายุยืน, คาถาเสริมโชคลาภ, ประจำวันเกิด และบูชาพระธาตุ 12 นักษัตร
+- เพิ่มพระคาถาแก้วสารพัดนึก (หลวงพ่อในป่า - หลวงพ่อจรัญ วัดอัมพวัน)
+- ปรับปรุงหน้าอ่าน: จัดหน้าแบบหนังสือจริง ชิดหัวหน้า สบายตา และคำนวณตัดหน้าใหม่อัตโนมัติตามขนาดตัวอักษร
+- ปรับปรุงแถบควบคุม: ปุ่มขยายตัวอักษร เล็กลง / ใหญ่ขึ้น กดง่ายสำหรับทุกวัย
+- ปรับปรุงระบบเสียงสวดมนต์: แยกแผงควบคุมเสียงชัดเจน และรองรับชุดเสียงสวดมนต์คุณภาพสูง
+- ปรับปรุงการแสดงผลตัวเลขอารบิก 0-9 ให้อ่านง่ายทั่วทั้งแอป
+```
+
+- **What's New in This Version - English:**
+```text
+What's new in version 1.0.1:
+- New prayer suites: Health and healing chants, wealth and fortune prayers, birthday protection, and 12 zodiac relic chants.
+- Added Phra Katha Kaew Sarapad Nuek (Luang Por Charan, Wat Amphawan).
+- Zen Reader enhancements: True book page pagination with top-aligned stanzas and dynamic font-scaling reflow.
+- Redesigned reader controls with clear, accessible font adjustment buttons.
+- Audio player upgrade: Streamlined monastic audio controls and studio voice-pack support.
+- Improved numeric readability across the app.
+```
+
+---
+
 ## 🤖 1. ส่วนของ Google Play Store (Android)
 
 ### 📌 ข้อมูลพื้นฐานสำหรับลงทะเบียนใน Google Play Console:
@@ -38,12 +95,13 @@
 - **ลิงก์เผยแพร่จริง (Live Play Store URL):** [https://play.google.com/store/apps/details?id=com.kaisoft.chant](https://play.google.com/store/apps/details?id=com.kaisoft.chant)
 
 ### 🛠️ ไฟล์และขั้นตอนการบิลด์สำหรับ Google Play:
-- **ไฟล์บิลด์ที่สร้างสำเร็จแล้ว:**
-  `d:\Kai Soft\Program\MyAIApps\tamma\android\app\build\outputs\bundle\release\app-release.aab` (ขนาด ~4.97 MB)
-- **คำสั่งสร้าง Key สำหรับ Sign Release (กรณีต้องการสร้าง Keystore ของตัวเอง):**
-  ```bash
-  keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias chant-key
-  ```
+- **ไฟล์บิลด์ Release เวอร์ชัน 1.0.1 (Build 4) สร้างสำเร็จแล้ว:**
+  - 📦 **Android App Bundle (.aab)** *(สำหรับอัปโหลดขึ้น Google Play Console)*:  
+    `d:\Kai Soft\Program\MyAIApps\tamma\android\app\build\outputs\bundle\release\app-release.aab` (ขนาด ~5.09 MB)
+  - 📱 **Android Package (.apk)** *(สำหรับติดตั้งทดสอบบนเครื่องจริง)*:  
+    `d:\Kai Soft\Program\MyAIApps\tamma\android\app\build\outputs\apk\release\app-release.apk` (ขนาด ~5.23 MB)
+- **การ Sign Keystore:** Sign อัตโนมัติด้วย `chant-release-key.jks` พร้อมอัปโหลดขึ้น Play Console ได้ทันที
+
 
 ---
 

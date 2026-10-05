@@ -1,6 +1,6 @@
 {
   "name": "chant-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chant: บทสวดมนต์ - Daily Buddhist Chanting & Prayer Companion App",
   "main": "tamma.html",
   "type": "module",
